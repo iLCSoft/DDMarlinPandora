@@ -22,7 +22,7 @@
 
 #include <cstdlib>
 
-DDPandoraPFANewProcessor pandoraPFANewProcessor;
+DDPandoraPFANewProcessor aDDPandoraPFANewProcessor;
 
 DDPandoraPFANewProcessor::PandoraToLCEventMap DDPandoraPFANewProcessor::m_pandoraToLCEventMap;
 
