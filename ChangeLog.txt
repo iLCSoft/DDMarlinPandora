@@ -1,0 +1,216 @@
+
+Development package to integrate with DD4hep
+
+********************  COPIED OVER FROM MARLINPANDORA REVISION 1934 ************************************************************************* 
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v02-00-00
+--------------------------------------------------------------------------------------------------------------------------------------------
+Update to reflect change to calo hit creation API.
+Allow for names "layer" and "stave" in cellID encoding string.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v01-00-01
+--------------------------------------------------------------------------------------------------------------------------------------------
+Improve specification of CMAKE_CXX_FLAGS.
+Handle cases where c++11 is not available.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v01-00-00
+--------------------------------------------------------------------------------------------------------------------------------------------
+Milestone v01 release.
+Update to reflect recent changes to PandoraSDK.
+Improved const-correctness. Algorithms are now only exposed to pointers to const managed-objects. Access to managed-object non-const functionality is now only via Pandora APIs.
+Use LCContentFast if c++11 is available: contains faster versions of algorithms in the LCContent library, using e.g. KD-trees and relying on c++11.
+Corrected radiation length and nuclear interaction lengths specified for Pandora CaloHits and Pandora SubDetectors.
+Restored PandoraSettingsBasic.xml to repository.
+Added to list of cheated neutral hadrons in PandoraSettingsPerfectPhotonNeutronK0L.xml
+Updated PandoraSettings readme.
+CMakeLists overhaul.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-15
+--------------------------------------------------------------------------------------------------------------------------------------------
+Update to reflect recent changes to PandoraSDK and LCContent.
+Overhaul, with emphasis on ensuring that client applications can instantiate and use multiple concurrent pandora instances.
+Address issues highlighted by Coverity.
+Improved member variable initialization, with default constructors for settings and local algorithms.
+Move some re-usable plugins from MarlinPandora into LCContent.
+Update PandoraSettings files, adding new CaloHitPreparation algorithm, using new configuration for plugins and improving list management.
+Add HCAL Ring geometry details (missing from gear file; ring is treated as an endcap, so symmetry order is not specified).
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-14
+--------------------------------------------------------------------------------------------------------------------------------------------
+Update to reflect changes to PandoraContentApi.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-13
+--------------------------------------------------------------------------------------------------------------------------------------------
+Update to reflect changes to PandoraSDK.
+Config overhaul; add some new PandoraSettings files and update readme.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-12
+--------------------------------------------------------------------------------------------------------------------------------------------
+Add hadronic energy non-linearity correction function.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-11
+--------------------------------------------------------------------------------------------------------------------------------------------
+Protect against missing/unavailable TrackStates.
+Add modifications to allow use of hybrid ScW/SiW and full ScW ECAL models.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-10
+--------------------------------------------------------------------------------------------------------------------------------------------
+RESTRUCTURING
+CMake and Makefile changes following updated treatment of the libraries that constitute the PandoraPFANew package.
+Recover daughter or sibling tracks if they are flagged as unable to form a pfo.
+Copy track states from input lcio tracks.
+Fix subdetector hit number encoding.
+Write out track subset collections to investigate different track usage in pfa.
+Updated TrackCreator class to work with either ILD00 or ILD01 geometry.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------
+GENERAL INFO:
+Pandora consists of the PandoraSDK (Software Development Kit), which comprises a single library and header files with flexible APIs.
+There is also an optional PandoraMonitoring library, which contains event display and tree/histogram-writing functionality.
+The PandoraMonitoring library depends on the PandoraSDK and ROOT.
+Pandora algorithms will necessarily depend upon the PandoraSDK (and also PandoraMonitoring, if desired).
+The algorithms can be built as part of a Pandora client application, such as MarlinPandora, or the standalone TestPandora binary.
+Algorithms declared to be suitably generic may be designed for use by multiple client applications.
+Such re-usable algorithms are best bundled together into a Pandora "content" library.
+Algorithms are always registered via the client application, using the PandoraAPIs, but the client app can link against as many content libraries as required.
+--------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-09
+--------------------------------------------------------------------------------------------------------------------------------------------
+Update MarlinPandora configuration scripts.
+Recover daughter or sibling tracks if they are flagged as unable to form a pfo.
+Copy track states from input lcio tracks by default.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-08
+--------------------------------------------------------------------------------------------------------------------------------------------
+First working implementation of code to copy lcio trackstates to pandora input track states.
+Add UseOldTrackStateCalculation xml key and set default value to 1.
+Include UTIL/ILDConf.h header to allow proper access to number of track hits by subdetector.
+Xml parser is now in pandora namespace.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-07
+--------------------------------------------------------------------------------------------------------------------------------------------
+Cosmetic changes and tidy-up of floating point accuracy issues in TrackCreator constructor.
+Optionally read new FTDParameters.
+Allow SET and/or ETD to be missing in detector description from GEAR.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-06
+--------------------------------------------------------------------------------------------------------------------------------------------
+Fixed problem where minimum number of ftd hits obtained from xml steering file was assigned to wrong variable.
+Updated to account for new monitoring location and added ability to link against PandoraMonitoring library.
+Updated to use new pandora API for pfo extraction.
+Updated to reflect recent changes to pandora APIs, including typedef changes and use of CaloHitLists, rather than OrderedCaloHitLists.
+Removed PathLengthCalculator class, now unused (no longer need to specify path lengths from interaction point).
+Added new PandoraSettings files following addition of new PhotonReconstruction algorithm to Pandora fine granularity content library.
+Added xml files containing photon likelihood PDFs, for both one and nine bins of reconstructed cluster energy.
+Updated PandoraSettings files to use new functionality of soft cluster merging and isolated hit merging algorithms.
+Updated to handle "à la Videau" geometry more elegantly.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-05
+--------------------------------------------------------------------------------------------------------------------------------------------
+Added ability to read pandora recluster monitoring output, writing results to collections of lcio GenericObjects and lcio Relations.
+Modifications for use with ILD SDHCal.
+Updated to reflect changes to pandora::CartesianVector class.
+Addressed issues raised by Coverity.
+Updated PandoraSettings scripts to reflect recent algorithm changes.
+Turned off DensityWeight and SurroundingEnergy calculations via PandoraSettings file.
+Updated standalone Makefile: changed default compiler to g++ and added -O2 optimization flag.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-04
+--------------------------------------------------------------------------------------------------------------------------------------------
+Updated default path length to interaction length (and radiation length) conversion constants to CLIC_ILD_CDR values.
+Updated CMake files to use new ILCUTIL package.
+Updated CMake files to reflect restructuring of PandoraPFANew.
+Updated standalone makefile to reflect restructuring of PandoraPFANew.
+Made use of interfaces to pandora content libraries, allowing for quick registration of multiple algorithms and helper functions.
+Added registration of FineGranularity PseudoLayerCalculator and ShowerProfileCalculator.
+Changed references to "track state at ecal" to "track state at calorimeter".
+Specified track (projected) time at calorimeter.
+Used results of track fit to determine track direction in z.
+Added new definition of reaches calorimeter for FTD tracks.
+Allowed for different barrel/endcap ECalToHadGeV calibration constants.
+Corrected cell unit vectors for HCal ring and other endcap-like detectors, located between the main barrels and endcaps.
+Updated to reflect changes to GeometryHelper.
+Made use of IsMirroredInZ subdetector parameter functionality.
+Updated pandorasettings, adding new (and renaming existing) entries for particle id and energy correction functions.
+Updated pandorasettings clustering parameters, specifying parameters for regions of fine or coarse granularity.
+Updated steering file scripts to specify separate ECalToHadGeV calibration constants for barrel and endcap.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-03
+--------------------------------------------------------------------------------------------------------------------------------------------
+Updated path length to interaction length (and radiation length) conversion constants. Default values are for CLIC_ILD_01.
+Added new approach to calculating path lengths through ILD-like subdetectors.
+Updated to specify new api parameters, required in order to help remove geometry dependence from pandora algorithms.
+Removed outdated geometry parameters.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG LCD_WG2_VALIDATION_4
+--------------------------------------------------------------------------------------------------------------------------------------------
+Deal with yoke plug hits and also hits that have zero absorber thickness.
+Updated to reflect namespace changes to pandora::StatusCode enum and pandora::StatusCodeException class.
+Added SimpleBFieldCalculator class and chose to use HighGranularityPseudoLayerCalculator class provided with PandoraPFANew library.
+Updated PandoraSettings files to reflect recent changes and provided file that uses separate muon reconstruction.
+Provided a gnu makefile.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-02
+--------------------------------------------------------------------------------------------------------------------------------------------
+Correct layer absorber thickness calculation.
+Switch order of calls to register user content and create geometry.
+Set BUILD_32BIT_COMPATIBLE to OFF by default.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG LCD_WG2_VALIDATION_3
+--------------------------------------------------------------------------------------------------------------------------------------------
+Reorganized and restructured all creator classes.
+Improved exception handling.
+Specify mc particle vertex and endpoint properties.
+Added ability to calculate number of interaction lengths from IP to calorimeter cells.
+Added detector gap treatment for ILD-based detectors.
+Added track quality cut on fraction of expected TPC hits.
+Added track quality cut on fractional momentum error.
+Removed track start and end helix fits; MarlinUtil classes (ClusterShapes and HelixClass) were providing unreliable track state information.
+Added ExternalClusteringAlgorithm, to recreate any lcio cluster collection in the pandora framework.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG LCD_WG2_VALIDATION_2
+--------------------------------------------------------------------------------------------------------------------------------------------
+Corrected HCal barrel normal vectors.
+Allowed non-digital treatment of muon hits - default behaviour is backward compatible.
+Corrected use of Kink/Prong/Split/V0 track particle identification.
+Added V0 track particle identification.
+Added check on expected number of track hits.
+Set default value for minimum number of track hits to 4.
+Set default minimum number of FTD hits (for forward tracks) to 4.
+Protected against invalid/inconsistent tracking geometry information.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG LCD_WG2_VALIDATION
+--------------------------------------------------------------------------------------------------------------------------------------------
+Added calo hit parameter: nInteractionLengthsFromIp.
+Updated to reflect Pandora header file reorganization.
+New treatment of tracks with FTD, ETD and SET hits to determine whether such tracks reach the ECal surface.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-01
+--------------------------------------------------------------------------------------------------------------------------------------------
