@@ -25,13 +25,13 @@ DD4hep::DDRec::LayeredCalorimeterData * getExtension(std::string detectorName){
     DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
     DD4hep::Geometry::DetElement theDetector = lcdd.detector(detectorName);
     theExtension = theDetector.extension<DD4hep::DDRec::LayeredCalorimeterData>();
-    std::cout<< "DEBUG: in getExtension(\""<<detectorName<<"\"): size of layers: "<<theExtension->layers.size()<<" positions not shown. "<<std::endl;
+//     std::cout<< "DEBUG: in getExtension(\""<<detectorName<<"\"): size of layers: "<<theExtension->layers.size()<<" positions not shown. "<<std::endl;
     
-    for(int i=0; i< theExtension->layers.size(); i++){
-      std::cout<<theExtension->layers[i].distance/dd4hep::mm<<" ";
-    }
+//     for(int i=0; i< theExtension->layers.size(); i++){
+//       std::cout<<theExtension->layers[i].distance/dd4hep::mm<<" ";
+//     }
     
-    std::cout<<std::endl;
+//     std::cout<<std::endl;
     
     
     
