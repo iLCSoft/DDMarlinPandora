@@ -8,10 +8,8 @@
 #include <IMPL/LCCollectionVec.h>
 #include <IMPL/LCRelationImpl.h>
 #include <marlin/Global.h>
-#include <gear/GEAR.h>
-#include <gear/LayerLayout.h>
-#include <gear/CalorimeterParameters.h>
-#include <gear/GearParameters.h>
+
+
 #include <EVENT/LCParameters.h>
 #include <UTIL/CellIDDecoder.h>
 #include <UTIL/CellIDEncoder.h>
@@ -35,9 +33,6 @@
 #include "DDRec/DDGear.h"
 #include "DDRec/MaterialManager.h"
 #include "DDRec/API/Calorimeter.h"
-
-#include "gearimpl/CalorimeterParametersImpl.h"
-
 
 using namespace std;
 using namespace lcio ;
@@ -571,42 +566,38 @@ void DDCaloDigi::init() {
     DetElement ecalBarrelDE = lcdd.detector("ECalBarrel");
     DDRec::LayeredCalorimeterData* ecalBarrelData = ecalBarrelDE.extension<DDRec::LayeredCalorimeterData>() ;
     
-    gear::CalorimeterParametersImpl pEcalBarrel(  ecalBarrelData->extent[0]/dd4hep::mm, ecalBarrelData->extent[3]/dd4hep::mm, ecalBarrelData->inner_symmetry, ecalBarrelData->phi0/dd4hep::rad );
-    
-    
     DetElement ecalEndcapDE = lcdd.detector("ECalEndcap");
     DDRec::LayeredCalorimeterData* ecalEndcapData = ecalEndcapDE.extension<DDRec::LayeredCalorimeterData>() ;
     
-    gear::CalorimeterParametersImpl pEcalEndcap(  ecalEndcapData->extent[0]/dd4hep::mm, ecalEndcapData->extent[1]/dd4hep::mm,ecalEndcapData->extent[2]/dd4hep::mm, ecalEndcapData->outer_symmetry, ecalEndcapData->phi0/dd4hep::rad );
+    const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& ecalBarrelLayers = ecalBarrelData->layers;
+    const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& ecalEndcapLayers = ecalEndcapData->layers;
     
-    const gear::LayerLayout& ecalBarrelLayout = pEcalBarrel.getLayerLayout();
-    const gear::LayerLayout& ecalEndcapLayout = pEcalEndcap.getLayerLayout();
     // determine geometry of ECAL
-    int symmetry = pEcalBarrel.getSymmetryOrder();
-    _zOfEcalEndcap = (float)pEcalEndcap.getExtent()[2];
+    int symmetry = ecalBarrelData->inner_symmetry;
+    _zOfEcalEndcap = ecalEndcapData->extent[2]/dd4hep::mm;
 
     // Determine ECAL polygon angles
     // Store radial vectors perpendicular to stave layers in _ecalBarrelStaveDir
     // ASSUMES Mokka Stave numbering 0 = top, then numbering increases anti-clockwise
     if(symmetry>1){
       float nFoldSymmetry = static_cast<float>(symmetry);
-      float phi0 = pEcalBarrel.getPhi0();
+      float phi0 = ecalBarrelData->phi0/dd4hep::rad ;
       for(int i=0;i<symmetry;++i){
-        float phi  = phi0 + i*twopi/nFoldSymmetry;
+        float phi  = phi0 + i*twopi/nFoldSymmetry;  
         _barrelStaveDir[i][0] = cos(phi);
         _barrelStaveDir[i][1] = sin(phi);
       }
     }
 
-    for(int i=0;i<ecalBarrelLayout.getNLayers();++i){
-      _barrelPixelSizeT[i] = ecalBarrelLayout.getCellSize0(i);
-      _barrelPixelSizeZ[i] = ecalBarrelLayout.getCellSize1(i);
+    for(int i=0;i<ecalBarrelLayers.size();++i){
+      _barrelPixelSizeT[i] = ecalBarrelLayers[i].cellSize0;
+      _barrelPixelSizeZ[i] = ecalBarrelLayers[i].cellSize1;
       streamlog_out ( DEBUG ) << "barrel pixel size " << i << " " << _barrelPixelSizeT[i] << " " << _barrelPixelSizeZ[i] << endl;
     }
 
-    for(int i=0;i<ecalEndcapLayout.getNLayers();++i){
-      _endcapPixelSizeX[i] = ecalEndcapLayout.getCellSize0(i);
-      _endcapPixelSizeY[i] = ecalEndcapLayout.getCellSize1(i);
+    for(int i=0;i<ecalEndcapLayers.size();++i){
+      _endcapPixelSizeX[i] = ecalEndcapLayers[i].cellSize0;
+      _endcapPixelSizeY[i] = ecalEndcapLayers[i].cellSize1;
       streamlog_out ( DEBUG ) << "endcap pixel size " << i << " " << _endcapPixelSizeX[i] << " " << _endcapPixelSizeY[i] << endl;
     }
 

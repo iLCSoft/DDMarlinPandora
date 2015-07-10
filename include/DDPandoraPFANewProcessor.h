@@ -14,7 +14,7 @@
 
 #include "MCParticleCreator.h"
 #include "PfoCreator.h"
-#include "TrackCreator.h"
+#include "DDTrackCreator.h"
 
 #include "DDGeometryCreator.h"
 #include "DDCaloHitCreator.h"
@@ -52,6 +52,25 @@ public:
 
         FloatVector     m_inputEnergyCorrectionPoints;      ///< The input energy points for non-linearity energy correction
         FloatVector     m_outputEnergyCorrectionPoints;     ///< The output energy points for non-linearity energy correction
+        
+        ///ADDED BY NIKIFOROS
+        std::string     m_vertexBarrelDetectorName;               ///< The vertex barrel detector name 
+        std::vector<std::string> m_barrelTrackerNames;      ///< The Barrel Tracking detector names 
+        std::vector<std::string> m_endcapTrackerNames;      ///< The Endcap Tracking detector names 
+        std::string     m_ecalBarrelName;                   ///< The ECal barrel detector name 
+        std::string     m_ecalEndcapName;                   ///< The ECal endcap detector name 
+        std::vector<std::string>  m_ecalOtherNames;         ///< Additional ECal detector names 
+        
+        std::string     m_hcalBarrelName;                   ///< The HCal barrel detector name 
+        std::string     m_hcalEndcapName;                   ///< The HCal endcap detector name 
+        std::vector<std::string>  m_hcalOtherNames;         ///< Additional HCal detector names 
+        
+        std::string     m_muonBarrelName;                   ///< The Muon barrel detector name 
+        std::string     m_muonEndcapName;                   ///< The Muon endcap detector name 
+        std::vector<std::string>  m_muonOtherNames;         ///< Additional Muon detector names 
+        
+        std::string     m_coilName;                   ///< The detector name for the coil
+        
     };
 
     /**
@@ -136,7 +155,7 @@ private:
     pandora::Pandora                   *m_pPandora;                         ///< Address of the pandora instance
     DDCaloHitCreator                     *m_pCaloHitCreator;                  ///< The calo hit creator
     DDGeometryCreator                    *m_pGeometryCreator;                 ///< The geometry creator
-    TrackCreator                       *m_pTrackCreator;                    ///< The track creator
+    DDTrackCreator                       *m_pTrackCreator;                    ///< The track creator
     MCParticleCreator                  *m_pMCParticleCreator;               ///< The mc particle creator
     PfoCreator                         *m_pPfoCreator;                      ///< The pfo creator
 
@@ -144,7 +163,7 @@ private:
     DDCaloHitCreator::Settings            m_caloHitCreatorSettings;           ///< The calo hit creator settings
     DDGeometryCreator::Settings           m_geometryCreatorSettings;          ///< The geometry creator settings
     MCParticleCreator::Settings         m_mcParticleCreatorSettings;        ///< The mc particle creator settings
-    TrackCreator::Settings              m_trackCreatorSettings;             ///< The track creator settings
+    DDTrackCreator::Settings              m_trackCreatorSettings;             ///< The track creator settings
     PfoCreator::Settings                m_pfoCreatorSettings;               ///< The pfo creator settings
 
     typedef std::map<const pandora::Pandora *, EVENT::LCEvent *> PandoraToLCEventMap;

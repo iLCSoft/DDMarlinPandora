@@ -20,9 +20,111 @@
 #include "ExternalClusteringAlgorithm.h"
 #include "DDPandoraPFANewProcessor.h"
 
+#include "DD4hep/LCDD.h"
+#include "DD4hep/DD4hepUnits.h"
+#include "DDRec/DetectorData.h"
+
 #include <cstdlib>
 
 DDPandoraPFANewProcessor aDDPandoraPFANewProcessor;
+
+double getFieldFromLCDD(){
+  
+  DD4hep::Geometry::LCDD& lcdd = DD4hep::Geometry::LCDD::getInstance();
+  const double position[3]={0,0,0}; // position to calculate magnetic field at (the origin in this case)
+  double magneticFieldVector[3]={0,0,0}; // initialise object to hold magnetic field
+  lcdd.field().magneticField(position,magneticFieldVector); // get the magnetic field vector from DD4hep
+  
+  return magneticFieldVector[2]/dd4hep::tesla; // z component at (0,0,0)
+  
+}
+
+double getCoilOuterR(){
+  DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
+  DD4hep::Geometry::DetElement coilDE = lcdd.detector("Solenoid") ;
+  //access the detelement and create a shape from the envelope since only minimal info needed
+  DD4hep::Geometry::Tube coilTube = DD4hep::Geometry::Tube( coilDE.volume().solid() )  ;
+  return coilTube->GetRmax()/ dd4hep::mm;
+}
+
+DD4hep::DDRec::LayeredCalorimeterData * getExtension(std::string detectorName){
+  
+  
+  DD4hep::DDRec::LayeredCalorimeterData * theExtension = 0;
+  
+  try {
+    DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
+    DD4hep::Geometry::DetElement theDetector = lcdd.detector(detectorName);
+    theExtension = theDetector.extension<DD4hep::DDRec::LayeredCalorimeterData>();
+    //     std::cout<< "DEBUG: in getExtension(\""<<detectorName<<"\"): size of layers: "<<theExtension->layers.size()<<" positions not shown. "<<std::endl;
+    
+    //     for(int i=0; i< theExtension->layers.size(); i++){
+    //       std::cout<<theExtension->layers[i].distance/dd4hep::mm<<" ";
+    //     }
+    
+    //     std::cout<<std::endl;
+    
+    
+    
+    
+  } catch ( ... ){
+    
+    std::cout << "BIG WARNING! EXTENSION DOES NOT EXIST FOR " << detectorName<<" filling with dummy values. MAKE SURE YOU CHANGE THIS!"<< std::endl;
+    
+    //     theExtension = new DD4hep::DDRec::LayeredCalorimeterData ;
+    //     theExtension->layoutType = DD4hep::DDRec::LayeredCalorimeterData::BarrelLayout ;
+    //     theExtension->inner_symmetry = 12;
+    //     theExtension->outer_symmetry = 12; 
+    //     theExtension->phi0 = 0.; 
+    //     
+    //     theExtension->extent[0] = 100;
+    //     theExtension->extent[1] = 200;
+    //     theExtension->extent[2] = 0. ;
+    //     theExtension->extent[3] = 2560;
+    //     
+    //     DD4hep::DDRec::LayeredCalorimeterData::Layer caloLayer ;
+    //     
+    //     caloLayer.distance = 110;
+    //     caloLayer.thickness = 10;
+    //     caloLayer.absorberThickness = 5;
+    //     caloLayer.cellSize0 = 30;
+    //     caloLayer.cellSize1 = 30;
+    //     
+    //     theExtension->layers.push_back( caloLayer ) ;
+    //     DD4hep::DDRec::LayeredCalorimeterData::Layer caloLayer2 ;
+    //     
+    //     caloLayer2.distance = 120;
+    //     caloLayer2.thickness = 10;
+    //     caloLayer2.absorberThickness = 5;
+    //     caloLayer2.cellSize0 = 30;
+    //     caloLayer2.cellSize1 = 30;
+    //     
+    //     theExtension->layers.push_back( caloLayer2 ) ;
+  }
+  
+  return theExtension;
+}
+
+std::vector<double> getTrackingRegionExtent(){
+  
+  ///Rmin, Rmax, MaxRow, Zmax
+  std::vector<double> extent;
+  
+  extent.reserve(4);
+  
+  DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
+  
+  
+  
+  extent[0]=3.290000000e+02;; ///FIXME! TPC INNER RADIUS FOR CLIC???
+  extent[1]=lcdd.constantAsDouble("tracker_region_rmax")/dd4hep::mm;
+  extent[2]=100.0; ///FIXME! TPC MAX ROW FOR CLIC???
+  extent[3]=lcdd.constantAsDouble("tracker_region_zmax")/dd4hep::mm;
+  
+  return extent;
+  
+  
+}
 
 DDPandoraPFANewProcessor::PandoraToLCEventMap DDPandoraPFANewProcessor::m_pandoraToLCEventMap;
 
@@ -54,7 +156,7 @@ void DDPandoraPFANewProcessor::init()
         m_pPandora = new pandora::Pandora();
         m_pGeometryCreator = new DDGeometryCreator(m_geometryCreatorSettings, m_pPandora);
         m_pCaloHitCreator = new DDCaloHitCreator(m_caloHitCreatorSettings, m_pPandora);
-        m_pTrackCreator = new TrackCreator(m_trackCreatorSettings, m_pPandora);
+        m_pTrackCreator = new DDTrackCreator(m_trackCreatorSettings, m_pPandora);
         m_pMCParticleCreator = new MCParticleCreator(m_mcParticleCreatorSettings, m_pPandora);
         m_pPfoCreator = new PfoCreator(m_pfoCreatorSettings, m_pPandora);
 
@@ -709,6 +811,92 @@ void DDPandoraPFANewProcessor::ProcessSteeringFile()
                             "The output energy points for hadronic energy correction",
                             m_settings.m_outputEnergyCorrectionPoints,
                             FloatVector());
+    
+    
+    ///EXTRA PARAMETERS FROM NIKIFOROS
+    
+    registerProcessorParameter("VertexBarrelDetectorName",
+                               "The name of the Vertex Barrel detector",
+                               m_settings.m_vertexBarrelDetectorName,
+                               std::string("VertexBarrel"));
+                               
+    std::vector<std::string> defaultTrackerBarrelNames;
+    defaultTrackerBarrelNames.push_back("InnerTrackerBarrel");
+    defaultTrackerBarrelNames.push_back("OuterTrackerBarrel");
+    
+    registerProcessorParameter("TrackerBarrelDetectorNames",
+                              "Detector names of the Trackers in the Barrel starting from the innermost one",
+                              m_settings.m_barrelTrackerNames,
+                              defaultTrackerBarrelNames);
+    
+    std::vector<std::string> defaultTrackerEndcapNames;
+    defaultTrackerEndcapNames.push_back("InnerTrackerEndcap");
+    defaultTrackerEndcapNames.push_back("OuterTrackerEndcap");
+    
+    registerProcessorParameter("TrackerEndcapDetectorNames",
+                               "Detector names of the Trackers in the Endcap starting from the innermost one",
+                              m_settings.m_barrelTrackerNames,
+                              defaultTrackerEndcapNames);
+    
+    registerProcessorParameter("ECalBarrelDetectorName",
+                               "The name of the ECal Barrel detector",
+                               m_settings.m_ecalBarrelName,
+                               std::string("ECalBarrel"));
+    
+    registerProcessorParameter("ECalEndcapDetectorName",
+                               "The name of the ECal Endcap detector",
+                               m_settings.m_ecalEndcapName,
+                               std::string("ECalEndcap"));
+    
+    std::vector<std::string> defaultECalOtherNames;
+    defaultECalOtherNames.push_back("ECalPlug");
+    defaultECalOtherNames.push_back("LumiCal");
+    
+    registerProcessorParameter("ECalOtherDetectorNames",
+                               "The names of the other ECal detectors",
+                               m_settings.m_ecalOtherNames,
+                               defaultECalOtherNames);
+    
+    registerProcessorParameter("HCalBarrelDetectorName",
+                               "The name of the HCal Barrel detector",
+                               m_settings.m_hcalBarrelName,
+                               std::string("HCalBarrel"));
+    
+    registerProcessorParameter("HCalEndcapDetectorName",
+                               "The name of the HCal Endcap detector",
+                               m_settings.m_hcalEndcapName,
+                               std::string("HCalEndcap"));
+    
+    std::vector<std::string> defaultHCalOtherNames;
+    defaultHCalOtherNames.push_back("HCalRing");
+    
+    registerProcessorParameter("HCalOtherDetectorNames",
+                               "The names of the Other HCal detectors",
+                               m_settings.m_hcalOtherNames,
+                               defaultHCalOtherNames);
+  
+    registerProcessorParameter("MuonBarrelDetectorName",
+                               "The name of the Muon Barrel detector",
+                               m_settings.m_muonBarrelName,
+                               std::string("YokeBarrel"));
+    
+    registerProcessorParameter("HCalEndcapDetectorName",
+                               "The name of the HCal Endcap detector",
+                               m_settings.m_muonEndcapName,
+                               std::string("YokeEndcap"));
+    
+    std::vector<std::string> defaultMuonOtherNames;
+    defaultMuonOtherNames.push_back("YokePlug");
+    
+    registerProcessorParameter("MuonOtherDetectorNames",
+                               "The names of the Other Muon detectors",
+                               m_settings.m_muonOtherNames,
+                               defaultMuonOtherNames);
+    
+  registerProcessorParameter("CoilName",
+                               "The name of the Coil",
+                               m_settings.m_coilName,
+                               std::string("Solenoid")); 
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -728,13 +916,74 @@ void DDPandoraPFANewProcessor::FinaliseSteeringParameters()
     m_caloHitCreatorSettings.m_hCalEndCapInnerPhiCoordinate = m_geometryCreatorSettings.m_hCalEndCapInnerPhiCoordinate;
 
     m_trackCreatorSettings.m_prongSplitVertexCollections = m_trackCreatorSettings.m_prongVertexCollections;
-    m_trackCreatorSettings.m_prongSplitVertexCollections.insert(m_trackCreatorSettings.m_prongSplitVertexCollections.end(),
-        m_trackCreatorSettings.m_splitVertexCollections.begin(), m_trackCreatorSettings.m_splitVertexCollections.end());
-
-    ///FIXME! CHANGE TO LCDD 
-
-    std::cout<<"BIG WARNING!: HARD CODED BFIELD VALUE TO BE ACCESSED FROM LCDD!"<<std::endl;
-    m_settings.m_innerBField = 4.0;
+    m_trackCreatorSettings.m_prongSplitVertexCollections.insert(m_trackCreatorSettings.m_prongSplitVertexCollections.end(),m_trackCreatorSettings.m_splitVertexCollections.begin(),m_trackCreatorSettings.m_splitVertexCollections.end());
+    
+    m_trackCreatorSettings.m_bField=getFieldFromLCDD();
+    m_trackCreatorSettings.m_tpcInnerR=getTrackingRegionExtent()[0];
+    m_trackCreatorSettings.m_tpcOuterR=getTrackingRegionExtent()[1];
+    m_trackCreatorSettings.m_tpcMaxRow=getTrackingRegionExtent()[2];
+    m_trackCreatorSettings.m_tpcZmax=getTrackingRegionExtent()[3];
+    m_trackCreatorSettings.m_eCalBarrelInnerSymmetry=getExtension(m_settings.m_ecalBarrelName)->inner_symmetry;
+    m_trackCreatorSettings.m_eCalBarrelInnerPhi0=getExtension(m_settings.m_ecalBarrelName)->inner_phi0;
+    m_trackCreatorSettings.m_eCalBarrelInnerR=getExtension(m_settings.m_ecalBarrelName)->extent[0];
+    m_trackCreatorSettings.m_eCalEndCapInnerZ=getExtension(m_settings.m_ecalEndcapName)->extent[2];
+    
+    
+    
+    
+    m_caloHitCreatorSettings.m_eCalBarrelOuterZ=getExtension(m_settings.m_ecalBarrelName)->extent[3]/dd4hep::mm;
+    m_caloHitCreatorSettings.m_hCalBarrelOuterZ=getExtension(m_settings.m_hcalBarrelName)->extent[3]/dd4hep::mm;
+    m_caloHitCreatorSettings.m_muonBarrelOuterZ=getExtension(m_settings.m_muonBarrelName)->extent[3]/dd4hep::mm;
+    m_caloHitCreatorSettings.m_coilOuterR=getCoilOuterR(); 
+    m_caloHitCreatorSettings.m_eCalBarrelInnerPhi0=getExtension(m_settings.m_ecalBarrelName)->phi0/dd4hep::rad;
+    m_caloHitCreatorSettings.m_eCalBarrelInnerSymmetry=getExtension(m_settings.m_ecalBarrelName)->inner_symmetry;
+    m_caloHitCreatorSettings.m_hCalBarrelInnerPhi0=getExtension(m_settings.m_hcalBarrelName)->phi0/dd4hep::rad;
+    m_caloHitCreatorSettings.m_hCalBarrelInnerSymmetry=getExtension(m_settings.m_hcalBarrelName)->inner_symmetry;
+    m_caloHitCreatorSettings.m_muonBarrelInnerPhi0=getExtension(m_settings.m_muonBarrelName)->phi0/dd4hep::rad;
+    m_caloHitCreatorSettings.m_muonBarrelInnerSymmetry=getExtension(m_settings.m_muonBarrelName)->inner_symmetry;
+    m_caloHitCreatorSettings.m_hCalEndCapOuterR=getExtension(m_settings.m_hcalEndcapName)->extent[1]/dd4hep::mm;
+    m_caloHitCreatorSettings.m_hCalEndCapOuterZ=getExtension(m_settings.m_hcalEndcapName)->extent[3]/dd4hep::mm;
+    m_caloHitCreatorSettings.m_hCalBarrelOuterR=getExtension(m_settings.m_hcalBarrelName)->extent[1]/dd4hep::mm;
+    m_caloHitCreatorSettings.m_hCalBarrelOuterPhi0=getExtension(m_settings.m_hcalBarrelName)->phi0/dd4hep::rad;
+    m_caloHitCreatorSettings.m_hCalBarrelOuterSymmetry=getExtension(m_settings.m_hcalBarrelName)->outer_symmetry;
+    
+    m_caloHitCreatorSettings.m_vertexBarrelDetectorName = m_settings.m_vertexBarrelDetectorName;        
+    m_caloHitCreatorSettings.m_barrelTrackerNames = m_settings.m_barrelTrackerNames;     
+    m_caloHitCreatorSettings.m_endcapTrackerNames = m_settings.m_endcapTrackerNames;     
+    m_caloHitCreatorSettings.m_ecalBarrelName = m_settings.m_ecalBarrelName;                  
+    m_caloHitCreatorSettings.m_ecalEndcapName = m_settings.m_ecalEndcapName;                  
+    m_caloHitCreatorSettings.m_ecalOtherNames= m_settings.m_ecalOtherNames;        
+    m_caloHitCreatorSettings.m_hcalBarrelName = m_settings.m_hcalBarrelName;                  
+    m_caloHitCreatorSettings.m_hcalEndcapName = m_settings.m_hcalEndcapName;                  
+    m_caloHitCreatorSettings.m_hcalOtherNames= m_settings.m_hcalOtherNames;        
+    m_caloHitCreatorSettings.m_muonBarrelName = m_settings.m_muonBarrelName;                  
+    m_caloHitCreatorSettings.m_muonEndcapName = m_settings.m_muonEndcapName;                  
+    m_caloHitCreatorSettings.m_muonOtherNames= m_settings.m_muonOtherNames;  
+    m_caloHitCreatorSettings.m_coilName= m_settings.m_coilName;   
+    
+    
+    m_geometryCreatorSettings.m_vertexBarrelDetectorName = m_settings.m_vertexBarrelDetectorName;        
+    m_geometryCreatorSettings.m_barrelTrackerNames = m_settings.m_barrelTrackerNames;     
+    m_geometryCreatorSettings.m_endcapTrackerNames = m_settings.m_endcapTrackerNames;     
+    m_geometryCreatorSettings.m_ecalBarrelName = m_settings.m_ecalBarrelName;                  
+    m_geometryCreatorSettings.m_ecalEndcapName = m_settings.m_ecalEndcapName;                  
+    m_geometryCreatorSettings.m_ecalOtherNames= m_settings.m_ecalOtherNames;        
+    m_geometryCreatorSettings.m_hcalBarrelName = m_settings.m_hcalBarrelName;                  
+    m_geometryCreatorSettings.m_hcalEndcapName = m_settings.m_hcalEndcapName;                  
+    m_geometryCreatorSettings.m_hcalOtherNames= m_settings.m_hcalOtherNames;        
+    m_geometryCreatorSettings.m_muonBarrelName = m_settings.m_muonBarrelName;                  
+    m_geometryCreatorSettings.m_muonEndcapName = m_settings.m_muonEndcapName;                  
+    m_geometryCreatorSettings.m_muonOtherNames= m_settings.m_muonOtherNames;   
+    m_geometryCreatorSettings.m_coilName= m_settings.m_coilName;   
+    
+    
+    // Get the magnetic field
+    DD4hep::Geometry::LCDD& lcdd = DD4hep::Geometry::LCDD::getInstance();
+    const double position[3]={0,0,0}; // position to calculate magnetic field at (the origin in this case)
+    double magneticFieldVector[3]={0,0,0}; // initialise object to hold magnetic field
+    lcdd.field().magneticField(position,magneticFieldVector); // get the magnetic field vector from DD4hep
+    
+    m_settings.m_innerBField = magneticFieldVector[2]/dd4hep::tesla; // z component at (0,0,0)
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -22,37 +22,21 @@
 #include "DD4hep/DD4hepUnits.h"
 #include "DDRec/DetectorData.h"
 
+//forward declarations. See in DDPandoraPFANewProcessor.cc
 
 DD4hep::DDRec::LayeredCalorimeterData * getExtension(std::string detectorName);
 
+double getCoilOuterR();
 
-///FIXME! SOME PARAMETERS ARE MISSIGN
 ///FIXME: HANDLE PROBLEM WHEN EXTENSION IS MISSING
 DDCaloHitCreator::DDCaloHitCreator(const Settings &settings, const pandora::Pandora *const pPandora) :
     m_settings(settings),
-    m_pPandora(pPandora),
-    m_eCalBarrelOuterZ(getExtension("ECalBarrel")->extent[3]/dd4hep::mm),
-    m_hCalBarrelOuterZ(getExtension("HCalBarrel")->extent[3]/dd4hep::mm),
-    m_muonBarrelOuterZ(getExtension("YokeBarrel")->extent[3]/dd4hep::mm),
-    m_coilOuterR(1000.), //FIXME: DUMMY!
-    m_eCalBarrelInnerPhi0(getExtension("ECalBarrel")->phi0/dd4hep::rad),
-    m_eCalBarrelInnerSymmetry(getExtension("ECalBarrel")->inner_symmetry),
-    m_hCalBarrelInnerPhi0(getExtension("HCalBarrel")->phi0/dd4hep::rad),
-    m_hCalBarrelInnerSymmetry(getExtension("HCalBarrel")->inner_symmetry),
-    m_muonBarrelInnerPhi0(getExtension("YokeBarrel")->phi0/dd4hep::rad),
-    m_muonBarrelInnerSymmetry(getExtension("YokeBarrel")->inner_symmetry),
-    m_hCalEndCapOuterR(getExtension("HCalEndcap")->extent[1]/dd4hep::mm),
-    m_hCalEndCapOuterZ(getExtension("HCalEndcap")->extent[3]/dd4hep::mm),
-    m_hCalBarrelOuterR(getExtension("HCalBarrel")->extent[1]/dd4hep::mm),
-    m_hCalBarrelOuterPhi0(getExtension("HCalBarrel")->phi0/dd4hep::rad),
-    m_hCalBarrelOuterSymmetry(getExtension("HCalBarrel")->outer_symmetry)
+    m_pPandora(pPandora)
 {
     
-  std::cout<< "BIG WARNING: m_coilOuterR IS SET TO DUMMY VALUE!!! MAKE SURE YOU CHANGE THIS!"<< std::endl;
-  
-    const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& barrelLayers= getExtension("HCalBarrel")->layers;
+    const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& barrelLayers= getExtension(m_settings.m_hcalBarrelName)->layers;
     
-    const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension("HCalEndcap")->layers;
+    const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension(m_settings.m_hcalEndcapName)->layers;
     
     ///Take thicknesses from last layer (was like that before with gear)
     m_hCalEndCapLayerThickness =endcapLayers.back().thickness/dd4hep::mm;
@@ -100,8 +84,8 @@ pandora::StatusCode DDCaloHitCreator::CreateECalCaloHits(const EVENT::LCEvent *c
                 continue;
 
             
-            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& barrelLayers= getExtension("ECalBarrel")->layers;
-            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension("ECalEndcap")->layers;
+            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& barrelLayers= getExtension(m_settings.m_ecalEndcapName)->layers;
+            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension(m_settings.m_ecalEndcapName)->layers;
             
 
             UTIL::CellIDDecoder<CalorimeterHit> cellIdDecoder(pCaloHitCollection);
@@ -157,9 +141,9 @@ pandora::StatusCode DDCaloHitCreator::CreateECalCaloHits(const EVENT::LCEvent *c
 
                     float absorberCorrection(1.);
 
-                    if (std::fabs(pCaloHit->getPosition()[2]) < m_eCalBarrelOuterZ)
+                    if (std::fabs(pCaloHit->getPosition()[2]) < m_settings.m_eCalBarrelOuterZ)
                     {
-                      this->GetBarrelCaloHitProperties(pCaloHit, barrelLayers, m_eCalBarrelInnerSymmetry, m_eCalBarrelInnerPhi0,
+                      this->GetBarrelCaloHitProperties(pCaloHit, barrelLayers, m_settings.m_eCalBarrelInnerSymmetry, m_settings.m_eCalBarrelInnerPhi0,
                             cellIdDecoder(pCaloHit)["stave"], caloHitParameters, absorberCorrection);
 
                         caloHitParameters.m_hadronicEnergy = eCalToHadGeVBarrel * pCaloHit->getEnergy();
@@ -225,8 +209,8 @@ pandora::StatusCode DDCaloHitCreator::CreateHCalCaloHits(const EVENT::LCEvent *c
                 continue;
 
             
-            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& barrelLayers= getExtension("HCalBarrel")->layers;
-            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension("HCalEndcap")->layers;
+            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& barrelLayers= getExtension(m_settings.m_hcalBarrelName)->layers;
+            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension(m_settings.m_hcalEndcapName)->layers;
             
             
             
@@ -250,10 +234,10 @@ pandora::StatusCode DDCaloHitCreator::CreateHCalCaloHits(const EVENT::LCEvent *c
 
                     float absorberCorrection(1.);
 
-                    if (std::fabs(pCaloHit->getPosition()[2]) < m_hCalBarrelOuterZ)
+                    if (std::fabs(pCaloHit->getPosition()[2]) < m_settings.m_hCalBarrelOuterZ)
                     {
-                        this->GetBarrelCaloHitProperties(pCaloHit, barrelLayers, m_hCalBarrelInnerSymmetry, m_hCalBarrelInnerPhi0,
-                            m_hCalBarrelInnerSymmetry - int(cellIdDecoder(pCaloHit)["stave"] / 2), caloHitParameters, absorberCorrection);
+                        this->GetBarrelCaloHitProperties(pCaloHit, barrelLayers, m_settings.m_hCalBarrelInnerSymmetry, m_settings.m_hCalBarrelInnerPhi0,
+                            m_settings.m_hCalBarrelInnerSymmetry - int(cellIdDecoder(pCaloHit)["stave"] / 2), caloHitParameters, absorberCorrection);
                     }
                     else
                     {
@@ -305,9 +289,10 @@ pandora::StatusCode DDCaloHitCreator::CreateMuonCaloHits(const EVENT::LCEvent *c
             if (0 == nElements)
                 continue;
 
-            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& barrelLayers= getExtension("YokeBarrel")->layers;
-            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension("YokeEndcap")->layers;
-            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& plugLayers= getExtension("YokePlug")->layers;
+            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& barrelLayers= getExtension(m_settings.m_muonEndcapName)->layers;
+            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension(m_settings.m_muonEndcapName)->layers;
+            ///FIXME: WHAT ABOUT MORE MUON SYSTEMS?
+            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& plugLayers= getExtension(m_settings.m_muonOtherNames[0])->layers;
             UTIL::CellIDDecoder<CalorimeterHit> cellIdDecoder(pCaloHitCollection);
             const std::string layerCodingString(pCaloHitCollection->getParameters().getStringVal(LCIO::CellIDEncoding));
             const std::string layerCoding("layer");
@@ -330,8 +315,8 @@ pandora::StatusCode DDCaloHitCreator::CreateMuonCaloHits(const EVENT::LCEvent *c
                     const float radius(std::sqrt(pCaloHit->getPosition()[0] * pCaloHit->getPosition()[0] +
                         pCaloHit->getPosition()[1] * pCaloHit->getPosition()[1]));
 
-                    const bool isWithinCoil(radius < m_coilOuterR);
-                    const bool isInBarrelRegion(std::fabs(pCaloHit->getPosition()[2]) < m_muonBarrelOuterZ);
+                    const bool isWithinCoil(radius < m_settings.m_coilOuterR);
+                    const bool isInBarrelRegion(std::fabs(pCaloHit->getPosition()[2]) < m_settings.m_muonBarrelOuterZ);
 
                     float absorberCorrection(1.);
 
@@ -342,7 +327,7 @@ pandora::StatusCode DDCaloHitCreator::CreateMuonCaloHits(const EVENT::LCEvent *c
                     }
                     else if (isInBarrelRegion)
                     {
-                        this->GetBarrelCaloHitProperties(pCaloHit, barrelLayers, m_muonBarrelInnerSymmetry, m_muonBarrelInnerPhi0,
+                        this->GetBarrelCaloHitProperties(pCaloHit, barrelLayers, m_settings.m_muonBarrelInnerSymmetry, m_settings.m_muonBarrelInnerPhi0,
                             cellIdDecoder(pCaloHit)["stave"], caloHitParameters, absorberCorrection);
                     }
                     else
@@ -403,7 +388,9 @@ pandora::StatusCode DDCaloHitCreator::CreateLCalCaloHits(const EVENT::LCEvent *c
 
             if (0 == nElements)
                 continue;
-            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension("LumiCal")->layers;
+            
+            ///FIXME: WHAT ABOUT OTHER ECALS?
+            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension(m_settings.m_ecalOtherNames[1])->layers;
         
 
             UTIL::CellIDDecoder<CalorimeterHit> cellIdDecoder(pCaloHitCollection);
@@ -474,7 +461,9 @@ pandora::StatusCode DDCaloHitCreator::CreateLHCalCaloHits(const EVENT::LCEvent *
             if (0 == nElements)
                 continue;
 
-            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension("LHCal")->layers;
+            
+            ///FIXME! WHAT ABOUT MORE HCALS?
+            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension(m_settings.m_hcalOtherNames[0])->layers;
             
             UTIL::CellIDDecoder<CalorimeterHit> cellIdDecoder(pCaloHitCollection);
             const std::string layerCodingString(pCaloHitCollection->getParameters().getStringVal(LCIO::CellIDEncoding));
@@ -646,36 +635,36 @@ void DDCaloHitCreator::GetBarrelCaloHitProperties(const EVENT::CalorimeterHit *c
 int DDCaloHitCreator::GetNLayersFromEdge(const EVENT::CalorimeterHit *const pCaloHit) const
 {
     // Calo hit coordinate calculations
-    const float barrelMaximumRadius(this->GetMaximumRadius(pCaloHit, m_hCalBarrelOuterSymmetry, m_hCalBarrelOuterPhi0));
+    const float barrelMaximumRadius(this->GetMaximumRadius(pCaloHit, m_settings.m_hCalBarrelOuterSymmetry, m_settings.m_hCalBarrelOuterPhi0));
     const float endCapMaximumRadius(this->GetMaximumRadius(pCaloHit, m_settings.m_hCalEndCapInnerSymmetryOrder, m_settings.m_hCalEndCapInnerPhiCoordinate));
     const float caloHitAbsZ(std::fabs(pCaloHit->getPosition()[2]));
 
     // Distance from radial outer
     float radialDistanceToEdge(std::numeric_limits<float>::max());
 
-    if (caloHitAbsZ < m_eCalBarrelOuterZ)
+    if (caloHitAbsZ < m_settings.m_eCalBarrelOuterZ)
     {
-        radialDistanceToEdge = (m_hCalBarrelOuterR - barrelMaximumRadius) / m_hCalBarrelLayerThickness;
+        radialDistanceToEdge = (m_settings.m_hCalBarrelOuterR - barrelMaximumRadius) / m_hCalBarrelLayerThickness;
     }
     else
     {
-        radialDistanceToEdge = (m_hCalEndCapOuterR - endCapMaximumRadius) / m_hCalEndCapLayerThickness;
+        radialDistanceToEdge = (m_settings.m_hCalEndCapOuterR - endCapMaximumRadius) / m_hCalEndCapLayerThickness;
     }
 
     // Distance from rear of endcap outer
     float rearDistanceToEdge(std::numeric_limits<float>::max());
 
-    if (caloHitAbsZ >= m_eCalBarrelOuterZ)
+    if (caloHitAbsZ >= m_settings.m_eCalBarrelOuterZ)
     {
-        rearDistanceToEdge = (m_hCalEndCapOuterZ - caloHitAbsZ) / m_hCalEndCapLayerThickness;
+        rearDistanceToEdge = (m_settings.m_hCalEndCapOuterZ - caloHitAbsZ) / m_hCalEndCapLayerThickness;
     }
     else
     {
-        const float rearDistance((m_eCalBarrelOuterZ - caloHitAbsZ) / m_hCalBarrelLayerThickness);
+        const float rearDistance((m_settings.m_eCalBarrelOuterZ - caloHitAbsZ) / m_hCalBarrelLayerThickness);
 
         if (rearDistance < m_settings.m_layersFromEdgeMaxRearDistance)
         {
-            const float overlapDistance((m_hCalEndCapOuterR - endCapMaximumRadius) / m_hCalEndCapLayerThickness);
+            const float overlapDistance((m_settings.m_hCalEndCapOuterR - endCapMaximumRadius) / m_hCalEndCapLayerThickness);
             rearDistanceToEdge = std::max(rearDistance, overlapDistance);
         }
     }

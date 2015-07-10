@@ -53,6 +53,25 @@ public:
         float           m_hCalRingInnerPhiCoordinate;           ///< HCal ring inner phi coordinate (missing from ILD gear files)
         int             m_hCalRingOuterSymmetryOrder;           ///< HCal ring outer symmetry order (missing from ILD gear files)
         float           m_hCalRingOuterPhiCoordinate;           ///< HCal ring outer phi coordinate (missing from ILD gear files)
+        
+        ///Added by Nikiforos
+        std::string     m_vertexBarrelDetectorName;               ///< The vertex barrel detector name 
+        std::vector<std::string> m_barrelTrackerNames;      ///< The Barrel Tracking detector names 
+        std::vector<std::string> m_endcapTrackerNames;      ///< The Endcap Tracking detector names 
+        std::string     m_ecalBarrelName;                   ///< The ECal barrel detector name 
+        std::string     m_ecalEndcapName;                   ///< The ECal endcap detector name 
+        std::vector<std::string>  m_ecalOtherNames;         ///< Additional ECal detector names 
+        
+        std::string     m_hcalBarrelName;                   ///< The HCal barrel detector name 
+        std::string     m_hcalEndcapName;                   ///< The HCal endcap detector name 
+        std::vector<std::string>  m_hcalOtherNames;         ///< Additional HCal detector names 
+        
+        std::string     m_muonBarrelName;                   ///< The Muon barrel detector name 
+        std::string     m_muonEndcapName;                   ///< The Muon endcap detector name 
+        std::vector<std::string>  m_muonOtherNames;         ///< Additional Muon detector names 
+        
+        std::string     m_coilName;                   ///< The detector name for the coil
+        
     };
 
     /**

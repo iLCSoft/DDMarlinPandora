@@ -85,6 +85,46 @@ public:
         float           m_eCalScToHadGeVBarrel;                 ///< The calibration from deposited Sc-layer energy on the endcaps to hadronic energy
         float           m_eCalSiToHadGeVEndCap;                 ///< The calibration from deposited Si-layer energy on the enecaps to hadronic energy
         float           m_eCalScToHadGeVEndCap;                 ///< The calibration from deposited Sc-layer energy on the endcaps to hadronic energy
+        
+        
+        ///ADDED BY NIKIFOROS
+        std::string     m_vertexBarrelDetectorName;               ///< The vertex barrel detector name 
+        std::vector<std::string> m_barrelTrackerNames;      ///< The Barrel Tracking detector names 
+        std::vector<std::string> m_endcapTrackerNames;      ///< The Endcap Tracking detector names 
+        std::string     m_ecalBarrelName;                   ///< The ECal barrel detector name 
+        std::string     m_ecalEndcapName;                   ///< The ECal endcap detector name 
+        std::vector<std::string>  m_ecalOtherNames;         ///< Additional ECal detector names 
+        
+        std::string     m_hcalBarrelName;                   ///< The HCal barrel detector name 
+        std::string     m_hcalEndcapName;                   ///< The HCal endcap detector name 
+        std::vector<std::string>  m_hcalOtherNames;         ///< Additional HCal detector names 
+        
+        std::string     m_muonBarrelName;                   ///< The Muon barrel detector name 
+        std::string     m_muonEndcapName;                   ///< The Muon endcap detector name 
+        std::vector<std::string>  m_muonOtherNames;         ///< Additional Muon detector names 
+        
+        std::string     m_coilName;                   ///< The detector name for the coil
+        
+        
+        //Nikiforos: Moved from main class 
+        
+        float                         m_eCalBarrelOuterZ;                 ///< ECal barrel outer z coordinate
+        float                         m_hCalBarrelOuterZ;                 ///< HCal barrel outer z coordinate
+        float                         m_muonBarrelOuterZ;                 ///< Muon barrel outer z coordinate
+        float                         m_coilOuterR;                       ///< Coil outer r coordinate
+          
+        float                         m_eCalBarrelInnerPhi0;              ///< ECal barrel inner phi0 coordinate
+        unsigned int                  m_eCalBarrelInnerSymmetry;          ///< ECal barrel inner symmetry order
+        float                         m_hCalBarrelInnerPhi0;              ///< HCal barrel inner phi0 coordinate
+        unsigned int                  m_hCalBarrelInnerSymmetry;          ///< HCal barrel inner symmetry order
+        float                         m_muonBarrelInnerPhi0;              ///< Muon barrel inner phi0 coordinate
+        unsigned int                  m_muonBarrelInnerSymmetry;          ///< Muon barrel inner symmetry order
+          
+        float                         m_hCalEndCapOuterR;                 ///< HCal endcap outer r coordinate
+        float                         m_hCalEndCapOuterZ;                 ///< HCal endcap outer z coordinate
+        float                         m_hCalBarrelOuterR;                 ///< HCal barrel outer r coordinate
+        float                         m_hCalBarrelOuterPhi0;              ///< HCal barrel outer phi0 coordinate
+        unsigned int                  m_hCalBarrelOuterSymmetry;          ///< HCal barrel outer symmetry order
     };
 
     /**
@@ -210,24 +250,6 @@ private:
     const Settings                      m_settings;                         ///< The calo hit creator settings
 
     const pandora::Pandora             *m_pPandora;                         ///< Address of the pandora object to create calo hits
-
-    const float                         m_eCalBarrelOuterZ;                 ///< ECal barrel outer z coordinate
-    const float                         m_hCalBarrelOuterZ;                 ///< HCal barrel outer z coordinate
-    const float                         m_muonBarrelOuterZ;                 ///< Muon barrel outer z coordinate
-    const float                         m_coilOuterR;                       ///< Coil outer r coordinate
-
-    const float                         m_eCalBarrelInnerPhi0;              ///< ECal barrel inner phi0 coordinate
-    const unsigned int                  m_eCalBarrelInnerSymmetry;          ///< ECal barrel inner symmetry order
-    const float                         m_hCalBarrelInnerPhi0;              ///< HCal barrel inner phi0 coordinate
-    const unsigned int                  m_hCalBarrelInnerSymmetry;          ///< HCal barrel inner symmetry order
-    const float                         m_muonBarrelInnerPhi0;              ///< Muon barrel inner phi0 coordinate
-    const unsigned int                  m_muonBarrelInnerSymmetry;          ///< Muon barrel inner symmetry order
-
-    const float                         m_hCalEndCapOuterR;                 ///< HCal endcap outer r coordinate
-    const float                         m_hCalEndCapOuterZ;                 ///< HCal endcap outer z coordinate
-    const float                         m_hCalBarrelOuterR;                 ///< HCal barrel outer r coordinate
-    const float                         m_hCalBarrelOuterPhi0;              ///< HCal barrel outer phi0 coordinate
-    const unsigned int                  m_hCalBarrelOuterSymmetry;          ///< HCal barrel outer symmetry order
 
     float                               m_hCalBarrelLayerThickness;         ///< HCal barrel layer thickness
     float                               m_hCalEndCapLayerThickness;         ///< HCal endcap layer thickness

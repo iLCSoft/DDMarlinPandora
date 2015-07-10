@@ -15,20 +15,26 @@
 
 #include "UTIL/LCRelationNavigator.h"
 
-#include "gear/BField.h"
 
 #include "DDCaloHitCreator.h"
 #include "MCParticleCreator.h"
 #include "DDPandoraPFANewProcessor.h"
-#include "TrackCreator.h"
+#include "DDTrackCreator.h"
 
 #include <cmath>
 #include <limits>
 
+#include "DD4hep/LCDD.h"
+#include "DD4hep/DD4hepUnits.h"
+
+//forward declarations. See in DDPandoraPFANewProcessor.cc
+double getFieldFromLCDD(); 
+
+
 MCParticleCreator::MCParticleCreator(const Settings &settings, const pandora::Pandora *const pPandora) :
     m_settings(settings),
     m_pPandora(pPandora),
-    m_bField(marlin::Global::GEAR->getBField().at(gear::Vector3D(0., 0., 0.)).z())
+    m_bField(getFieldFromLCDD())
 {
 }
 
