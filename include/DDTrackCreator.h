@@ -1,13 +1,13 @@
 /**
- *  @file   MarlinPandora/include/TrackCreator.h
+ *  @file   MarlinPandora/include/DDTrackCreator.h
  * 
  *  @brief  Header file for the track creator class.
  * 
  *  $Log: $
  */
 
-#ifndef TRACK_CREATOR_H
-#define TRACK_CREATOR_H 1
+#ifndef DDTRACK_CREATOR_H
+#define DDTRACK_CREATOR_H 1
 
 #include "lcio.h"
 
@@ -40,9 +40,9 @@ inline LCCollectionVec *newTrkCol(const std::string &name, LCEvent *evt , bool i
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
- *  @brief  TrackCreator class
+ *  @brief  DDTrackCreator class
  */
-class TrackCreator
+class DDTrackCreator
 {
 public:
     typedef std::vector<double> DoubleVector;
@@ -102,6 +102,21 @@ public:
         float           m_maxTpcInnerRDistance;                 ///< Track cut on distance from tpc inner r to id whether track can form pfo
         float           m_minTpcHitFractionOfExpected;          ///< Minimum fraction of TPC hits compared to expected
         int             m_minFtdHitsForTpcHitFraction;          ///< Minimum number of FTD hits to ignore TPC hit fraction
+        
+        ///Nikiforos: Moved from main class
+        
+        float             m_bField;                       ///< The bfield
+        
+        float             m_tpcInnerR;                    ///< The tpc inner radius
+        float             m_tpcOuterR;                    ///< The tpc outer radius
+        unsigned int      m_tpcMaxRow;                    ///< The tpc maximum row number
+        float             m_tpcZmax;                      ///< The tpc maximum z coordinate
+        
+        int               m_eCalBarrelInnerSymmetry;      ///< ECal barrel inner symmetry order
+        float             m_eCalBarrelInnerPhi0;          ///< ECal barrel inner phi 0
+        float             m_eCalBarrelInnerR;             ///< ECal barrel inner radius
+        float             m_eCalEndCapInnerZ;             ///< ECal endcap inner z
+        
     };
 
     /**
@@ -110,12 +125,12 @@ public:
      *  @param  settings the creator settings
      *  @param  pPandora address of the relevant pandora instance
      */
-     TrackCreator(const Settings &settings, const pandora::Pandora *const pPandora);
+     DDTrackCreator(const Settings &settings, const pandora::Pandora *const pPandora);
 
     /**
      *  @brief  Destructor
      */
-     ~TrackCreator();
+     ~DDTrackCreator();
 
     /**
      *  @brief  Create associations between tracks, V0s, kinks, etc
@@ -263,12 +278,7 @@ private:
     const Settings          m_settings;                     ///< The track creator settings
     const pandora::Pandora *m_pPandora;                     ///< Address of the pandora object to create tracks and track relationships
 
-    const float             m_bField;                       ///< The bfield
 
-    const float             m_tpcInnerR;                    ///< The tpc inner radius
-    const float             m_tpcOuterR;                    ///< The tpc outer radius
-    const unsigned int      m_tpcMaxRow;                    ///< The tpc maximum row number
-    const float             m_tpcZmax;                      ///< The tpc maximum z coordinate
     float                   m_cosTpc;                       ///< Cos(theta) value at end of tpc
 
     DoubleVector            m_ftdInnerRadii;                ///< List of ftd inner radii
@@ -276,12 +286,7 @@ private:
     DoubleVector            m_ftdZPositions;                ///< List of ftd z positions
     unsigned int            m_nFtdLayers;                   ///< Number of ftd layers
     float                   m_tanLambdaFtd;                 ///< Tan lambda for first ftd layer
-
-    const int               m_eCalBarrelInnerSymmetry;      ///< ECal barrel inner symmetry order
-    const float             m_eCalBarrelInnerPhi0;          ///< ECal barrel inner phi 0
-    const float             m_eCalBarrelInnerR;             ///< ECal barrel inner radius
-    const float             m_eCalEndCapInnerZ;             ///< ECal endcap inner z
-
+    
     float                   m_minEtdZPosition;              ///< Min etd z position
     float                   m_minSetRadius;                 ///< Min set radius
 
@@ -294,14 +299,14 @@ private:
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const TrackVector &TrackCreator::GetTrackVector() const
+inline const TrackVector &DDTrackCreator::GetTrackVector() const
 {
     return m_trackVector;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline void TrackCreator::Reset()
+inline void DDTrackCreator::Reset()
 {
     m_trackVector.clear();
     m_v0TrackList.clear();
@@ -312,21 +317,21 @@ inline void TrackCreator::Reset()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline bool TrackCreator::IsV0(const Track *const pTrack) const
+inline bool DDTrackCreator::IsV0(const Track *const pTrack) const
 {
     return (m_v0TrackList.end() != m_v0TrackList.find(pTrack));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline bool TrackCreator::IsParent(const Track *const pTrack) const
+inline bool DDTrackCreator::IsParent(const Track *const pTrack) const
 {
     return (m_parentTrackList.end() != m_parentTrackList.find(pTrack));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline bool TrackCreator::IsDaughter(const Track *const pTrack) const
+inline bool DDTrackCreator::IsDaughter(const Track *const pTrack) const
 {
     return (m_daughterTrackList.end() != m_daughterTrackList.find(pTrack));
 }

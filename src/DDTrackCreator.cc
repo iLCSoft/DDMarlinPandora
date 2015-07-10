@@ -1,5 +1,5 @@
 /**
- *  @file   MarlinPandora/src/TrackCreator.cc
+ *  @file   MarlinPandora/src/DDTrackCreator.cc
  * 
  *  @brief  Implementation of the track creator class.
  * 
@@ -22,25 +22,28 @@
 #include "gear/FTDLayerLayout.h"
 
 #include "DDPandoraPFANewProcessor.h"
-#include "TrackCreator.h"
+#include "DDTrackCreator.h"
 #include "Pandora/PdgTable.h"
 
 #include <algorithm>
 #include <cmath>
 #include <limits>
 
-TrackCreator::TrackCreator(const Settings &settings, const pandora::Pandora *const pPandora) :
+#include "DD4hep/LCDD.h"
+#include "DD4hep/DD4hepUnits.h"
+#include "DDRec/DetectorData.h"
+
+
+
+//forward declarations. See in DDPandoraPFANewProcessor.cc
+double getFieldFromLCDD(); 
+DD4hep::DDRec::LayeredCalorimeterData * getExtension(std::string detectorName);
+
+std::vector<double> getTrackingRegionExtent();
+
+DDTrackCreator::DDTrackCreator(const Settings &settings, const pandora::Pandora *const pPandora) :
     m_settings(settings),
-    m_pPandora(pPandora),
-    m_bField(marlin::Global::GEAR->getBField().at(gear::Vector3D(0., 0., 0.)).z()),
-    m_tpcInnerR(marlin::Global::GEAR->getTPCParameters().getPadLayout().getPlaneExtent()[0]),
-    m_tpcOuterR(marlin::Global::GEAR->getTPCParameters().getPadLayout().getPlaneExtent()[1]),
-    m_tpcMaxRow(marlin::Global::GEAR->getTPCParameters().getPadLayout().getNRows()),
-    m_tpcZmax(marlin::Global::GEAR->getTPCParameters().getMaxDriftLength()),
-    m_eCalBarrelInnerSymmetry(marlin::Global::GEAR->getEcalBarrelParameters().getSymmetryOrder()),
-    m_eCalBarrelInnerPhi0(marlin::Global::GEAR->getEcalBarrelParameters().getPhi0()),
-    m_eCalBarrelInnerR(marlin::Global::GEAR->getEcalBarrelParameters().getExtent()[0]),
-    m_eCalEndCapInnerZ(marlin::Global::GEAR->getEcalEndcapParameters().getExtent()[2])
+    m_pPandora(pPandora)
 {
     // fg: FTD description in GEAR has changed ...
     try
@@ -71,13 +74,13 @@ TrackCreator::TrackCreator(const Settings &settings, const pandora::Pandora *con
     }
 
     // Check tpc parameters
-    if ((std::fabs(m_tpcZmax) < std::numeric_limits<float>::epsilon()) || (std::fabs(m_tpcInnerR) < std::numeric_limits<float>::epsilon())
-        || (std::fabs(m_tpcOuterR - m_tpcInnerR) < std::numeric_limits<float>::epsilon()))
+    if ((std::fabs(m_settings.m_tpcZmax) < std::numeric_limits<float>::epsilon()) || (std::fabs(m_settings.m_tpcInnerR) < std::numeric_limits<float>::epsilon())
+        || (std::fabs(m_settings.m_tpcOuterR - m_settings.m_tpcInnerR) < std::numeric_limits<float>::epsilon()))
     {
         throw pandora::StatusCodeException(pandora::STATUS_CODE_INVALID_PARAMETER);
     }
 
-    m_cosTpc = m_tpcZmax / std::sqrt(m_tpcZmax * m_tpcZmax + m_tpcInnerR * m_tpcInnerR);
+    m_cosTpc = m_settings.m_tpcZmax / std::sqrt(m_settings.m_tpcZmax * m_settings.m_tpcZmax + m_settings.m_tpcInnerR * m_settings.m_tpcInnerR);
 
     // Check ftd parameters
     if ((0 == m_nFtdLayers) || (m_nFtdLayers != m_ftdInnerRadii.size()) || (m_nFtdLayers != m_ftdOuterRadii.size()))
@@ -122,13 +125,13 @@ TrackCreator::TrackCreator(const Settings &settings, const pandora::Pandora *con
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-TrackCreator::~TrackCreator()
+DDTrackCreator::~DDTrackCreator()
 {
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-pandora::StatusCode TrackCreator::CreateTrackAssociations(const EVENT::LCEvent *const pLCEvent)
+pandora::StatusCode DDTrackCreator::CreateTrackAssociations(const EVENT::LCEvent *const pLCEvent)
 {
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, this->ExtractKinks(pLCEvent));
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, this->ExtractProngsAndSplits(pLCEvent));
@@ -139,7 +142,7 @@ pandora::StatusCode TrackCreator::CreateTrackAssociations(const EVENT::LCEvent *
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-pandora::StatusCode TrackCreator::ExtractKinks(const EVENT::LCEvent *const pLCEvent)
+pandora::StatusCode DDTrackCreator::ExtractKinks(const EVENT::LCEvent *const pLCEvent)
 {
     for (StringVector::const_iterator iter = m_settings.m_kinkVertexCollections.begin(), iterEnd = m_settings.m_kinkVertexCollections.end();
         iter != iterEnd; ++iter)
@@ -247,7 +250,7 @@ pandora::StatusCode TrackCreator::ExtractKinks(const EVENT::LCEvent *const pLCEv
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-pandora::StatusCode TrackCreator::ExtractProngsAndSplits(const EVENT::LCEvent *const pLCEvent)
+pandora::StatusCode DDTrackCreator::ExtractProngsAndSplits(const EVENT::LCEvent *const pLCEvent)
 {
     for (StringVector::const_iterator iter = m_settings.m_prongSplitVertexCollections.begin(), iterEnd = m_settings.m_prongSplitVertexCollections.end();
         iter != iterEnd; ++iter)
@@ -319,7 +322,7 @@ pandora::StatusCode TrackCreator::ExtractProngsAndSplits(const EVENT::LCEvent *c
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-pandora::StatusCode TrackCreator::ExtractV0s(const EVENT::LCEvent *const pLCEvent)
+pandora::StatusCode DDTrackCreator::ExtractV0s(const EVENT::LCEvent *const pLCEvent)
 {
     for (StringVector::const_iterator iter = m_settings.m_v0VertexCollections.begin(), iterEnd = m_settings.m_v0VertexCollections.end();
         iter != iterEnd; ++iter)
@@ -403,7 +406,7 @@ pandora::StatusCode TrackCreator::ExtractV0s(const EVENT::LCEvent *const pLCEven
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool TrackCreator::IsConflictingRelationship(const EVENT::TrackVec &trackVec) const
+bool DDTrackCreator::IsConflictingRelationship(const EVENT::TrackVec &trackVec) const
 {
     for (unsigned int iTrack = 0, nTracks = trackVec.size(); iTrack < nTracks; ++iTrack)
     {
@@ -418,7 +421,7 @@ bool TrackCreator::IsConflictingRelationship(const EVENT::TrackVec &trackVec) co
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-pandora::StatusCode TrackCreator::CreateTracks(EVENT::LCEvent *pLCEvent)
+pandora::StatusCode DDTrackCreator::CreateTracks(EVENT::LCEvent *pLCEvent)
 {
     for (StringVector::const_iterator iter = m_settings.m_trackCollections.begin(), iterEnd = m_settings.m_trackCollections.end();
         iter != iterEnd; ++iter)
@@ -511,7 +514,7 @@ pandora::StatusCode TrackCreator::CreateTracks(EVENT::LCEvent *pLCEvent)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void TrackCreator::GetTrackStates(const EVENT::Track *const pTrack, PandoraApi::Track::Parameters &trackParameters) const
+void DDTrackCreator::GetTrackStates(const EVENT::Track *const pTrack, PandoraApi::Track::Parameters &trackParameters) const
 {
     if (m_settings.m_useOldTrackStateCalculation > 0)
         return this->GetTrackStatesOld(pTrack, trackParameters);
@@ -521,7 +524,7 @@ void TrackCreator::GetTrackStates(const EVENT::Track *const pTrack, PandoraApi::
     if (!pTrackState)
         throw pandora::StatusCodeException(pandora::STATUS_CODE_NOT_INITIALIZED);
 
-    const double pt(m_bField * 2.99792e-4 / std::fabs(pTrackState->getOmega()));
+    const double pt(m_settings.m_bField * 2.99792e-4 / std::fabs(pTrackState->getOmega()));
     trackParameters.m_momentumAtDca = pandora::CartesianVector(std::cos(pTrackState->getPhi()), std::sin(pTrackState->getPhi()), pTrackState->getTanLambda()) * pt;
 
     this->CopyTrackState(pTrack->getTrackState(TrackState::AtFirstHit), trackParameters.m_trackStateAtStart);
@@ -532,7 +535,7 @@ void TrackCreator::GetTrackStates(const EVENT::Track *const pTrack, PandoraApi::
     this->CopyTrackState(pEndTrack->getTrackState(TrackState::AtLastHit), trackParameters.m_trackStateAtEnd);
     this->CopyTrackState(pEndTrack->getTrackState(TrackState::AtCalorimeter), trackParameters.m_trackStateAtCalorimeter);
 
-    trackParameters.m_isProjectedToEndCap = ((std::fabs(trackParameters.m_trackStateAtCalorimeter.Get().GetPosition().GetZ()) < m_eCalEndCapInnerZ) ? false : true);
+    trackParameters.m_isProjectedToEndCap = ((std::fabs(trackParameters.m_trackStateAtCalorimeter.Get().GetPosition().GetZ()) < m_settings.m_eCalEndCapInnerZ) ? false : true);
 
     // TODO minGenericTime * particleEnergy / 300.f;
     trackParameters.m_timeAtCalorimeter = 0.f;
@@ -540,12 +543,12 @@ void TrackCreator::GetTrackStates(const EVENT::Track *const pTrack, PandoraApi::
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void TrackCreator::CopyTrackState(const TrackState *const pTrackState, pandora::InputTrackState &inputTrackState) const
+void DDTrackCreator::CopyTrackState(const TrackState *const pTrackState, pandora::InputTrackState &inputTrackState) const
 {
     if (!pTrackState)
         throw pandora::StatusCodeException(pandora::STATUS_CODE_NOT_INITIALIZED);
 
-    const double pt(m_bField * 2.99792e-4 / std::fabs(pTrackState->getOmega()));
+    const double pt(m_settings.m_bField * 2.99792e-4 / std::fabs(pTrackState->getOmega()));
 
     const double px(pt * std::cos(pTrackState->getPhi()));
     const double py(pt * std::sin(pTrackState->getPhi()));
@@ -560,9 +563,9 @@ void TrackCreator::CopyTrackState(const TrackState *const pTrackState, pandora::
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void TrackCreator::GetTrackStatesOld(const EVENT::Track *const pTrack, PandoraApi::Track::Parameters &trackParameters) const
+void DDTrackCreator::GetTrackStatesOld(const EVENT::Track *const pTrack, PandoraApi::Track::Parameters &trackParameters) const
 {
-    pandora::Helix *pHelixFit = new pandora::Helix(pTrack->getPhi(), pTrack->getD0(), pTrack->getZ0(), pTrack->getOmega(), pTrack->getTanLambda(), m_bField);
+    pandora::Helix *pHelixFit = new pandora::Helix(pTrack->getPhi(), pTrack->getD0(), pTrack->getZ0(), pTrack->getOmega(), pTrack->getTanLambda(), m_settings.m_bField);
     trackParameters.m_momentumAtDca = pHelixFit->GetMomentum();
 
     const EVENT::TrackerHitVec &trackerHitvec(pTrack->getTrackerHits());
@@ -600,7 +603,7 @@ void TrackCreator::GetTrackStatesOld(const EVENT::Track *const pTrack, PandoraAp
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void TrackCreator::GetECalProjectionOld(const pandora::Helix *const pHelix, const int signPz, PandoraApi::Track::Parameters &trackParameters) const
+void DDTrackCreator::GetECalProjectionOld(const pandora::Helix *const pHelix, const int signPz, PandoraApi::Track::Parameters &trackParameters) const
 {
     const pandora::CartesianVector &referencePoint(pHelix->GetReferencePoint());
 
@@ -609,22 +612,22 @@ void TrackCreator::GetECalProjectionOld(const pandora::Helix *const pHelix, cons
     bool isProjectedToEndCap(true);
 
     pandora::CartesianVector bestECalProjection(0.f, 0.f, 0.f);
-    (void) pHelix->GetPointInZ(static_cast<float>(signPz) * m_eCalEndCapInnerZ, referencePoint, bestECalProjection, minGenericTime);
+    (void) pHelix->GetPointInZ(static_cast<float>(signPz) * m_settings.m_eCalEndCapInnerZ, referencePoint, bestECalProjection, minGenericTime);
 
     // Then project to barrel surface(s)
     pandora::CartesianVector barrelProjection(0.f, 0.f, 0.f);
 
-    if (m_eCalBarrelInnerSymmetry > 0)
+    if (m_settings.m_eCalBarrelInnerSymmetry > 0)
     {
         // Polygon
-        float twopi_n = 2. * M_PI / (static_cast<float>(m_eCalBarrelInnerSymmetry));
+        float twopi_n = 2. * M_PI / (static_cast<float>(m_settings.m_eCalBarrelInnerSymmetry));
 
-        for (int i = 0; i < m_eCalBarrelInnerSymmetry; ++i)
+        for (int i = 0; i < m_settings.m_eCalBarrelInnerSymmetry; ++i)
         {
             float genericTime(std::numeric_limits<float>::max());
-            const float phi(twopi_n * static_cast<float>(i) + m_eCalBarrelInnerPhi0);
+            const float phi(twopi_n * static_cast<float>(i) + m_settings.m_eCalBarrelInnerPhi0);
 
-            const pandora::StatusCode statusCode(pHelix->GetPointInXY(m_eCalBarrelInnerR * std::cos(phi), m_eCalBarrelInnerR * std::sin(phi),
+            const pandora::StatusCode statusCode(pHelix->GetPointInXY(m_settings.m_eCalBarrelInnerR * std::cos(phi), m_settings.m_eCalBarrelInnerR * std::sin(phi),
                 std::cos(phi + 0.5 * M_PI), std::sin(phi + 0.5 * M_PI), referencePoint, barrelProjection, genericTime));
 
             if ((pandora::STATUS_CODE_SUCCESS == statusCode) && (genericTime < minGenericTime))
@@ -639,7 +642,7 @@ void TrackCreator::GetECalProjectionOld(const pandora::Helix *const pHelix, cons
     {
         // Cylinder
         float genericTime(std::numeric_limits<float>::max());
-        const pandora::StatusCode statusCode(pHelix->GetPointOnCircle(m_eCalBarrelInnerR, referencePoint, barrelProjection, genericTime));
+        const pandora::StatusCode statusCode(pHelix->GetPointOnCircle(m_settings.m_eCalBarrelInnerR, referencePoint, barrelProjection, genericTime));
 
         if ((pandora::STATUS_CODE_SUCCESS == statusCode) && (genericTime < minGenericTime))
         {
@@ -663,7 +666,7 @@ void TrackCreator::GetECalProjectionOld(const pandora::Helix *const pHelix, cons
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void TrackCreator::TrackReachesECAL(const EVENT::Track *const pTrack, PandoraApi::Track::Parameters &trackParameters) const
+void DDTrackCreator::TrackReachesECAL(const EVENT::Track *const pTrack, PandoraApi::Track::Parameters &trackParameters) const
 {
     // Calculate hit position information
     float hitZMin(std::numeric_limits<float>::max());
@@ -693,7 +696,7 @@ void TrackCreator::TrackReachesECAL(const EVENT::Track *const pTrack, PandoraApi
         if (r > hitOuterR)
             hitOuterR = r;
 
-        if ((r > m_tpcInnerR) && (r < m_tpcOuterR) && (std::fabs(z) <= m_tpcZmax))
+        if ((r > m_settings.m_tpcInnerR) && (r < m_settings.m_tpcOuterR) && (std::fabs(z) <= m_settings.m_tpcZmax))
         {
             nTpcHits++;
             continue;
@@ -724,9 +727,9 @@ void TrackCreator::TrackReachesECAL(const EVENT::Track *const pTrack, PandoraApi
     // Require sufficient hits in tpc or ftd, then compare extremal hit positions with tracker dimensions
     if ((nTpcHits >= m_settings.m_reachesECalNTpcHits) || (nFtdHits >= m_settings.m_reachesECalNFtdHits))
     {
-        if ((hitOuterR - m_tpcOuterR > m_settings.m_reachesECalTpcOuterDistance) ||
-            (std::fabs(hitZMax) - m_tpcZmax > m_settings.m_reachesECalTpcZMaxDistance) ||
-            (std::fabs(hitZMin) - m_tpcZmax > m_settings.m_reachesECalTpcZMaxDistance) ||
+        if ((hitOuterR - m_settings.m_tpcOuterR > m_settings.m_reachesECalTpcOuterDistance) ||
+            (std::fabs(hitZMax) - m_settings.m_tpcZmax > m_settings.m_reachesECalTpcZMaxDistance) ||
+            (std::fabs(hitZMin) - m_settings.m_tpcZmax > m_settings.m_reachesECalTpcZMaxDistance) ||
             (maxOccupiedFtdLayer >= m_settings.m_reachesECalMinFtdLayer))
         {
             trackParameters.m_reachesCalorimeter = true;
@@ -740,7 +743,7 @@ void TrackCreator::TrackReachesECAL(const EVENT::Track *const pTrack, PandoraApi
     const float pX(momentumAtDca.GetX()), pY(momentumAtDca.GetY());
     const float pT(std::sqrt(pX * pX + pY * pY));
 
-    if ((cosAngleAtDca > m_cosTpc) || (pT < m_settings.m_curvatureToMomentumFactor * m_bField * m_tpcOuterR))
+    if ((cosAngleAtDca > m_cosTpc) || (pT < m_settings.m_curvatureToMomentumFactor * m_settings.m_bField * m_settings.m_tpcOuterR))
     {
         trackParameters.m_reachesCalorimeter = true;
         return;
@@ -751,7 +754,7 @@ void TrackCreator::TrackReachesECAL(const EVENT::Track *const pTrack, PandoraApi
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void TrackCreator::DefineTrackPfoUsage(const EVENT::Track *const pTrack, PandoraApi::Track::Parameters &trackParameters) const
+void DDTrackCreator::DefineTrackPfoUsage(const EVENT::Track *const pTrack, PandoraApi::Track::Parameters &trackParameters) const
 {
     bool canFormPfo(false);
     bool canFormClusterlessPfo(false);
@@ -782,14 +785,14 @@ void TrackCreator::DefineTrackPfoUsage(const EVENT::Track *const pTrack, Pandora
             const float pX(momentumAtDca.GetX()), pY(momentumAtDca.GetY()), pZ(momentumAtDca.GetZ());
             const float pT(std::sqrt(pX * pX + pY * pY));
 
-            const float zCutForNonVertexTracks(m_tpcInnerR * std::fabs(pZ / pT) + m_settings.m_zCutForNonVertexTracks);
-            const bool passRzQualityCuts((zMin < zCutForNonVertexTracks) && (rInner < m_tpcInnerR + m_settings.m_maxTpcInnerRDistance));
+            const float zCutForNonVertexTracks(m_settings.m_tpcInnerR * std::fabs(pZ / pT) + m_settings.m_zCutForNonVertexTracks);
+            const bool passRzQualityCuts((zMin < zCutForNonVertexTracks) && (rInner < m_settings.m_tpcInnerR + m_settings.m_maxTpcInnerRDistance));
 
             const bool isV0(this->IsV0(pTrack));
             const bool isDaughter(this->IsDaughter(pTrack));
 
             // Decide whether track can be associated with a pandora cluster and used to form a charged PFO
-            if ((d0 < m_settings.m_d0TrackCut) && (z0 < m_settings.m_z0TrackCut) && (rInner < m_tpcInnerR + m_settings.m_maxTpcInnerRDistance))
+            if ((d0 < m_settings.m_d0TrackCut) && (z0 < m_settings.m_z0TrackCut) && (rInner < m_settings.m_tpcInnerR + m_settings.m_maxTpcInnerRDistance))
             {
                 canFormPfo = true;
             }
@@ -809,7 +812,7 @@ void TrackCreator::DefineTrackPfoUsage(const EVENT::Track *const pTrack, Pandora
             if ((0 != m_settings.m_usingUnmatchedVertexTracks) && (trackEnergy < m_settings.m_unmatchedVertexTrackMaxEnergy))
             {
                 if ((d0 < m_settings.m_d0UnmatchedVertexTrackCut) && (z0 < m_settings.m_z0UnmatchedVertexTrackCut) &&
-                    (rInner < m_tpcInnerR + m_settings.m_maxTpcInnerRDistance))
+                    (rInner < m_settings.m_tpcInnerR + m_settings.m_maxTpcInnerRDistance))
                 {
                     canFormClusterlessPfo = true;
                 }
@@ -836,7 +839,7 @@ void TrackCreator::DefineTrackPfoUsage(const EVENT::Track *const pTrack, Pandora
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool TrackCreator::PassesQualityCuts(const EVENT::Track *const pTrack, const PandoraApi::Track::Parameters &trackParameters) const
+bool DDTrackCreator::PassesQualityCuts(const EVENT::Track *const pTrack, const PandoraApi::Track::Parameters &trackParameters) const
 {
     // First simple sanity checks
     if (trackParameters.m_trackStateAtCalorimeter.Get().GetPosition().GetMagnitude() < m_settings.m_minTrackECalDistanceFromIp)
@@ -869,7 +872,7 @@ bool TrackCreator::PassesQualityCuts(const EVENT::Track *const pTrack, const Pan
         const float pT(std::sqrt(pX * pX + pY * pY));
         const float rInnermostHit(pTrack->getRadiusOfInnermostHit());
 
-        if ((0.f == pT) || (0.f == pZ) || (rInnermostHit == m_tpcOuterR))
+        if ((0.f == pT) || (0.f == pZ) || (rInnermostHit == m_settings.m_tpcOuterR))
         {
             streamlog_out(ERROR) << "Invalid track parameter, pT " << pT << ", pZ " << pZ << ", rInnermostHit " << rInnermostHit << std::endl;
             return false;
@@ -877,22 +880,22 @@ bool TrackCreator::PassesQualityCuts(const EVENT::Track *const pTrack, const Pan
 
         float nExpectedTpcHits(0.);
 
-        if (pZ < m_tpcZmax / m_tpcOuterR * pT)
+        if (pZ < m_settings.m_tpcZmax / m_settings.m_tpcOuterR * pT)
         {
-            const float innerExpectedHitRadius(std::max(m_tpcInnerR, rInnermostHit));
-            const float frac((m_tpcOuterR - innerExpectedHitRadius) / (m_tpcOuterR - m_tpcInnerR));
-            nExpectedTpcHits = m_tpcMaxRow * frac;
+            const float innerExpectedHitRadius(std::max(m_settings.m_tpcInnerR, rInnermostHit));
+            const float frac((m_settings.m_tpcOuterR - innerExpectedHitRadius) / (m_settings.m_tpcOuterR - m_settings.m_tpcInnerR));
+            nExpectedTpcHits = m_settings.m_tpcMaxRow * frac;
         }
 
-        if ((pZ <= m_tpcZmax / m_tpcInnerR * pT) && (pZ >= m_tpcZmax / m_tpcOuterR * pT))
+        if ((pZ <= m_settings.m_tpcZmax / m_settings.m_tpcInnerR * pT) && (pZ >= m_settings.m_tpcZmax / m_settings.m_tpcOuterR * pT))
         {
-            const float innerExpectedHitRadius(std::max(m_tpcInnerR, rInnermostHit));
-            const float frac((m_tpcZmax * pT / pZ - innerExpectedHitRadius) / (m_tpcOuterR - innerExpectedHitRadius));
-            nExpectedTpcHits = frac * m_tpcMaxRow;
+            const float innerExpectedHitRadius(std::max(m_settings.m_tpcInnerR, rInnermostHit));
+            const float frac((m_settings.m_tpcZmax * pT / pZ - innerExpectedHitRadius) / (m_settings.m_tpcOuterR - innerExpectedHitRadius));
+            nExpectedTpcHits = frac * m_settings.m_tpcMaxRow;
         }
 
         // TODO Get TPC membrane information from GEAR when available
-        if (std::fabs(pZ) / momentumAtDca.GetMagnitude() < m_settings.m_tpcMembraneMaxZ / m_tpcInnerR)
+        if (std::fabs(pZ) / momentumAtDca.GetMagnitude() < m_settings.m_tpcMembraneMaxZ / m_settings.m_tpcInnerR)
             nExpectedTpcHits = 0;
 
         const EVENT::IntVec &hitsBySubdetector(pTrack->getSubdetectorHitNumbers());
@@ -920,7 +923,7 @@ bool TrackCreator::PassesQualityCuts(const EVENT::Track *const pTrack, const Pan
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-TrackCreator::Settings::Settings() :
+DDTrackCreator::Settings::Settings() :
     m_shouldFormTrackRelationships(1),
     m_minTrackHits(5),
     m_minFtdTrackHits(0),
