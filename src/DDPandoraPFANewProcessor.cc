@@ -662,67 +662,7 @@ void DDPandoraPFANewProcessor::ProcessSteeringFile()
                             m_trackCreatorSettings.m_maxTpcInnerRDistance,
                             float(50.));
 
-    // Additional geometry parameters
-    registerProcessorParameter("ECalEndCapInnerSymmetryOrder",
-                            "ECal end cap inner symmetry order (missing from ILD gear files)",
-                            m_geometryCreatorSettings.m_eCalEndCapInnerSymmetryOrder,
-                            int(4));
-
-    registerProcessorParameter("ECalEndCapInnerPhiCoordinate",
-                            "ECal end cap inner phi coordinate (missing from ILD gear files)",
-                            m_geometryCreatorSettings.m_eCalEndCapInnerPhiCoordinate,
-                            float(0.));
-
-    registerProcessorParameter("ECalEndCapOuterSymmetryOrder",
-                            "ECal end cap outer symmetry order (missing from ILD gear files)",
-                            m_geometryCreatorSettings.m_eCalEndCapOuterSymmetryOrder,
-                            int(8));
-
-    registerProcessorParameter("ECalEndCapOuterPhiCoordinate",
-                            "ECal end cap outer phi coordinate (missing from ILD gear files)",
-                            m_geometryCreatorSettings.m_eCalEndCapOuterPhiCoordinate,
-                            float(0.));
-
-    registerProcessorParameter("HCalEndCapInnerSymmetryOrder",
-                            "HCal end cap inner symmetry order (missing from ILD gear files)",
-                            m_geometryCreatorSettings.m_hCalEndCapInnerSymmetryOrder,
-                            int(4));
-
-    registerProcessorParameter("HCalEndCapInnerPhiCoordinate",
-                            "HCal end cap inner phi coordinate (missing from ILD gear files)",
-                            m_geometryCreatorSettings.m_hCalEndCapInnerPhiCoordinate,
-                            float(0.));
-
-    registerProcessorParameter("HCalEndCapOuterSymmetryOrder",
-                            "HCal end cap outer symmetry order (missing from ILD gear files)",
-                            m_geometryCreatorSettings.m_hCalEndCapOuterSymmetryOrder,
-                            int(16));
-
-    registerProcessorParameter("HCalEndCapOuterPhiCoordinate",
-                            "HCal end cap outer phi coordinate (missing from ILD gear files)",
-                            m_geometryCreatorSettings.m_hCalEndCapOuterPhiCoordinate,
-                            float(0.));
-
-    registerProcessorParameter("HCalRingInnerSymmetryOrder",
-                            "HCal ring inner symmetry order (missing from ILD gear files)",
-                            m_geometryCreatorSettings.m_hCalRingInnerSymmetryOrder,
-                            int(8));
-
-    registerProcessorParameter("HCalRingInnerPhiCoordinate",
-                            "HCal ring inner phi coordinate (missing from ILD gear files)",
-                            m_geometryCreatorSettings.m_hCalRingInnerPhiCoordinate,
-                            float(0.));
-
-    registerProcessorParameter("HCalRingOuterSymmetryOrder",
-                            "HCal ring outer symmetry order (missing from ILD gear files)",
-                            m_geometryCreatorSettings.m_hCalRingOuterSymmetryOrder,
-                            int(16));
-
-    registerProcessorParameter("HCalRingOuterPhiCoordinate",
-                            "HCal ring outer phi coordinate (missing from ILD gear files)",
-                            m_geometryCreatorSettings.m_hCalRingOuterPhiCoordinate,
-                            float(0.));
-
+   
     // For Strip Splitting method and also for hybrid ECAL
     registerProcessorParameter("StripSplittingOn",
                             "To use strip splitting algorithm, this should be true",
@@ -919,14 +859,14 @@ void DDPandoraPFANewProcessor::FinaliseSteeringParameters()
     m_trackCreatorSettings.m_prongSplitVertexCollections.insert(m_trackCreatorSettings.m_prongSplitVertexCollections.end(),m_trackCreatorSettings.m_splitVertexCollections.begin(),m_trackCreatorSettings.m_splitVertexCollections.end());
     
     m_trackCreatorSettings.m_bField=getFieldFromLCDD();
-    m_trackCreatorSettings.m_tpcInnerR=getTrackingRegionExtent()[0];
-    m_trackCreatorSettings.m_tpcOuterR=getTrackingRegionExtent()[1];
-    m_trackCreatorSettings.m_tpcMaxRow=getTrackingRegionExtent()[2];
-    m_trackCreatorSettings.m_tpcZmax=getTrackingRegionExtent()[3];
+    m_trackCreatorSettings.m_tpcInnerR=getTrackingRegionExtent()[0]/dd4hep::mm;
+    m_trackCreatorSettings.m_tpcOuterR=getTrackingRegionExtent()[1]/dd4hep::mm;
+    m_trackCreatorSettings.m_tpcMaxRow=getTrackingRegionExtent()[2]; ///FIXME! 
+    m_trackCreatorSettings.m_tpcZmax=getTrackingRegionExtent()[3]/dd4hep::mm;
     m_trackCreatorSettings.m_eCalBarrelInnerSymmetry=getExtension(m_settings.m_ecalBarrelName)->inner_symmetry;
-    m_trackCreatorSettings.m_eCalBarrelInnerPhi0=getExtension(m_settings.m_ecalBarrelName)->inner_phi0;
-    m_trackCreatorSettings.m_eCalBarrelInnerR=getExtension(m_settings.m_ecalBarrelName)->extent[0];
-    m_trackCreatorSettings.m_eCalEndCapInnerZ=getExtension(m_settings.m_ecalEndcapName)->extent[2];
+    m_trackCreatorSettings.m_eCalBarrelInnerPhi0=getExtension(m_settings.m_ecalBarrelName)->inner_phi0/dd4hep::rad;
+    m_trackCreatorSettings.m_eCalBarrelInnerR=getExtension(m_settings.m_ecalBarrelName)->extent[0]/dd4hep::mm;
+    m_trackCreatorSettings.m_eCalEndCapInnerZ=getExtension(m_settings.m_ecalEndcapName)->extent[2]/dd4hep::mm;
     
     
     
@@ -935,16 +875,16 @@ void DDPandoraPFANewProcessor::FinaliseSteeringParameters()
     m_caloHitCreatorSettings.m_hCalBarrelOuterZ=getExtension(m_settings.m_hcalBarrelName)->extent[3]/dd4hep::mm;
     m_caloHitCreatorSettings.m_muonBarrelOuterZ=getExtension(m_settings.m_muonBarrelName)->extent[3]/dd4hep::mm;
     m_caloHitCreatorSettings.m_coilOuterR=getCoilOuterR(); 
-    m_caloHitCreatorSettings.m_eCalBarrelInnerPhi0=getExtension(m_settings.m_ecalBarrelName)->phi0/dd4hep::rad;
+    m_caloHitCreatorSettings.m_eCalBarrelInnerPhi0=getExtension(m_settings.m_ecalBarrelName)->inner_phi0/dd4hep::rad;
     m_caloHitCreatorSettings.m_eCalBarrelInnerSymmetry=getExtension(m_settings.m_ecalBarrelName)->inner_symmetry;
-    m_caloHitCreatorSettings.m_hCalBarrelInnerPhi0=getExtension(m_settings.m_hcalBarrelName)->phi0/dd4hep::rad;
+    m_caloHitCreatorSettings.m_hCalBarrelInnerPhi0=getExtension(m_settings.m_hcalBarrelName)->inner_phi0/dd4hep::rad;
     m_caloHitCreatorSettings.m_hCalBarrelInnerSymmetry=getExtension(m_settings.m_hcalBarrelName)->inner_symmetry;
-    m_caloHitCreatorSettings.m_muonBarrelInnerPhi0=getExtension(m_settings.m_muonBarrelName)->phi0/dd4hep::rad;
+    m_caloHitCreatorSettings.m_muonBarrelInnerPhi0=getExtension(m_settings.m_muonBarrelName)->inner_phi0/dd4hep::rad;
     m_caloHitCreatorSettings.m_muonBarrelInnerSymmetry=getExtension(m_settings.m_muonBarrelName)->inner_symmetry;
     m_caloHitCreatorSettings.m_hCalEndCapOuterR=getExtension(m_settings.m_hcalEndcapName)->extent[1]/dd4hep::mm;
     m_caloHitCreatorSettings.m_hCalEndCapOuterZ=getExtension(m_settings.m_hcalEndcapName)->extent[3]/dd4hep::mm;
     m_caloHitCreatorSettings.m_hCalBarrelOuterR=getExtension(m_settings.m_hcalBarrelName)->extent[1]/dd4hep::mm;
-    m_caloHitCreatorSettings.m_hCalBarrelOuterPhi0=getExtension(m_settings.m_hcalBarrelName)->phi0/dd4hep::rad;
+    m_caloHitCreatorSettings.m_hCalBarrelOuterPhi0=getExtension(m_settings.m_hcalBarrelName)->outer_phi0/dd4hep::rad;
     m_caloHitCreatorSettings.m_hCalBarrelOuterSymmetry=getExtension(m_settings.m_hcalBarrelName)->outer_symmetry;
     
     m_caloHitCreatorSettings.m_vertexBarrelDetectorName = m_settings.m_vertexBarrelDetectorName;        
@@ -976,6 +916,23 @@ void DDPandoraPFANewProcessor::FinaliseSteeringParameters()
     m_geometryCreatorSettings.m_muonOtherNames= m_settings.m_muonOtherNames;   
     m_geometryCreatorSettings.m_coilName= m_settings.m_coilName;   
     
+    //These were processor parametes but now can be accessed from DD4hep
+    m_geometryCreatorSettings.m_eCalEndCapInnerSymmetryOrder=getExtension(m_settings.m_ecalEndcapName)->inner_symmetry;
+    m_geometryCreatorSettings.m_eCalEndCapInnerPhiCoordinate=getExtension(m_settings.m_ecalEndcapName)->inner_phi0/dd4hep::rad;
+    m_geometryCreatorSettings.m_eCalEndCapOuterSymmetryOrder=getExtension(m_settings.m_ecalEndcapName)->outer_symmetry;
+    m_geometryCreatorSettings.m_eCalEndCapOuterPhiCoordinate=getExtension(m_settings.m_ecalEndcapName)->outer_phi0/dd4hep::rad;
+    
+    m_geometryCreatorSettings.m_hCalEndCapInnerSymmetryOrder=getExtension(m_settings.m_hcalEndcapName)->inner_symmetry;
+    m_geometryCreatorSettings.m_hCalEndCapInnerPhiCoordinate=getExtension(m_settings.m_hcalEndcapName)->inner_phi0/dd4hep::rad;
+    m_geometryCreatorSettings.m_hCalEndCapOuterSymmetryOrder=getExtension(m_settings.m_hcalEndcapName)->outer_symmetry;
+    m_geometryCreatorSettings.m_hCalEndCapOuterPhiCoordinate=getExtension(m_settings.m_hcalEndcapName)->outer_phi0/dd4hep::rad;
+    
+      
+    std::string hcalRingName = m_settings.m_hcalOtherNames[0]; ///FIXME! IMPLEMENT A SEARCH FOR RING OR SOMETHING
+    m_geometryCreatorSettings.m_hCalRingInnerSymmetryOrder=getExtension(hcalRingName)->inner_symmetry;
+    m_geometryCreatorSettings.m_hCalRingInnerPhiCoordinate=getExtension(hcalRingName)->inner_phi0/dd4hep::rad;
+    m_geometryCreatorSettings.m_hCalRingOuterSymmetryOrder=getExtension(hcalRingName)->outer_symmetry;
+    m_geometryCreatorSettings.m_hCalRingOuterPhiCoordinate=getExtension(hcalRingName)->outer_phi0/dd4hep::mm;
     
     // Get the magnetic field
     DD4hep::Geometry::LCDD& lcdd = DD4hep::Geometry::LCDD::getInstance();

@@ -130,7 +130,7 @@ public:
     /**
      *  @brief  Destructor
      */
-     ~DDTrackCreator();
+     virtual ~DDTrackCreator();
 
     /**
      *  @brief  Create associations between tracks, V0s, kinks, etc
@@ -275,6 +275,7 @@ private:
      */
     bool PassesQualityCuts(const EVENT::Track *const pTrack, const PandoraApi::Track::Parameters &trackParameters) const;
 
+protected:
     const Settings          m_settings;                     ///< The track creator settings
     const pandora::Pandora *m_pPandora;                     ///< Address of the pandora object to create tracks and track relationships
 

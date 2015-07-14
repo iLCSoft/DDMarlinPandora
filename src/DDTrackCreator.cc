@@ -14,10 +14,6 @@
 #include "EVENT/Vertex.h"
 #include "UTIL/ILDConf.h"
 
-#include "gear/BField.h"
-#include "gear/CalorimeterParameters.h"
-#include "gear/PadRowLayout2D.h"
-#include "gear/TPCParameters.h"
 #include "gear/FTDParameters.h"
 #include "gear/FTDLayerLayout.h"
 

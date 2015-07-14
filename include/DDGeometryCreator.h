@@ -39,20 +39,20 @@ public:
         float           m_absorberRadLengthOther;               ///< The absorber radiation length in other detector regions
         float           m_absorberIntLengthOther;               ///< The absorber interaction length in other detector regions
 
-        int             m_eCalEndCapInnerSymmetryOrder;         ///< ECal end cap inner symmetry order (missing from ILD gear files)
-        float           m_eCalEndCapInnerPhiCoordinate;         ///< ECal end cap inner phi coordinate (missing from ILD gear files)
-        int             m_eCalEndCapOuterSymmetryOrder;         ///< ECal end cap outer symmetry order (missing from ILD gear files)
-        float           m_eCalEndCapOuterPhiCoordinate;         ///< ECal end cap outer phi coordinate (missing from ILD gear files)
+        int             m_eCalEndCapInnerSymmetryOrder;         ///< ECal end cap inner symmetry order
+        float           m_eCalEndCapInnerPhiCoordinate;         ///< ECal end cap inner phi coordinate
+        int             m_eCalEndCapOuterSymmetryOrder;         ///< ECal end cap outer symmetry order
+        float           m_eCalEndCapOuterPhiCoordinate;         ///< ECal end cap outer phi coordinate
 
-        int             m_hCalEndCapInnerSymmetryOrder;         ///< HCal end cap inner symmetry order (missing from ILD gear files)
-        float           m_hCalEndCapInnerPhiCoordinate;         ///< HCal end cap inner phi coordinate (missing from ILD gear files)
-        int             m_hCalEndCapOuterSymmetryOrder;         ///< HCal end cap outer symmetry order (missing from ILD gear files)
-        float           m_hCalEndCapOuterPhiCoordinate;         ///< HCal end cap outer phi coordinate (missing from ILD gear files)
+        int             m_hCalEndCapInnerSymmetryOrder;         ///< HCal end cap inner symmetry order
+        float           m_hCalEndCapInnerPhiCoordinate;         ///< HCal end cap inner phi coordinate
+        int             m_hCalEndCapOuterSymmetryOrder;         ///< HCal end cap outer symmetry order
+        float           m_hCalEndCapOuterPhiCoordinate;         ///< HCal end cap outer phi coordinate
 
-        int             m_hCalRingInnerSymmetryOrder;           ///< HCal ring inner symmetry order (missing from ILD gear files)
-        float           m_hCalRingInnerPhiCoordinate;           ///< HCal ring inner phi coordinate (missing from ILD gear files)
-        int             m_hCalRingOuterSymmetryOrder;           ///< HCal ring outer symmetry order (missing from ILD gear files)
-        float           m_hCalRingOuterPhiCoordinate;           ///< HCal ring outer phi coordinate (missing from ILD gear files)
+        int             m_hCalRingInnerSymmetryOrder;           ///< HCal ring inner symmetry order
+        float           m_hCalRingInnerPhiCoordinate;           ///< HCal ring inner phi coordinate
+        int             m_hCalRingOuterSymmetryOrder;           ///< HCal ring outer symmetry order
+        float           m_hCalRingOuterPhiCoordinate;           ///< HCal ring outer phi coordinate
         
         ///Added by Nikiforos
         std::string     m_vertexBarrelDetectorName;               ///< The vertex barrel detector name 
