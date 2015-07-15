@@ -39,9 +39,9 @@ double getFieldFromLCDD(){
   
 }
 
-double getCoilOuterR(){
+double getCoilOuterR(std::string detname){
   DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
-  DD4hep::Geometry::DetElement coilDE = lcdd.detector("Solenoid") ;
+  DD4hep::Geometry::DetElement coilDE = lcdd.detector(detname) ;
   //access the detelement and create a shape from the envelope since only minimal info needed
   DD4hep::Geometry::Tube coilTube = DD4hep::Geometry::Tube( coilDE.volume().solid() )  ;
   return coilTube->GetRmax()/ dd4hep::mm;
@@ -874,7 +874,7 @@ void DDPandoraPFANewProcessor::FinaliseSteeringParameters()
     m_caloHitCreatorSettings.m_eCalBarrelOuterZ=getExtension(m_settings.m_ecalBarrelName)->extent[3]/dd4hep::mm;
     m_caloHitCreatorSettings.m_hCalBarrelOuterZ=getExtension(m_settings.m_hcalBarrelName)->extent[3]/dd4hep::mm;
     m_caloHitCreatorSettings.m_muonBarrelOuterZ=getExtension(m_settings.m_muonBarrelName)->extent[3]/dd4hep::mm;
-    m_caloHitCreatorSettings.m_coilOuterR=getCoilOuterR(); 
+    m_caloHitCreatorSettings.m_coilOuterR=getCoilOuterR(m_settings.m_coilName); 
     m_caloHitCreatorSettings.m_eCalBarrelInnerPhi0=getExtension(m_settings.m_ecalBarrelName)->inner_phi0/dd4hep::rad;
     m_caloHitCreatorSettings.m_eCalBarrelInnerSymmetry=getExtension(m_settings.m_ecalBarrelName)->inner_symmetry;
     m_caloHitCreatorSettings.m_hCalBarrelInnerPhi0=getExtension(m_settings.m_hcalBarrelName)->inner_phi0/dd4hep::rad;
