@@ -820,8 +820,8 @@ void DDPandoraPFANewProcessor::ProcessSteeringFile()
                                m_settings.m_muonBarrelName,
                                std::string("YokeBarrel"));
     
-    registerProcessorParameter("HCalEndcapDetectorName",
-                               "The name of the HCal Endcap detector",
+    registerProcessorParameter("MuonEndcapDetectorName",
+                               "The name of the Muon Endcap detector",
                                m_settings.m_muonEndcapName,
                                std::string("YokeEndcap"));
     
