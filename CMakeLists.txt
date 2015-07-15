@@ -50,10 +50,13 @@ IF( NOT COMPILER_SUPPORTS_CXX_FLAGS )
 ENDIF()
 
 if( APPLE )
-    SET( CMAKE_CXX_FLAGS "-Wall -Werror -pedantic -Wno-long-long -Wno-sign-compare -fno-strict-aliasing ${CMAKE_CXX_FLAGS}" )
+    SET( CMAKE_CXX_FLAGS "-Wall -pedantic -Wno-long-long -Wno-sign-compare -fno-strict-aliasing ${CMAKE_CXX_FLAGS}" )
+
 else()
-    SET( CMAKE_CXX_FLAGS "-Wall -Werror -ansi -pedantic -Wno-long-long -Wno-sign-compare -fno-strict-aliasing ${CMAKE_CXX_FLAGS}" )
+    SET( CMAKE_CXX_FLAGS "-Wall -pedantic -Wno-long-long -Wno-sign-compare -fno-strict-aliasing ${CMAKE_CXX_FLAGS}" )
 endif()
+
+MESSAGE( STATUS "DDMarlinPandora CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS} " )
 
 
 ### DEPENDENCIES ############################################################
@@ -65,10 +68,8 @@ FIND_PACKAGE( LCContent 02.00.00 REQUIRED )
 FIND_PACKAGE( DD4hep REQUIRED )
 FIND_PACKAGE( ROOT REQUIRED )
 
-INCLUDE_DIRECTORIES( ${ROOT_INCLUDE_DIRS} )
 
-
-FOREACH( pkg Marlin MarlinUtil PandoraSDK LCContent DD4hep )
+FOREACH( pkg Marlin MarlinUtil PandoraSDK LCContent DD4hep ROOT)
     IF( ${pkg}_FOUND )
         INCLUDE_DIRECTORIES( ${${pkg}_INCLUDE_DIRS} )
         LINK_LIBRARIES( ${${pkg}_LIBRARIES} )
@@ -85,7 +86,6 @@ IF( PANDORA_MONITORING )
         ADD_DEFINITIONS( "-DMONITORING" )
     ENDIF()
 ENDIF()
-
 
 ### DOCUMENTATION ###########################################################
 
