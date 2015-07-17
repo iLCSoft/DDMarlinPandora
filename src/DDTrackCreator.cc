@@ -13,6 +13,7 @@
 #include "EVENT/ReconstructedParticle.h"
 #include "EVENT/Vertex.h"
 #include "UTIL/ILDConf.h"
+#include "UTIL/Operators.h"
 
 #include "gear/FTDParameters.h"
 #include "gear/FTDLayerLayout.h"
@@ -855,7 +856,10 @@ bool DDTrackCreator::PassesQualityCuts(const EVENT::Track *const pTrack, const P
     {
         streamlog_out(WARNING) << " Dropping track : " << momentumAtDca.GetMagnitude() << "+-" << sigmaPOverP * (momentumAtDca.GetMagnitude())
                                << " chi2 = " <<  pTrack->getChi2() << " " << pTrack->getNdf()
-                               << " from " << pTrack->getTrackerHits().size() << std::endl;
+                               << " from " << pTrack->getTrackerHits().size()  << std::endl ;
+
+	streamlog_out(DEBUG5)  << " track : " << *pTrack
+			       << std::endl;
         return false;
     }
 
@@ -908,7 +912,10 @@ bool DDTrackCreator::PassesQualityCuts(const EVENT::Track *const pTrack, const P
         if ((nTpcHits < minTpcHits) && (nFtdHits < m_settings.m_minFtdHitsForTpcHitFraction))
         {
             streamlog_out(WARNING) << " Dropping track : " << momentumAtDca.GetMagnitude() << " Number of TPC hits = " << nTpcHits
-                                   << " < " << minTpcHits << " nftd = " << nFtdHits  << std::endl;
+                                   << " < " << minTpcHits << " nftd = " << nFtdHits << std::endl;
+
+	    streamlog_out(DEBUG5)  << " track : " << *pTrack
+				   << std::endl;
             return false;
         }
     }
