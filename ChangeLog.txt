@@ -1,5 +1,11 @@
 
-Development package to integrate with DD4hep
+DDMarlinPandora: Development package to integrate with DD4hep
+N.Nikiforou
+
+v00-01
+
+  - first version that 'runs' with CLIC_o2_v01 and ILD_o1_v05
+ 
 
 ********************  COPIED OVER FROM MARLINPANDORA REVISION 1934 ************************************************************************* 
 --------------------------------------------------------------------------------------------------------------------------------------------
