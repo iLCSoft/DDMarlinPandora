@@ -429,8 +429,6 @@ pandora::StatusCode DDTrackCreator::CreateTracks(EVENT::LCEvent *pLCEvent)
 
             for (int i = 0, iMax = pTrackCollection->getNumberOfElements(); i < iMax; ++i)
             {
-                try
-                {
                     EVENT::Track *pTrack = dynamic_cast<Track*>(pTrackCollection->getElementAt(i));
 
                     if (NULL == pTrack)
@@ -487,17 +485,21 @@ pandora::StatusCode DDTrackCreator::CreateTracks(EVENT::LCEvent *pLCEvent)
                     this->TrackReachesECAL(pTrack, trackParameters);
                     this->DefineTrackPfoUsage(pTrack, trackParameters);
 
-                    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Track::Create(*m_pPandora, trackParameters));
-                    m_trackVector.push_back(pTrack);
-                }
-                catch (pandora::StatusCodeException &statusCodeException)
-                {
-                    streamlog_out(ERROR) << "Failed to extract a track: " << statusCodeException.ToString() << std::endl;
-                }
-                catch (EVENT::Exception &exception)
-                {
-                    streamlog_out(WARNING) << "Failed to extract a vertex: " << exception.what() << std::endl;
-                }
+		    try
+		      {
+			PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Track::Create(*m_pPandora, trackParameters));
+			m_trackVector.push_back(pTrack);
+		      }
+		    catch (pandora::StatusCodeException &statusCodeException)
+		      {
+			streamlog_out(ERROR) << "Failed to extract a track: " << statusCodeException.ToString() << std::endl;
+			
+			streamlog_out( DEBUG5 ) << " failed track : " << *pTrack << std::endl ;
+		      }
+		    catch (EVENT::Exception &exception)
+		      {
+			streamlog_out(WARNING) << "Failed to extract a vertex: " << exception.what() << std::endl;
+		      }
             }
         }
         catch (EVENT::Exception &exception)
