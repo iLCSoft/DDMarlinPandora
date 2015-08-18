@@ -61,45 +61,10 @@ DD4hep::DDRec::LayeredCalorimeterData * getExtension(std::string detectorName){
     //     for(int i=0; i< theExtension->layers.size(); i++){
     //       std::cout<<theExtension->layers[i].distance/dd4hep::mm<<" ";
     //     }
-    
     //     std::cout<<std::endl;
-    
-    
-    
-    
   } catch ( ... ){
     
-    std::cout << "BIG WARNING! EXTENSION DOES NOT EXIST FOR " << detectorName<<" filling with dummy values. MAKE SURE YOU CHANGE THIS!"<< std::endl;
-    
-    //     theExtension = new DD4hep::DDRec::LayeredCalorimeterData ;
-    //     theExtension->layoutType = DD4hep::DDRec::LayeredCalorimeterData::BarrelLayout ;
-    //     theExtension->inner_symmetry = 12;
-    //     theExtension->outer_symmetry = 12; 
-    //     theExtension->phi0 = 0.; 
-    //     
-    //     theExtension->extent[0] = 100;
-    //     theExtension->extent[1] = 200;
-    //     theExtension->extent[2] = 0. ;
-    //     theExtension->extent[3] = 2560;
-    //     
-    //     DD4hep::DDRec::LayeredCalorimeterData::Layer caloLayer ;
-    //     
-    //     caloLayer.distance = 110;
-    //     caloLayer.thickness = 10;
-    //     caloLayer.absorberThickness = 5;
-    //     caloLayer.cellSize0 = 30;
-    //     caloLayer.cellSize1 = 30;
-    //     
-    //     theExtension->layers.push_back( caloLayer ) ;
-    //     DD4hep::DDRec::LayeredCalorimeterData::Layer caloLayer2 ;
-    //     
-    //     caloLayer2.distance = 120;
-    //     caloLayer2.thickness = 10;
-    //     caloLayer2.absorberThickness = 5;
-    //     caloLayer2.cellSize0 = 30;
-    //     caloLayer2.cellSize1 = 30;
-    //     
-    //     theExtension->layers.push_back( caloLayer2 ) ;
+    std::cout << "BIG WARNING! EXTENSION DOES NOT EXIST FOR " << detectorName<<". MAKE SURE YOU CHANGE THIS!"<< std::endl;
   }
   
   return theExtension;
@@ -107,20 +72,19 @@ DD4hep::DDRec::LayeredCalorimeterData * getExtension(std::string detectorName){
 
 std::vector<double> getTrackingRegionExtent(){
   
-  ///Rmin, Rmax, MaxRow, Zmax
+  ///Rmin, Rmax, Zmax
   std::vector<double> extent;
   
-  extent.reserve(4);
+  extent.reserve(3);
   
   DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
   
   
   
-  extent[0]=3.290000000e+02;; ///FIXME! TPC INNER RADIUS FOR CLIC???
+  extent[0]=0.1; ///FIXME! CLIC-specific: Inner radius was set to 0 for SiD-type detectors
   extent[1]=lcdd.constantAsDouble("tracker_region_rmax")/dd4hep::mm;
-  extent[2]=100.0; ///FIXME! TPC MAX ROW FOR CLIC???
-  extent[3]=lcdd.constantAsDouble("tracker_region_zmax")/dd4hep::mm;
-  
+  extent[2]=lcdd.constantAsDouble("tracker_region_zmax")/dd4hep::mm;
+
   return extent;
   
   
@@ -416,7 +380,11 @@ void DDPandoraPFANewProcessor::ProcessSteeringFile()
                             "The absorber interaction length in other detector regions",
                             m_geometryCreatorSettings.m_absorberIntLengthOther,
                             float(0.0060)); // Default: Fe, 1 / lambdaI[mm]
-
+    registerProcessorParameter("CreateGaps",
+                            "Decides whether to create gaps in the geometry (ILD-specific)",
+                            m_geometryCreatorSettings.m_createGaps,
+                            bool(true)); 
+    
     // Name of PFO collection written by MarlinPandora
     registerOutputCollection(LCIO::CLUSTER,
                              "ClusterCollectionName",
@@ -826,7 +794,10 @@ void DDPandoraPFANewProcessor::ProcessSteeringFile()
                                std::string("YokeEndcap"));
     
     std::vector<std::string> defaultMuonOtherNames;
-    defaultMuonOtherNames.push_back("YokePlug");
+    std::cout<< "WARNING! DO NOT MASK! REMEMBER TO HANDLE DEFAULT MUON OTHER SUBDETs" << std::endl;
+
+    
+//     defaultMuonOtherNames.push_back("YokePlug");
     
     registerProcessorParameter("MuonOtherDetectorNames",
                                "The names of the Other Muon detectors",
@@ -852,8 +823,7 @@ void DDPandoraPFANewProcessor::FinaliseSteeringParameters()
     m_caloHitCreatorSettings.m_absorberRadLengthOther = m_geometryCreatorSettings.m_absorberRadLengthOther;
     m_caloHitCreatorSettings.m_absorberIntLengthOther = m_geometryCreatorSettings.m_absorberIntLengthOther;
 
-    m_caloHitCreatorSettings.m_hCalEndCapInnerSymmetryOrder = m_geometryCreatorSettings.m_hCalEndCapInnerSymmetryOrder;
-    m_caloHitCreatorSettings.m_hCalEndCapInnerPhiCoordinate = m_geometryCreatorSettings.m_hCalEndCapInnerPhiCoordinate;
+
 
     m_trackCreatorSettings.m_prongSplitVertexCollections = m_trackCreatorSettings.m_prongVertexCollections;
     m_trackCreatorSettings.m_prongSplitVertexCollections.insert(m_trackCreatorSettings.m_prongSplitVertexCollections.end(),m_trackCreatorSettings.m_splitVertexCollections.begin(),m_trackCreatorSettings.m_splitVertexCollections.end());
@@ -861,8 +831,11 @@ void DDPandoraPFANewProcessor::FinaliseSteeringParameters()
     m_trackCreatorSettings.m_bField=getFieldFromLCDD();
     m_trackCreatorSettings.m_tpcInnerR=getTrackingRegionExtent()[0]/dd4hep::mm;
     m_trackCreatorSettings.m_tpcOuterR=getTrackingRegionExtent()[1]/dd4hep::mm;
-    m_trackCreatorSettings.m_tpcMaxRow=getTrackingRegionExtent()[2]; ///FIXME! 
-    m_trackCreatorSettings.m_tpcZmax=getTrackingRegionExtent()[3]/dd4hep::mm;
+    
+    std::cout<< "WARNING! DO NOT MASK! REMEMBER TO HANDLE m_tpcMaxRow" << std::endl;
+
+    m_trackCreatorSettings.m_tpcMaxRow=100.; ///FIXME! 
+    m_trackCreatorSettings.m_tpcZmax=getTrackingRegionExtent()[2]/dd4hep::mm;
     m_trackCreatorSettings.m_eCalBarrelInnerSymmetry=getExtension(m_settings.m_ecalBarrelName)->inner_symmetry;
     m_trackCreatorSettings.m_eCalBarrelInnerPhi0=getExtension(m_settings.m_ecalBarrelName)->inner_phi0/dd4hep::rad;
     m_trackCreatorSettings.m_eCalBarrelInnerR=getExtension(m_settings.m_ecalBarrelName)->extent[0]/dd4hep::mm;
@@ -886,6 +859,8 @@ void DDPandoraPFANewProcessor::FinaliseSteeringParameters()
     m_caloHitCreatorSettings.m_hCalBarrelOuterR=getExtension(m_settings.m_hcalBarrelName)->extent[1]/dd4hep::mm;
     m_caloHitCreatorSettings.m_hCalBarrelOuterPhi0=getExtension(m_settings.m_hcalBarrelName)->outer_phi0/dd4hep::rad;
     m_caloHitCreatorSettings.m_hCalBarrelOuterSymmetry=getExtension(m_settings.m_hcalBarrelName)->outer_symmetry;
+    m_caloHitCreatorSettings.m_hCalEndCapInnerSymmetryOrder = getExtension(m_settings.m_hcalEndcapName)->inner_symmetry;;
+    m_caloHitCreatorSettings.m_hCalEndCapInnerPhiCoordinate = getExtension(m_settings.m_hcalEndcapName)->inner_phi0/dd4hep::rad;;
     
     m_caloHitCreatorSettings.m_vertexBarrelDetectorName = m_settings.m_vertexBarrelDetectorName;        
     m_caloHitCreatorSettings.m_barrelTrackerNames = m_settings.m_barrelTrackerNames;     
@@ -915,24 +890,6 @@ void DDPandoraPFANewProcessor::FinaliseSteeringParameters()
     m_geometryCreatorSettings.m_muonEndcapName = m_settings.m_muonEndcapName;                  
     m_geometryCreatorSettings.m_muonOtherNames= m_settings.m_muonOtherNames;   
     m_geometryCreatorSettings.m_coilName= m_settings.m_coilName;   
-    
-    //These were processor parametes but now can be accessed from DD4hep
-    m_geometryCreatorSettings.m_eCalEndCapInnerSymmetryOrder=getExtension(m_settings.m_ecalEndcapName)->inner_symmetry;
-    m_geometryCreatorSettings.m_eCalEndCapInnerPhiCoordinate=getExtension(m_settings.m_ecalEndcapName)->inner_phi0/dd4hep::rad;
-    m_geometryCreatorSettings.m_eCalEndCapOuterSymmetryOrder=getExtension(m_settings.m_ecalEndcapName)->outer_symmetry;
-    m_geometryCreatorSettings.m_eCalEndCapOuterPhiCoordinate=getExtension(m_settings.m_ecalEndcapName)->outer_phi0/dd4hep::rad;
-    
-    m_geometryCreatorSettings.m_hCalEndCapInnerSymmetryOrder=getExtension(m_settings.m_hcalEndcapName)->inner_symmetry;
-    m_geometryCreatorSettings.m_hCalEndCapInnerPhiCoordinate=getExtension(m_settings.m_hcalEndcapName)->inner_phi0/dd4hep::rad;
-    m_geometryCreatorSettings.m_hCalEndCapOuterSymmetryOrder=getExtension(m_settings.m_hcalEndcapName)->outer_symmetry;
-    m_geometryCreatorSettings.m_hCalEndCapOuterPhiCoordinate=getExtension(m_settings.m_hcalEndcapName)->outer_phi0/dd4hep::rad;
-    
-      
-    std::string hcalRingName = m_settings.m_hcalOtherNames[0]; ///FIXME! IMPLEMENT A SEARCH FOR RING OR SOMETHING
-    m_geometryCreatorSettings.m_hCalRingInnerSymmetryOrder=getExtension(hcalRingName)->inner_symmetry;
-    m_geometryCreatorSettings.m_hCalRingInnerPhiCoordinate=getExtension(hcalRingName)->inner_phi0/dd4hep::rad;
-    m_geometryCreatorSettings.m_hCalRingOuterSymmetryOrder=getExtension(hcalRingName)->outer_symmetry;
-    m_geometryCreatorSettings.m_hCalRingOuterPhiCoordinate=getExtension(hcalRingName)->outer_phi0/dd4hep::mm;
     
     // Get the magnetic field
     DD4hep::Geometry::LCDD& lcdd = DD4hep::Geometry::LCDD::getInstance();

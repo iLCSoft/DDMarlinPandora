@@ -39,21 +39,7 @@ public:
         float           m_absorberRadLengthOther;               ///< The absorber radiation length in other detector regions
         float           m_absorberIntLengthOther;               ///< The absorber interaction length in other detector regions
 
-        int             m_eCalEndCapInnerSymmetryOrder;         ///< ECal end cap inner symmetry order
-        float           m_eCalEndCapInnerPhiCoordinate;         ///< ECal end cap inner phi coordinate
-        int             m_eCalEndCapOuterSymmetryOrder;         ///< ECal end cap outer symmetry order
-        float           m_eCalEndCapOuterPhiCoordinate;         ///< ECal end cap outer phi coordinate
-
-        int             m_hCalEndCapInnerSymmetryOrder;         ///< HCal end cap inner symmetry order
-        float           m_hCalEndCapInnerPhiCoordinate;         ///< HCal end cap inner phi coordinate
-        int             m_hCalEndCapOuterSymmetryOrder;         ///< HCal end cap outer symmetry order
-        float           m_hCalEndCapOuterPhiCoordinate;         ///< HCal end cap outer phi coordinate
-
-        int             m_hCalRingInnerSymmetryOrder;           ///< HCal ring inner symmetry order
-        float           m_hCalRingInnerPhiCoordinate;           ///< HCal ring inner phi coordinate
-        int             m_hCalRingOuterSymmetryOrder;           ///< HCal ring outer symmetry order
-        float           m_hCalRingOuterPhiCoordinate;           ///< HCal ring outer phi coordinate
-        
+        ///NN: Extra geometry variables removed since all accessible from DDRec
         ///Added by Nikiforos
         std::string     m_vertexBarrelDetectorName;               ///< The vertex barrel detector name 
         std::vector<std::string> m_barrelTrackerNames;      ///< The Barrel Tracking detector names 
@@ -71,6 +57,8 @@ public:
         std::vector<std::string>  m_muonOtherNames;         ///< Additional Muon detector names 
         
         std::string     m_coilName;                   ///< The detector name for the coil
+        bool            m_createGaps;                   ///< Whether should create gaps
+        
         
     };
 
@@ -134,7 +122,6 @@ private:
      * 
      *  @param  subDetectorTypeMap the sub detector type map
      */
-    pandora::StatusCode SetILD_SDHCALSpecificGeometry(SubDetectorTypeMap &subDetectorTypeMap) const;
 
     /**
      *  @brief  Specify positions of hcal barrel box gaps - ILD specific
