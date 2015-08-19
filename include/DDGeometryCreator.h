@@ -31,15 +31,9 @@ public:
          *  @brief  Default constructor
          */
         Settings();
-
-        float           m_absorberRadLengthECal;                ///< The absorber radiation length in the ECal
-        float           m_absorberIntLengthECal;                ///< The absorber interaction length in the ECal
-        float           m_absorberRadLengthHCal;                ///< The absorber radiation length in the HCal
-        float           m_absorberIntLengthHCal;                ///< The absorber interaction length in the HCal
-        float           m_absorberRadLengthOther;               ///< The absorber radiation length in other detector regions
-        float           m_absorberIntLengthOther;               ///< The absorber interaction length in other detector regions
-
+        //NN: Material properties obtained from geometry; relevant variables removed
         ///NN: Extra geometry variables removed since all accessible from DDRec
+        
         ///Added by Nikiforos
         std::string     m_vertexBarrelDetectorName;               ///< The vertex barrel detector name 
         std::vector<std::string> m_barrelTrackerNames;      ///< The Barrel Tracking detector names 

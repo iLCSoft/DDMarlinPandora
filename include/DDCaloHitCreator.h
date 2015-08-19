@@ -43,13 +43,8 @@ public:
         StringVector    m_lHCalCaloHitCollections;              ///< The lhcal calorimeter hit collections
         StringVector    m_muonCaloHitCollections;               ///< The muon calorimeter hit collections
 
-        float           m_absorberRadLengthECal;                ///< The absorber radiation length in the ECal
-        float           m_absorberIntLengthECal;                ///< The absorber interaction length in the ECal
-        float           m_absorberRadLengthHCal;                ///< The absorber radiation length in the HCal
-        float           m_absorberIntLengthHCal;                ///< The absorber interaction length in the HCal
-        float           m_absorberRadLengthOther;               ///< The absorber radiation length in other detector regions
-        float           m_absorberIntLengthOther;               ///< The absorber interaction length in other detector regions
-
+        //NN: Material properties variables removed; obtained from geometry
+        
         float           m_eCalToMip;                            ///< The calibration from deposited ECal energy to mip
         float           m_hCalToMip;                            ///< The calibration from deposited HCal energy to mip
         float           m_muonToMip;                            ///< The calibration from deposited Muon energy to mip

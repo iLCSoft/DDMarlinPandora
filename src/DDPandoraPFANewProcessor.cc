@@ -350,37 +350,7 @@ void DDPandoraPFANewProcessor::ProcessSteeringFile()
                             m_mcParticleCreatorSettings.m_lcTrackRelationCollections,
                             StringVector());
 
-    // Absorber properties
-    registerProcessorParameter("AbsorberRadLengthECal",
-                            "The absorber radation length in the ECal",
-                            m_geometryCreatorSettings.m_absorberRadLengthECal,
-                            float(0.2854)); // Default: W, 1 / X0[mm]
-
-    registerProcessorParameter("AbsorberIntLengthECal",
-                            "The absorber interaction length in the ECal",
-                            m_geometryCreatorSettings.m_absorberIntLengthECal,
-                            float(0.0101)); // Default: W, 1 / lambdaI[mm]
-
-    registerProcessorParameter("AbsorberRadLengthHCal",
-                            "The absorber radation length in the HCal",
-                            m_geometryCreatorSettings.m_absorberRadLengthHCal,
-                            float(0.0569)); // Default: Fe, 1 / X0[mm]
-
-    registerProcessorParameter("AbsorberIntLengthHCal",
-                            "The absorber interaction length in the HCal",
-                            m_geometryCreatorSettings.m_absorberIntLengthHCal,
-                            float(0.0060)); // Default: Fe, 1 / lambdaI[mm]
-
-    registerProcessorParameter("AbsorberRadLengthOther",
-                            "The absorber radation length in other detector regions",
-                            m_geometryCreatorSettings.m_absorberRadLengthOther,
-                            float(0.0569)); // Default: Fe, 1 / X0[mm]
-
-    registerProcessorParameter("AbsorberIntLengthOther",
-                            "The absorber interaction length in other detector regions",
-                            m_geometryCreatorSettings.m_absorberIntLengthOther,
-                            float(0.0060)); // Default: Fe, 1 / lambdaI[mm]
-    registerProcessorParameter("CreateGaps",
+       registerProcessorParameter("CreateGaps",
                             "Decides whether to create gaps in the geometry (ILD-specific)",
                             m_geometryCreatorSettings.m_createGaps,
                             bool(true)); 
@@ -816,15 +786,6 @@ void DDPandoraPFANewProcessor::FinaliseSteeringParameters()
 {
     // ATTN: This function seems to be necessary for operations that cannot easily be performed at construction of the processor,
     // when the steering file is parsed e.g. the call to GEAR to get the inner bfield
-    m_caloHitCreatorSettings.m_absorberRadLengthECal = m_geometryCreatorSettings.m_absorberRadLengthECal;
-    m_caloHitCreatorSettings.m_absorberIntLengthECal = m_geometryCreatorSettings.m_absorberIntLengthECal;
-    m_caloHitCreatorSettings.m_absorberRadLengthHCal = m_geometryCreatorSettings.m_absorberRadLengthHCal;
-    m_caloHitCreatorSettings.m_absorberIntLengthHCal = m_geometryCreatorSettings.m_absorberIntLengthHCal;
-    m_caloHitCreatorSettings.m_absorberRadLengthOther = m_geometryCreatorSettings.m_absorberRadLengthOther;
-    m_caloHitCreatorSettings.m_absorberIntLengthOther = m_geometryCreatorSettings.m_absorberIntLengthOther;
-
-
-
     m_trackCreatorSettings.m_prongSplitVertexCollections = m_trackCreatorSettings.m_prongVertexCollections;
     m_trackCreatorSettings.m_prongSplitVertexCollections.insert(m_trackCreatorSettings.m_prongSplitVertexCollections.end(),m_trackCreatorSettings.m_splitVertexCollections.begin(),m_trackCreatorSettings.m_splitVertexCollections.end());
     

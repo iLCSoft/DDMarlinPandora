@@ -207,24 +207,26 @@ void DDGeometryCreator::SetDefaultSubDetectorParameters(const DD4hep::DDRec::Lay
     parameters.m_isMirroredInZ = true;
     parameters.m_nLayers = layers.size();
 
-    // ATTN Not always going to be correct for any optional subdetectors, but impact of this is negligible for ILD
-    ///FIXME: Should get from geometry?
-    const float radiationLength(((pandora::ECAL_BARREL == subDetectorType) || (pandora::ECAL_ENDCAP == subDetectorType)) ? m_settings.m_absorberRadLengthECal :
-        ((pandora::HCAL_BARREL == subDetectorType) || (pandora::HCAL_ENDCAP == subDetectorType)) ? m_settings.m_absorberRadLengthHCal : m_settings.m_absorberRadLengthOther);
-    const float interactionLength(((pandora::ECAL_BARREL == subDetectorType) || (pandora::ECAL_ENDCAP == subDetectorType)) ? m_settings.m_absorberIntLengthECal :
-        ((pandora::HCAL_BARREL == subDetectorType) || (pandora::HCAL_ENDCAP == subDetectorType)) ? m_settings.m_absorberIntLengthHCal : m_settings.m_absorberIntLengthOther);
-
-    //Apparently for some reason some subdets have layer ordering inverted
     for (int i = 0; i< layers.size(); i++)
     {
         const DD4hep::DDRec::LayeredCalorimeterStruct::Layer & theLayer = layers.at(i);
         
         PandoraApi::Geometry::LayerParameters layerParameters;
-        layerParameters.m_closestDistanceToIp = theLayer.distance/dd4hep::mm; //Before was such that distance was center of active layer
-        //+ (0.5 * (theLayer.thickness/dd4hep::mm + theLayer.absorberThickness/dd4hep::mm)); ///FIXME! IS THIS NEEDED? No
         
-        layerParameters.m_nRadiationLengths = radiationLength * theLayer.absorberThickness/dd4hep::mm;
-        layerParameters.m_nInteractionLengths = interactionLength * theLayer.absorberThickness/dd4hep::mm;
+        double totalNumberOfRadLengths = theLayer.inner_nRadiationLengths;
+        double totalNumberOfIntLengths = theLayer.inner_nInteractionLengths;
+        
+        if(i>0){
+            //Add the numbers from previous layer's outer side
+            totalNumberOfRadLengths += layers.at(i-1).outer_nRadiationLengths;
+            totalNumberOfIntLengths += layers.at(i-1).outer_nInteractionLengths;
+            
+        }
+        
+        layerParameters.m_closestDistanceToIp = (theLayer.distance+theLayer.inner_thickness)/dd4hep::mm; //Distance to center of sensitive element
+        layerParameters.m_nRadiationLengths = totalNumberOfRadLengths;
+        layerParameters.m_nInteractionLengths = totalNumberOfIntLengths;
+        
         parameters.m_layerParametersList.push_back(layerParameters);
     }
 }
@@ -379,12 +381,6 @@ pandora::StatusCode DDGeometryCreator::CreateRegularBoxGaps(unsigned int symmetr
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 DDGeometryCreator::Settings::Settings() :
-    m_absorberRadLengthECal(1.f),
-    m_absorberIntLengthECal(1.f),
-    m_absorberRadLengthHCal(1.f),
-    m_absorberIntLengthHCal(1.f),
-    m_absorberRadLengthOther(1.f),
-    m_absorberIntLengthOther(1.f),
     m_createGaps(false)
 {
 }
