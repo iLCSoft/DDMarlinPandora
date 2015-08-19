@@ -39,8 +39,8 @@ DDCaloHitCreator::DDCaloHitCreator(const Settings &settings, const pandora::Pand
     const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension(m_settings.m_hcalEndcapName)->layers;
     
     ///Take thicknesses from last layer (was like that before with gear)
-    m_hCalEndCapLayerThickness =endcapLayers.back().thickness/dd4hep::mm;
-    m_hCalBarrelLayerThickness =barrelLayers.back().thickness/dd4hep::mm;
+    m_hCalEndCapLayerThickness =(endcapLayers.back().inner_thickness+endcapLayers.back().outer_thickness)/dd4hep::mm;
+    m_hCalBarrelLayerThickness =(barrelLayers.back().inner_thickness+barrelLayers.back().outer_thickness)/dd4hep::mm;
 
     if ((m_hCalEndCapLayerThickness < std::numeric_limits<float>::epsilon()) || (m_hCalBarrelLayerThickness < std::numeric_limits<float>::epsilon()))
         throw pandora::StatusCodeException(pandora::STATUS_CODE_INVALID_PARAMETER);
@@ -544,25 +544,37 @@ void DDCaloHitCreator::GetEndCapCaloHitProperties(const EVENT::CalorimeterHit *c
     const int physicalLayer(std::min(static_cast<int>(caloHitParameters.m_layer.Get()), static_cast<int>(layers.size()-1)));
     caloHitParameters.m_cellSize0 = layers[physicalLayer].cellSize0/dd4hep::mm;
     caloHitParameters.m_cellSize1 = layers[physicalLayer].cellSize1/dd4hep::mm;
-    caloHitParameters.m_cellThickness = layers[physicalLayer].thickness/dd4hep::mm;
+    
+    double thickness = (layers[physicalLayer].inner_thickness+layers[physicalLayer].sensitive_thickness/2.0)/dd4hep::mm;
+    double nRadLengths = layers[physicalLayer].inner_nRadiationLengths;
+    double nIntLengths = layers[physicalLayer].inner_nInteractionLengths;
 
-    const float layerAbsorberThickness(layers[physicalLayer].absorberThickness/dd4hep::mm);
-    caloHitParameters.m_nCellRadiationLengths = layers[physicalLayer].inner_nRadiationLengths;
-    caloHitParameters.m_nCellInteractionLengths = layers[physicalLayer].inner_nInteractionLengths;
-
-    absorberCorrection = 1.;
-    for (unsigned int i = 0, iMax = layers.size(); i < iMax; ++i)
-    {
-        const float absorberThickness(layers[i].absorberThickness/dd4hep::mm);
-
-        if (absorberThickness <= 0.)
-            continue;
-
-        if (layerAbsorberThickness > 0.)
-            absorberCorrection = absorberThickness / layerAbsorberThickness;
-
-        break;
+    if(physicalLayer>0){
+        thickness += (layers[physicalLayer-1].outer_thickness -layers[physicalLayer].sensitive_thickness/2.0)/dd4hep::mm;
+        nRadLengths = layers[physicalLayer-1].outer_nRadiationLengths;
+        nIntLengths = layers[physicalLayer-1].outer_nInteractionLengths;
     }
+    
+    caloHitParameters.m_cellThickness = thickness;
+    caloHitParameters.m_nCellRadiationLengths = nRadLengths;
+    caloHitParameters.m_nCellInteractionLengths = nIntLengths;
+    
+//     const float layerAbsorberThickness(layers[physicalLayer].absorberThickness/dd4hep::mm);
+
+    //FIXME! DO WE NEED THIS?
+    absorberCorrection = 1.;
+//     for (unsigned int i = 0, iMax = layers.size(); i < iMax; ++i)
+//     {
+//         const float absorberThickness(layers[i].absorberThickness/dd4hep::mm);
+// 
+//         if (absorberThickness <= 0.)
+//             continue;
+// 
+//         if (layerAbsorberThickness > 0.)
+//             absorberCorrection = absorberThickness / layerAbsorberThickness;
+// 
+//         break;
+//     }
 
     caloHitParameters.m_cellNormalVector = (pCaloHit->getPosition()[2] > 0) ? pandora::CartesianVector(0, 0, 1) :
         pandora::CartesianVector(0, 0, -1);
@@ -576,29 +588,39 @@ void DDCaloHitCreator::GetBarrelCaloHitProperties(const EVENT::CalorimeterHit *c
 {
     caloHitParameters.m_hitRegion = pandora::BARREL;
 
-    const int physicalLayer(std::min(static_cast<int>(caloHitParameters.m_layer.Get()), static_cast<int>(layers.size()) - 1));
+    //FIXME! WHAT DO WE DO HERE?
+    const int physicalLayer(std::min(static_cast<int>(caloHitParameters.m_layer.Get()), static_cast<int>(layers.size()-1)));
     caloHitParameters.m_cellSize0 = layers[physicalLayer].cellSize0/dd4hep::mm;
     caloHitParameters.m_cellSize1 = layers[physicalLayer].cellSize1/dd4hep::mm;
-    caloHitParameters.m_cellThickness = layers[physicalLayer].thickness/dd4hep::mm;
+    
+    double thickness = (layers[physicalLayer].inner_thickness+layers[physicalLayer].sensitive_thickness/2.0)/dd4hep::mm;
+    double nRadLengths = layers[physicalLayer].inner_nRadiationLengths;
+    double nIntLengths = layers[physicalLayer].inner_nInteractionLengths;
 
-   
-    const float layerAbsorberThickness(layers[physicalLayer].absorberThickness/dd4hep::mm);
-    caloHitParameters.m_nCellRadiationLengths = layers[physicalLayer].inner_nRadiationLengths;
-    caloHitParameters.m_nCellInteractionLengths = layers[physicalLayer].inner_nInteractionLengths;
-
-    absorberCorrection = 1.;
-    for (unsigned int i = 0, iMax = layers.size(); i < iMax; ++i)
-    {
-        const float absorberThickness(layers[i].absorberThickness/dd4hep::mm);
-
-        if (absorberThickness <= 0.)
-            continue;
-
-        if (layerAbsorberThickness > 0.)
-            absorberCorrection = absorberThickness / layerAbsorberThickness;
-
-        break;
+    if(physicalLayer>0){
+        thickness += (layers[physicalLayer-1].outer_thickness -layers[physicalLayer].sensitive_thickness/2.0)/dd4hep::mm;
+        nRadLengths = layers[physicalLayer-1].outer_nRadiationLengths;
+        nIntLengths = layers[physicalLayer-1].outer_nInteractionLengths;
     }
+    
+    caloHitParameters.m_cellThickness = thickness;
+    caloHitParameters.m_nCellRadiationLengths = nRadLengths;
+    caloHitParameters.m_nCellInteractionLengths = nIntLengths;
+
+    //FIXME! do we need this?
+    absorberCorrection = 1.;
+//     for (unsigned int i = 0, iMax = layers.size(); i < iMax; ++i)
+//     {
+//         const float absorberThickness(layers[i].absorberThickness/dd4hep::mm);
+// 
+//         if (absorberThickness <= 0.)
+//             continue;
+// 
+//         if (layerAbsorberThickness > 0.)
+//             absorberCorrection = absorberThickness / layerAbsorberThickness;
+// 
+//         break;
+//     }
 
     if (barrelSymmetryOrder > 2)
     {
