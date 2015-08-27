@@ -551,8 +551,8 @@ void DDCaloHitCreator::GetEndCapCaloHitProperties(const EVENT::CalorimeterHit *c
 
     if(physicalLayer>0){
         thickness += (layers[physicalLayer-1].outer_thickness -layers[physicalLayer].sensitive_thickness/2.0)/dd4hep::mm;
-        nRadLengths = layers[physicalLayer-1].outer_nRadiationLengths;
-        nIntLengths = layers[physicalLayer-1].outer_nInteractionLengths;
+        nRadLengths += layers[physicalLayer-1].outer_nRadiationLengths;
+        nIntLengths += layers[physicalLayer-1].outer_nInteractionLengths;
     }
     
     caloHitParameters.m_cellThickness = thickness;
@@ -578,6 +578,9 @@ void DDCaloHitCreator::GetEndCapCaloHitProperties(const EVENT::CalorimeterHit *c
 
     caloHitParameters.m_cellNormalVector = (pCaloHit->getPosition()[2] > 0) ? pandora::CartesianVector(0, 0, 1) :
         pandora::CartesianVector(0, 0, -1);
+        
+//     streamlog_out(DEBUG) <<" GetEndCapCaloHitProperties: physLayer: "<<physicalLayer <<" layer: "<<caloHitParameters.m_layer.Get()<<" nX0: "<<    caloHitParameters.m_nCellRadiationLengths.Get() <<" nLambdaI: "<<    caloHitParameters.m_nCellInteractionLengths.Get()<<" thickness: "<<caloHitParameters.m_cellThickness.Get()<<std::endl;
+    
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -599,8 +602,8 @@ void DDCaloHitCreator::GetBarrelCaloHitProperties(const EVENT::CalorimeterHit *c
 
     if(physicalLayer>0){
         thickness += (layers[physicalLayer-1].outer_thickness -layers[physicalLayer].sensitive_thickness/2.0)/dd4hep::mm;
-        nRadLengths = layers[physicalLayer-1].outer_nRadiationLengths;
-        nIntLengths = layers[physicalLayer-1].outer_nInteractionLengths;
+        nRadLengths += layers[physicalLayer-1].outer_nRadiationLengths;
+        nIntLengths += layers[physicalLayer-1].outer_nInteractionLengths;
     }
     
     caloHitParameters.m_cellThickness = thickness;
@@ -642,6 +645,8 @@ void DDCaloHitCreator::GetBarrelCaloHitProperties(const EVENT::CalorimeterHit *c
                 pandora::CartesianVector(-1, 0, 0);
         }
     }
+    
+//     streamlog_out(DEBUG)<<" GetBarrelCaloHitProperties: physLayer: "<<physicalLayer <<" layer: "<<caloHitParameters.m_layer.Get()<<" nX0: "<<    caloHitParameters.m_nCellRadiationLengths.Get() <<" nLambdaI: "<<    caloHitParameters.m_nCellInteractionLengths.Get()<<" thickness: "<<caloHitParameters.m_cellThickness.Get()<<std::endl;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
