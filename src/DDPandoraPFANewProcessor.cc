@@ -708,12 +708,13 @@ void DDPandoraPFANewProcessor::ProcessSteeringFile()
                               defaultTrackerBarrelNames);
     
     std::vector<std::string> defaultTrackerEndcapNames;
+    defaultTrackerEndcapNames.push_back("VertexEndcap");
     defaultTrackerEndcapNames.push_back("InnerTrackerEndcap");
     defaultTrackerEndcapNames.push_back("OuterTrackerEndcap");
     
     registerProcessorParameter("TrackerEndcapDetectorNames",
                                "Detector names of the Trackers in the Endcap starting from the innermost one",
-                              m_settings.m_barrelTrackerNames,
+                              m_settings.m_endcapTrackerNames,
                               defaultTrackerEndcapNames);
     
     registerProcessorParameter("ECalBarrelDetectorName",
@@ -801,7 +802,9 @@ void DDPandoraPFANewProcessor::FinaliseSteeringParameters()
     m_trackCreatorSettings.m_eCalBarrelInnerPhi0=getExtension(m_settings.m_ecalBarrelName)->inner_phi0/dd4hep::rad;
     m_trackCreatorSettings.m_eCalBarrelInnerR=getExtension(m_settings.m_ecalBarrelName)->extent[0]/dd4hep::mm;
     m_trackCreatorSettings.m_eCalEndCapInnerZ=getExtension(m_settings.m_ecalEndcapName)->extent[2]/dd4hep::mm;
-    
+    m_trackCreatorSettings.m_vertexBarrelDetectorName = m_settings.m_vertexBarrelDetectorName;        
+    m_trackCreatorSettings.m_barrelTrackerNames = m_settings.m_barrelTrackerNames;     
+    m_trackCreatorSettings.m_endcapTrackerNames = m_settings.m_endcapTrackerNames; 
     
     
     

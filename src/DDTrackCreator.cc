@@ -15,9 +15,6 @@
 #include "UTIL/ILDConf.h"
 #include "UTIL/Operators.h"
 
-#include "gear/FTDParameters.h"
-#include "gear/FTDLayerLayout.h"
-
 #include "DDPandoraPFANewProcessor.h"
 #include "DDTrackCreator.h"
 #include "Pandora/PdgTable.h"
@@ -42,33 +39,61 @@ DDTrackCreator::DDTrackCreator(const Settings &settings, const pandora::Pandora 
     m_settings(settings),
     m_pPandora(pPandora)
 {
-    // fg: FTD description in GEAR has changed ...
-    try
-    {
-        m_ftdInnerRadii = marlin::Global::GEAR->getGearParameters("FTD").getDoubleVals("FTDInnerRadius");
-        m_ftdOuterRadii = marlin::Global::GEAR->getGearParameters("FTD").getDoubleVals("FTDOuterRadius");
-        m_ftdZPositions = marlin::Global::GEAR->getGearParameters("FTD").getDoubleVals("FTDZCoordinate");
-        m_nFtdLayers = m_ftdZPositions.size();
-    }
-    catch (gear::UnknownParameterException &)
-    {
-        const gear::FTDLayerLayout &ftdLayerLayout(marlin::Global::GEAR->getFTDParameters().getFTDLayerLayout());
-        streamlog_out( DEBUG2 ) << " Filling FTD parameters from gear::FTDParameters - n layers: " << ftdLayerLayout.getNLayers() << std::endl;
-
-        for(unsigned int i = 0, N = ftdLayerLayout.getNLayers(); i < N; ++i)
+    
+    
+    m_nFtdLayers=0;
+    m_ftdInnerRadii.clear();
+    m_ftdOuterRadii.clear();
+    
+    //Instead of gear, loop over a provided list of forward (read: endcap) tracking detectors. For ILD this would be FTD
+    ///FIXME: Should we use surfaces instead?
+    for (std::vector<std::string>::const_iterator iter = m_settings.m_endcapTrackerNames.begin(), iterEnd = m_settings.m_endcapTrackerNames.end();iter != iterEnd; ++iter){
+    
+        try
         {
-            // Create a disk to represent even number petals front side
-            m_ftdInnerRadii.push_back(ftdLayerLayout.getSensitiveRinner(i));
-            m_ftdOuterRadii.push_back(ftdLayerLayout.getMaxRadius(i));
+            
+            
+            
+            DD4hep::DDRec::ZDiskPetalsData * theExtension = 0;
+  
+            DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
+            DD4hep::Geometry::DetElement theDetector = lcdd.detector(*iter);
+            theExtension = theDetector.extension<DD4hep::DDRec::ZDiskPetalsData>();
+            
+            unsigned int N = theExtension->layers.size();
+            
+            streamlog_out( DEBUG2 ) << " Filling FTD-like parameters from DD4hep for "<< *iter<< "- n layers: " << N<< std::endl;
 
-            // Take the mean z position of the staggered petals
-            const double zpos(ftdLayerLayout.getZposition(i));
-            m_ftdZPositions.push_back(zpos);
-            streamlog_out( DEBUG2 ) << "     layer " << i << " - mean z position = " << zpos << std::endl;
+            for(unsigned int i = 0; i < N; ++i)
+            {
+                
+                DD4hep::DDRec::ZDiskPetalsData::LayerLayout thisLayer  = theExtension->layers[i];
+
+                // Create a disk to represent even number petals front side
+                //FIXME! VERIFY THAT TIS MAKES SENSE!
+                m_ftdInnerRadii.push_back(thisLayer.distanceSensitive);
+                m_ftdOuterRadii.push_back(thisLayer.distanceSensitive+thisLayer.lengthSensitive);
+
+                // Take the mean z position of the staggered petals
+                const double zpos(thisLayer.zPosition);
+                m_ftdZPositions.push_back(zpos);
+                
+                streamlog_out( DEBUG2 ) << "     layer " << i << " - mean z position = " << zpos << std::endl;
+            }
+
+            m_nFtdLayers = m_ftdZPositions.size() ;
+       
+        } catch (std::runtime_error &exception){
+            
+            streamlog_out(WARNING) << "DDTrackCreator exception during Forward Tracking Disk parameter construction for detector "<<*iter<<" : " << exception.what() << std::endl;
         }
-
-        m_nFtdLayers = m_ftdZPositions.size() ;
     }
+  
+  
+    
+
+
+
 
     // Check tpc parameters
     if ((std::fabs(m_settings.m_tpcZmax) < std::numeric_limits<float>::epsilon()) || (std::fabs(m_settings.m_tpcInnerR) < std::numeric_limits<float>::epsilon())
@@ -98,26 +123,33 @@ DDTrackCreator::DDTrackCreator(const Settings &settings, const pandora::Pandora 
 
     // Calculate etd and set parameters
     // fg: make SET and ETD optional - as they might not be in the model ...
-    try
-    {
-        const DoubleVector &etdZPositions(marlin::Global::GEAR->getGearParameters("ETD").getDoubleVals("ETDLayerZ"));
-        const DoubleVector &setInnerRadii(marlin::Global::GEAR->getGearParameters("SET").getDoubleVals("SETLayerRadius"));
+    //FIXME: THINK OF A UNIVERSAL WAY TO HANDLE EXISTENCE OF ADDITIONAL DETECTORS
 
-        if (etdZPositions.empty() || setInnerRadii.empty())
-            throw pandora::StatusCodeException(pandora::STATUS_CODE_INVALID_PARAMETER);
-
-        m_minEtdZPosition = *(std::min_element(etdZPositions.begin(), etdZPositions.end()));
-        m_minSetRadius = *(std::min_element(setInnerRadii.begin(), setInnerRadii.end()));
-    }
-    catch(gear::UnknownParameterException &)
-    {
-        streamlog_out(WARNING) << " ETDLayerZ or SETLayerRadius parameters missing from GEAR parameters!" << std::endl
+    streamlog_out(WARNING) << " ETDLayerZ or SETLayerRadius parameters Not being handled!" << std::endl
                                << "     -> both will be set to " << std::numeric_limits<float>::quiet_NaN() << std::endl;
-
-        //fg: Set them to NAN, so that they cannot be used to set   trackParameters.m_reachesCalorimeter = true;
-        m_minEtdZPosition = std::numeric_limits<float>::quiet_NaN();
-        m_minSetRadius = std::numeric_limits<float>::quiet_NaN();
-    }
+    m_minEtdZPosition = std::numeric_limits<float>::quiet_NaN();
+    m_minSetRadius = std::numeric_limits<float>::quiet_NaN();
+    
+//     try
+//     {
+//         const DoubleVector &etdZPositions(marlin::Global::GEAR->getGearParameters("ETD").getDoubleVals("ETDLayerZ"));
+//         const DoubleVector &setInnerRadii(marlin::Global::GEAR->getGearParameters("SET").getDoubleVals("SETLayerRadius"));
+// 
+//         if (etdZPositions.empty() || setInnerRadii.empty())
+//             throw pandora::StatusCodeException(pandora::STATUS_CODE_INVALID_PARAMETER);
+// 
+//         m_minEtdZPosition = *(std::min_element(etdZPositions.begin(), etdZPositions.end()));
+//         m_minSetRadius = *(std::min_element(setInnerRadii.begin(), setInnerRadii.end()));
+//     }
+//     catch(gear::UnknownParameterException &)
+//     {
+//         streamlog_out(WARNING) << " ETDLayerZ or SETLayerRadius parameters missing from GEAR parameters!" << std::endl
+//                                << "     -> both will be set to " << std::numeric_limits<float>::quiet_NaN() << std::endl;
+// 
+//         //fg: Set them to NAN, so that they cannot be used to set   trackParameters.m_reachesCalorimeter = true;
+//         m_minEtdZPosition = std::numeric_limits<float>::quiet_NaN();
+//         m_minSetRadius = std::numeric_limits<float>::quiet_NaN();
+//     }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
