@@ -1,13 +1,13 @@
 /**
- *  @file   MarlinPandora/include/DDTrackCreator.h
+ *  @file   MarlinPandora/include/DDTrackCreatorBase.h
  * 
- *  @brief  Header file for the track creator class.
+ *  @brief  Header file for the track creator base class.
  * 
  *  $Log: $
  */
 
-#ifndef DDTRACK_CREATOR_H
-#define DDTRACK_CREATOR_H 1
+#ifndef DDTRACK_CREATOR_BASE_H
+#define DDTRACK_CREATOR_BASE_H 1
 
 #include "lcio.h"
 
@@ -40,9 +40,9 @@ inline LCCollectionVec *newTrkCol(const std::string &name, LCEvent *evt , bool i
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
- *  @brief  DDTrackCreator class
+ *  @brief  DDTrackCreatorBase class
  */
-class DDTrackCreator
+class DDTrackCreatorBase
 {
 public:
     typedef std::vector<double> DoubleVector;
@@ -86,11 +86,11 @@ public:
         float           m_z0UnmatchedVertexTrackCut;            ///< z0 cut used to determine whether unmatched vertex track can form pfo
         float           m_zCutForNonVertexTracks;               ///< Non vtx track z cut to determine whether track can be used to form pfo
 
-        int             m_reachesECalNTpcHits;                  ///< Minimum number of tpc hits to consider track as reaching ecal
+        int             m_reachesECalNBarrelTrackerHits;                  ///< Minimum number of barrel tracker hits to consider track as reaching ecal
         int             m_reachesECalNFtdHits;                  ///< Minimum number of ftd hits to consider track as reaching ecal
-        float           m_reachesECalTpcOuterDistance;          ///< Max distance from track to tpc r max to id whether track reaches ecal
+        float           m_reachesECalBarrelTrackerOuterDistance;          ///< Max distance from track to barrel tracker r max to id whether track reaches ecal
         int             m_reachesECalMinFtdLayer;               ///< Min layer in Ftd for tracks to be considered to have reached decal
-        float           m_reachesECalTpcZMaxDistance;           ///< Max distance from track to tpc z max to id whether track reaches ecal
+        float           m_reachesECalBarrelTrackerZMaxDistance;           ///< Max distance from track to barrel tracker z max to id whether track reaches ecal
         float           m_reachesECalFtdZMaxDistance;           ///< Max distance from track hit to ftd z position to identify ftd hits
         float           m_curvatureToMomentumFactor;            ///< Constant relating track curvature in b field to momentum
 
@@ -98,20 +98,13 @@ public:
         float           m_maxTrackSigmaPOverP;                  ///< Track fraction momentum error cut
         float           m_minMomentumForTrackHitChecks;         ///< Min track momentum required to perform final quality checks on number of hits
 
-        float           m_tpcMembraneMaxZ;                      ///< Tpc membrane max z coordinate
-        float           m_maxTpcInnerRDistance;                 ///< Track cut on distance from tpc inner r to id whether track can form pfo
-        float           m_minTpcHitFractionOfExpected;          ///< Minimum fraction of TPC hits compared to expected
-        int             m_minFtdHitsForTpcHitFraction;          ///< Minimum number of FTD hits to ignore TPC hit fraction
+        float           m_maxBarrelTrackerInnerRDistance;                 ///< Track cut on distance from barrel tracker inner r to id whether track can form pfo
+        float           m_minBarrelTrackerHitFractionOfExpected;          ///< Minimum fraction of TPC hits compared to expected
+        int             m_minFtdHitsForBarrelTrackerHitFraction;          ///< Minimum number of FTD hits to ignore TPC hit fraction
         
         ///Nikiforos: Moved from main class
         
         float             m_bField;                       ///< The bfield
-        
-        float             m_tpcInnerR;                    ///< The tpc inner radius
-        float             m_tpcOuterR;                    ///< The tpc outer radius
-        unsigned int      m_tpcMaxRow;                    ///< The tpc maximum row number
-        float             m_tpcZmax;                      ///< The tpc maximum z coordinate
-        
         int               m_eCalBarrelInnerSymmetry;      ///< ECal barrel inner symmetry order
         float             m_eCalBarrelInnerPhi0;          ///< ECal barrel inner phi 0
         float             m_eCalBarrelInnerR;             ///< ECal barrel inner radius
@@ -130,12 +123,12 @@ public:
      *  @param  settings the creator settings
      *  @param  pPandora address of the relevant pandora instance
      */
-     DDTrackCreator(const Settings &settings, const pandora::Pandora *const pPandora);
+     DDTrackCreatorBase(const Settings &settings, const pandora::Pandora *const pPandora);
 
     /**
      *  @brief  Destructor
      */
-     virtual ~DDTrackCreator();
+     virtual ~DDTrackCreatorBase();
 
     /**
      *  @brief  Create associations between tracks, V0s, kinks, etc
@@ -145,11 +138,11 @@ public:
     pandora::StatusCode CreateTrackAssociations(const EVENT::LCEvent *const pLCEvent);
 
     /**
-     *  @brief  Create tracks, insert user code here
+     *  @brief  Create tracks, insert user code here. Implement accordin to detector model
      * 
      *  @param  pLCEvent the lcio event
      */
-    pandora::StatusCode CreateTracks(EVENT::LCEvent *pLCEvent);
+    virtual pandora::StatusCode CreateTracks(EVENT::LCEvent *pLCEvent) = 0 ;
 
     /**
      *  @brief  Get the track vector
@@ -162,8 +155,56 @@ public:
      *  @brief  Reset the track creator
      */
     void Reset();
+    
+    
+    
 
-private:
+protected:
+    
+    
+    
+
+    const Settings          m_settings;                     ///< The track creator settings
+    const pandora::Pandora *m_pPandora;                     ///< Address of the pandora object to create tracks and track relationships
+
+
+    TrackVector             m_trackVector;                  ///< The track vector
+    TrackList               m_v0TrackList;                  ///< The list of v0 tracks
+    TrackList               m_parentTrackList;              ///< The list of parent tracks
+    TrackList               m_daughterTrackList;            ///< The list of daughter tracks
+    TrackToPidMap           m_trackToPidMap;                ///< The map from track addresses to particle ids, where set by kinks/V0s
+    
+    
+    ///Nikiforos: Need to implement following abstract functions according to detector model
+    
+     /**
+     *  @brief  Whether track passes the quality cuts required in order to be used to form a pfo
+     * 
+     *  @param  pTrack the lcio track
+     *  @param  trackParameters the track parameters
+     * 
+     *  @return boolean
+     */
+    virtual bool PassesQualityCuts(const EVENT::Track *const pTrack, const PandoraApi::Track::Parameters &trackParameters) const = 0;
+    
+    /**
+     *  @brief  Decide whether track reaches the ecal surface
+     * 
+     *  @param  pTrack the lcio track
+     *  @param  trackParameters the track parameters
+     */
+    virtual void TrackReachesECAL(const EVENT::Track *const pTrack, PandoraApi::Track::Parameters &trackParameters) const = 0 ;
+
+    /**
+     *  @brief  Determine whether a track can be used to form a pfo under the following conditions:
+     *          1) if the track proves to be associated with a cluster, OR
+     *          2) if the track proves to have no cluster associations
+     * 
+     *  @param  pTrack the lcio track
+     *  @param  trackParameters the track parameters
+     */
+    virtual void DefineTrackPfoUsage(const EVENT::Track *const pTrack, PandoraApi::Track::Parameters &trackParameters) const = 0;
+    
     /**
      *  @brief  Extract kink information from specified lcio collections
      * 
@@ -252,67 +293,20 @@ private:
      */
     void GetECalProjectionOld(const pandora::Helix *const pHelix, const int signPz, PandoraApi::Track::Parameters &trackParameters) const;
 
-    /**
-     *  @brief  Decide whether track reaches the ecal surface
-     * 
-     *  @param  pTrack the lcio track
-     *  @param  trackParameters the track parameters
-     */
-    void TrackReachesECAL(const EVENT::Track *const pTrack, PandoraApi::Track::Parameters &trackParameters) const;
-
-    /**
-     *  @brief  Determine whether a track can be used to form a pfo under the following conditions:
-     *          1) if the track proves to be associated with a cluster, OR
-     *          2) if the track proves to have no cluster associations
-     * 
-     *  @param  pTrack the lcio track
-     *  @param  trackParameters the track parameters
-     */
-    void DefineTrackPfoUsage(const EVENT::Track *const pTrack, PandoraApi::Track::Parameters &trackParameters) const;
-
-    /**
-     *  @brief  Whether track passes the quality cuts required in order to be used to form a pfo
-     * 
-     *  @param  pTrack the lcio track
-     *  @param  trackParameters the track parameters
-     * 
-     *  @return boolean
-     */
-    bool PassesQualityCuts(const EVENT::Track *const pTrack, const PandoraApi::Track::Parameters &trackParameters) const;
-
-protected:
-    const Settings          m_settings;                     ///< The track creator settings
-    const pandora::Pandora *m_pPandora;                     ///< Address of the pandora object to create tracks and track relationships
 
 
-    float                   m_cosTpc;                       ///< Cos(theta) value at end of tpc
-
-    DoubleVector            m_ftdInnerRadii;                ///< List of ftd inner radii
-    DoubleVector            m_ftdOuterRadii;                ///< List of ftd outer radii
-    DoubleVector            m_ftdZPositions;                ///< List of ftd z positions
-    unsigned int            m_nFtdLayers;                   ///< Number of ftd layers
-    float                   m_tanLambdaFtd;                 ///< Tan lambda for first ftd layer
-    
-    float                   m_minEtdZPosition;              ///< Min etd z position
-    float                   m_minSetRadius;                 ///< Min set radius
-
-    TrackVector             m_trackVector;                  ///< The track vector
-    TrackList               m_v0TrackList;                  ///< The list of v0 tracks
-    TrackList               m_parentTrackList;              ///< The list of parent tracks
-    TrackList               m_daughterTrackList;            ///< The list of daughter tracks
-    TrackToPidMap           m_trackToPidMap;                ///< The map from track addresses to particle ids, where set by kinks/V0s
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const TrackVector &DDTrackCreator::GetTrackVector() const
+inline const TrackVector &DDTrackCreatorBase::GetTrackVector() const
 {
     return m_trackVector;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline void DDTrackCreator::Reset()
+inline void DDTrackCreatorBase::Reset()
 {
     m_trackVector.clear();
     m_v0TrackList.clear();
@@ -323,23 +317,23 @@ inline void DDTrackCreator::Reset()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline bool DDTrackCreator::IsV0(const Track *const pTrack) const
+inline bool DDTrackCreatorBase::IsV0(const Track *const pTrack) const
 {
     return (m_v0TrackList.end() != m_v0TrackList.find(pTrack));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline bool DDTrackCreator::IsParent(const Track *const pTrack) const
+inline bool DDTrackCreatorBase::IsParent(const Track *const pTrack) const
 {
     return (m_parentTrackList.end() != m_parentTrackList.find(pTrack));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline bool DDTrackCreator::IsDaughter(const Track *const pTrack) const
+inline bool DDTrackCreatorBase::IsDaughter(const Track *const pTrack) const
 {
     return (m_daughterTrackList.end() != m_daughterTrackList.find(pTrack));
 }
 
-#endif // #ifndef TRACK_CREATOR_H
+#endif // #ifndef DDTRACK_CREATOR_BASE_H

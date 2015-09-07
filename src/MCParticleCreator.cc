@@ -19,7 +19,7 @@
 #include "DDCaloHitCreator.h"
 #include "MCParticleCreator.h"
 #include "DDPandoraPFANewProcessor.h"
-#include "DDTrackCreator.h"
+#include "DDTrackCreatorBase.h"
 
 #include <cmath>
 #include <limits>

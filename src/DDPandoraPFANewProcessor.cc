@@ -24,6 +24,10 @@
 #include "DD4hep/DD4hepUnits.h"
 #include "DDRec/DetectorData.h"
 
+#include "DDTrackCreatorILD.h"
+#include "DDTrackCreatorCLIC.h"
+
+
 #include <cstdlib>
 
 DDPandoraPFANewProcessor aDDPandoraPFANewProcessor;
@@ -120,7 +124,17 @@ void DDPandoraPFANewProcessor::init()
         m_pPandora = new pandora::Pandora();
         m_pGeometryCreator = new DDGeometryCreator(m_geometryCreatorSettings, m_pPandora);
         m_pCaloHitCreator = new DDCaloHitCreator(m_caloHitCreatorSettings, m_pPandora);
-        m_pTrackCreator = new DDTrackCreator(m_trackCreatorSettings, m_pPandora);
+        
+        
+        ///FIXME: IMPLEMENT FACTORY
+        if (m_settings.m_trackCreatorName == "DDTrackCreatorCLIC")
+            m_pTrackCreator = new DDTrackCreatorCLIC(m_trackCreatorSettings, m_pPandora);
+        else if (m_settings.m_trackCreatorName == "DDTrackCreatorILD")
+            m_pTrackCreator = new DDTrackCreatorCLIC(m_trackCreatorSettings, m_pPandora);
+        else
+            streamlog_out(ERROR) << "Unknown DDTrackCreator: "<<m_settings.m_trackCreatorName << std::endl;
+
+
         m_pMCParticleCreator = new MCParticleCreator(m_mcParticleCreatorSettings, m_pPandora);
         m_pPfoCreator = new PfoCreator(m_pfoCreatorSettings, m_pPandora);
 
@@ -529,9 +543,9 @@ void DDPandoraPFANewProcessor::ProcessSteeringFile()
                             float(250.));
 
     // Track "reaches ecal" parameters
-    registerProcessorParameter("ReachesECalNTpcHits",
-                            "Minimum number of tpc hits to consider track as reaching ecal",
-                            m_trackCreatorSettings.m_reachesECalNTpcHits,
+    registerProcessorParameter("ReachesECalNBarrelTrackerHits",
+                            "Minimum number of BarrelTracker hits to consider track as reaching ecal",
+                            m_trackCreatorSettings.m_reachesECalNBarrelTrackerHits,
                             int(11));
 
     registerProcessorParameter("ReachesECalNFtdHits",
@@ -539,9 +553,9 @@ void DDPandoraPFANewProcessor::ProcessSteeringFile()
                             m_trackCreatorSettings.m_reachesECalNFtdHits,
                             int(4));
 
-    registerProcessorParameter("ReachesECalTpcOuterDistance",
-                            "Max distance from track to tpc r max to id whether track reaches ecal",
-                            m_trackCreatorSettings.m_reachesECalTpcOuterDistance,
+    registerProcessorParameter("ReachesECalBarrelTrackerOuterDistance",
+                            "Max distance from track to BarrelTracker r max to id whether track reaches ecal",
+                            m_trackCreatorSettings.m_reachesECalBarrelTrackerOuterDistance,
                             float(-100.));
 
     registerProcessorParameter("ReachesECalMinFtdLayer",
@@ -549,9 +563,9 @@ void DDPandoraPFANewProcessor::ProcessSteeringFile()
                             m_trackCreatorSettings.m_reachesECalMinFtdLayer,
                             int(9));
 
-    registerProcessorParameter("ReachesECalTpcZMaxDistance",
-                            "Max distance from track to tpc z max to id whether track reaches ecal",
-                            m_trackCreatorSettings.m_reachesECalTpcZMaxDistance,
+    registerProcessorParameter("ReachesECalBarrelTrackerZMaxDistance",
+                            "Max distance from track to BarrelTracker z max to id whether track reaches ecal",
+                            m_trackCreatorSettings.m_reachesECalBarrelTrackerZMaxDistance,
                             float(-50.));
 
     registerProcessorParameter("ReachesECalFtdZMaxDistance",
@@ -580,24 +594,19 @@ void DDPandoraPFANewProcessor::ProcessSteeringFile()
                             m_trackCreatorSettings.m_minMomentumForTrackHitChecks,
                             float(1.));
 
-    registerProcessorParameter("TpcMembraneMaxZ",
-                            "Tpc membrane max z coordinate",
-                            m_trackCreatorSettings.m_tpcMembraneMaxZ,
-                            float(10.));
-
-    registerProcessorParameter("MinTpcHitFractionOfExpected",
-                            "Cut on fractional of expected number of TPC hits",
-                            m_trackCreatorSettings.m_minTpcHitFractionOfExpected,
+    registerProcessorParameter("MinBarrelTrackerHitFractionOfExpected",
+                            "Cut on fractional of expected number of BarrelTracker hits",
+                            m_trackCreatorSettings.m_minBarrelTrackerHitFractionOfExpected,
                             float(0.20));
 
-    registerProcessorParameter("MinFtdHitsForTpcHitFraction",
-                            "Cut on minimum number of FTD hits of TPC hit fraction to be applied",
-                            m_trackCreatorSettings.m_minFtdHitsForTpcHitFraction,
+    registerProcessorParameter("MinFtdHitsForBarrelTrackerHitFraction",
+                            "Cut on minimum number of FTD hits of BarrelTracker hit fraction to be applied",
+                            m_trackCreatorSettings.m_minFtdHitsForBarrelTrackerHitFraction,
                             int(2));
 
-    registerProcessorParameter("MaxTpcInnerRDistance",
-                            "Track cut on distance from tpc inner r to id whether track can form pfo",
-                            m_trackCreatorSettings.m_maxTpcInnerRDistance,
+    registerProcessorParameter("MaxBarrelTrackerInnerRDistance",
+                            "Track cut on distance from BarrelTracker inner r to id whether track can form pfo",
+                            m_trackCreatorSettings.m_maxBarrelTrackerInnerRDistance,
                             float(50.));
 
    
@@ -779,6 +788,11 @@ void DDPandoraPFANewProcessor::ProcessSteeringFile()
                                "The name of the Coil",
                                m_settings.m_coilName,
                                std::string("Solenoid")); 
+  
+    registerProcessorParameter("TrackCreatorName",
+                               "The name of the DDTrackCreator implementation",
+                               m_settings.m_trackCreatorName,
+                               std::string("DDTrackCreatorCLIC")); 
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -791,13 +805,6 @@ void DDPandoraPFANewProcessor::FinaliseSteeringParameters()
     m_trackCreatorSettings.m_prongSplitVertexCollections.insert(m_trackCreatorSettings.m_prongSplitVertexCollections.end(),m_trackCreatorSettings.m_splitVertexCollections.begin(),m_trackCreatorSettings.m_splitVertexCollections.end());
     
     m_trackCreatorSettings.m_bField=getFieldFromLCDD();
-    m_trackCreatorSettings.m_tpcInnerR=getTrackingRegionExtent()[0]/dd4hep::mm;
-    m_trackCreatorSettings.m_tpcOuterR=getTrackingRegionExtent()[1]/dd4hep::mm;
-    
-    std::cout<< "WARNING! DO NOT MASK! REMEMBER TO HANDLE m_tpcMaxRow" << std::endl;
-
-    m_trackCreatorSettings.m_tpcMaxRow=100.; ///FIXME! 
-    m_trackCreatorSettings.m_tpcZmax=getTrackingRegionExtent()[2]/dd4hep::mm;
     m_trackCreatorSettings.m_eCalBarrelInnerSymmetry=getExtension(m_settings.m_ecalBarrelName)->inner_symmetry;
     m_trackCreatorSettings.m_eCalBarrelInnerPhi0=getExtension(m_settings.m_ecalBarrelName)->inner_phi0/dd4hep::rad;
     m_trackCreatorSettings.m_eCalBarrelInnerR=getExtension(m_settings.m_ecalBarrelName)->extent[0]/dd4hep::mm;

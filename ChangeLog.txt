@@ -1,7 +1,19 @@
 
 DDMarlinPandora: Development package to integrate with DD4hep
-N.Nikiforou
 
+
+N.Nikiforou 07/09/2015:
+  - Many changes that require full implemetation of DDRec structures for all subdetectors 
+  - Introduced DDTrackCreatorBase class and derived implementation classes for ILD and CLIC
+  - Removed references to "TPC" from DDTrackCreatorBase::Settings. Whatever was a configuration parameter
+    has its relevant variable and Processor parameter names changed from "Tpc" to "BarrelTracker". Also, 
+    moved any TPC geometry-related variables from DDTrackCreatorBase::Settings to DDTrackCreatorILD proper.
+  - Added Parameter for DDPandoraPFANewProcessor: TrackCreatorName to select the relevant implementation 
+    of DDTrackCreatorBase for the detector model in use (Curretly ILD or CLIC). Still need to implement
+    a proper factory to select the proper algorithm. 
+
+
+N. Nikiforou
 v00-01
 
   - first version that 'runs' with CLIC_o2_v01 and ILD_o1_v05

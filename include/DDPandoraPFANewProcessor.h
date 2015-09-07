@@ -14,7 +14,7 @@
 
 #include "MCParticleCreator.h"
 #include "PfoCreator.h"
-#include "DDTrackCreator.h"
+#include "DDTrackCreatorBase.h"
 
 #include "DDGeometryCreator.h"
 #include "DDCaloHitCreator.h"
@@ -70,6 +70,9 @@ public:
         std::vector<std::string>  m_muonOtherNames;         ///< Additional Muon detector names 
         
         std::string     m_coilName;                   ///< The detector name for the coil
+        
+        std::string     m_trackCreatorName;                 ///< The name of the DDTrackCreator implementation to use
+
         
     };
 
@@ -155,7 +158,7 @@ private:
     pandora::Pandora                   *m_pPandora;                         ///< Address of the pandora instance
     DDCaloHitCreator                     *m_pCaloHitCreator;                  ///< The calo hit creator
     DDGeometryCreator                    *m_pGeometryCreator;                 ///< The geometry creator
-    DDTrackCreator                       *m_pTrackCreator;                    ///< The track creator
+    DDTrackCreatorBase                   *m_pTrackCreator;                    ///< The track creator
     MCParticleCreator                  *m_pMCParticleCreator;               ///< The mc particle creator
     PfoCreator                         *m_pPfoCreator;                      ///< The pfo creator
 
@@ -163,7 +166,7 @@ private:
     DDCaloHitCreator::Settings            m_caloHitCreatorSettings;           ///< The calo hit creator settings
     DDGeometryCreator::Settings           m_geometryCreatorSettings;          ///< The geometry creator settings
     MCParticleCreator::Settings         m_mcParticleCreatorSettings;        ///< The mc particle creator settings
-    DDTrackCreator::Settings              m_trackCreatorSettings;             ///< The track creator settings
+    DDTrackCreatorBase::Settings              m_trackCreatorSettings;             ///< The track creator settings
     PfoCreator::Settings                m_pfoCreatorSettings;               ///< The pfo creator settings
 
     typedef std::map<const pandora::Pandora *, EVENT::LCEvent *> PandoraToLCEventMap;

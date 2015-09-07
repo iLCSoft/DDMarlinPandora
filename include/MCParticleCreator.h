@@ -14,7 +14,7 @@
 #include "Api/PandoraApi.h"
 
 #include "DDCaloHitCreator.h"
-#include "DDTrackCreator.h"
+#include "DDTrackCreatorBase.h"
 
 /**
  *  @brief  MCParticleCreator class
