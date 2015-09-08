@@ -130,7 +130,7 @@ void DDPandoraPFANewProcessor::init()
         if (m_settings.m_trackCreatorName == "DDTrackCreatorCLIC")
             m_pTrackCreator = new DDTrackCreatorCLIC(m_trackCreatorSettings, m_pPandora);
         else if (m_settings.m_trackCreatorName == "DDTrackCreatorILD")
-            m_pTrackCreator = new DDTrackCreatorCLIC(m_trackCreatorSettings, m_pPandora);
+            m_pTrackCreator = new DDTrackCreatorILD(m_trackCreatorSettings, m_pPandora);
         else
             streamlog_out(ERROR) << "Unknown DDTrackCreator: "<<m_settings.m_trackCreatorName << std::endl;
 
