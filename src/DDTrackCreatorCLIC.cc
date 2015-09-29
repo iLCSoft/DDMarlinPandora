@@ -272,10 +272,7 @@ bool DDTrackCreatorCLIC::PassesQualityCuts(const EVENT::Track *const pTrack, con
 
 
         const EVENT::IntVec &hitsBySubdetector(pTrack->getSubdetectorHitNumbers());
-
-        //fg: hit numbers are now given in different order wrt LOI:  
-        // trk->subdetectorHitNumbers()[ 2 * ILDDetID::TPC - 1 ] =  hitsInFit ;  
-        // trk->subdetectorHitNumbers()[ 2 * ILDDetID::TPC - 2 ] =  hitCount ;  
+ 
         // ---- use hitsInFit :
         const int nTrackerHits = hitsBySubdetector[ 2 * lcio::ILDDetID::TPC - 1 ];
         const int nFtdHits = hitsBySubdetector[ 2 * lcio::ILDDetID::FTD - 1 ];

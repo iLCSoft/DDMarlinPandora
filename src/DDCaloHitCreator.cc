@@ -548,33 +548,37 @@ void DDCaloHitCreator::GetEndCapCaloHitProperties(const EVENT::CalorimeterHit *c
     double thickness = (layers[physicalLayer].inner_thickness+layers[physicalLayer].sensitive_thickness/2.0)/dd4hep::mm;
     double nRadLengths = layers[physicalLayer].inner_nRadiationLengths;
     double nIntLengths = layers[physicalLayer].inner_nInteractionLengths;
+    double layerAbsorberThickness = (layers[physicalLayer].inner_thickness-layers[physicalLayer].sensitive_thickness/2.0)/dd4hep::mm;
 
     if(physicalLayer>0){
         thickness += (layers[physicalLayer-1].outer_thickness -layers[physicalLayer].sensitive_thickness/2.0)/dd4hep::mm;
         nRadLengths += layers[physicalLayer-1].outer_nRadiationLengths;
         nIntLengths += layers[physicalLayer-1].outer_nInteractionLengths;
+        layerAbsorberThickness += (layers[physicalLayer-1].outer_thickness -layers[physicalLayer].sensitive_thickness/2.0)/dd4hep::mm;
+
     }
     
     caloHitParameters.m_cellThickness = thickness;
     caloHitParameters.m_nCellRadiationLengths = nRadLengths;
     caloHitParameters.m_nCellInteractionLengths = nIntLengths;
     
-//     const float layerAbsorberThickness(layers[physicalLayer].absorberThickness/dd4hep::mm);
-
-    //FIXME! DO WE NEED THIS?
+    //FIXME! do we need this?
     absorberCorrection = 1.;
-//     for (unsigned int i = 0, iMax = layers.size(); i < iMax; ++i)
-//     {
-//         const float absorberThickness(layers[i].absorberThickness/dd4hep::mm);
-// 
-//         if (absorberThickness <= 0.)
-//             continue;
-// 
-//         if (layerAbsorberThickness > 0.)
-//             absorberCorrection = absorberThickness / layerAbsorberThickness;
-// 
-//         break;
-//     }
+    for (unsigned int i = 0, iMax = layers.size(); i < iMax; ++i)
+    {
+        float absorberThickness((layers[i].inner_thickness - layers[i].sensitive_thickness/2.0 )/dd4hep::mm);
+        
+        if (i>0)
+            absorberThickness += (layers[i-1].outer_thickness - layers[i-1].sensitive_thickness/2.0)/dd4hep::mm;
+
+        if (absorberThickness <= 0.)
+            continue;
+
+        if (layerAbsorberThickness > 0.)
+            absorberCorrection = absorberThickness / layerAbsorberThickness;
+
+        break;
+    }
 
     caloHitParameters.m_cellNormalVector = (pCaloHit->getPosition()[2] > 0) ? pandora::CartesianVector(0, 0, 1) :
         pandora::CartesianVector(0, 0, -1);
@@ -600,30 +604,36 @@ void DDCaloHitCreator::GetBarrelCaloHitProperties(const EVENT::CalorimeterHit *c
     double nRadLengths = layers[physicalLayer].inner_nRadiationLengths;
     double nIntLengths = layers[physicalLayer].inner_nInteractionLengths;
 
+    double layerAbsorberThickness = (layers[physicalLayer].inner_thickness-layers[physicalLayer].sensitive_thickness/2.0)/dd4hep::mm;
     if(physicalLayer>0){
         thickness += (layers[physicalLayer-1].outer_thickness -layers[physicalLayer].sensitive_thickness/2.0)/dd4hep::mm;
         nRadLengths += layers[physicalLayer-1].outer_nRadiationLengths;
         nIntLengths += layers[physicalLayer-1].outer_nInteractionLengths;
+        layerAbsorberThickness += (layers[physicalLayer-1].outer_thickness -layers[physicalLayer].sensitive_thickness/2.0)/dd4hep::mm;
     }
     
     caloHitParameters.m_cellThickness = thickness;
     caloHitParameters.m_nCellRadiationLengths = nRadLengths;
     caloHitParameters.m_nCellInteractionLengths = nIntLengths;
 
+    
     //FIXME! do we need this?
     absorberCorrection = 1.;
-//     for (unsigned int i = 0, iMax = layers.size(); i < iMax; ++i)
-//     {
-//         const float absorberThickness(layers[i].absorberThickness/dd4hep::mm);
-// 
-//         if (absorberThickness <= 0.)
-//             continue;
-// 
-//         if (layerAbsorberThickness > 0.)
-//             absorberCorrection = absorberThickness / layerAbsorberThickness;
-// 
-//         break;
-//     }
+    for (unsigned int i = 0, iMax = layers.size(); i < iMax; ++i)
+    {
+        float absorberThickness((layers[i].inner_thickness - layers[i].sensitive_thickness/2.0 )/dd4hep::mm);
+        
+        if (i>0)
+            absorberThickness += (layers[i-1].outer_thickness - layers[i-1].sensitive_thickness/2.0)/dd4hep::mm;
+
+        if (absorberThickness <= 0.)
+            continue;
+
+        if (layerAbsorberThickness > 0.)
+            absorberCorrection = absorberThickness / layerAbsorberThickness;
+
+        break;
+    }
 
     if (barrelSymmetryOrder > 2)
     {
