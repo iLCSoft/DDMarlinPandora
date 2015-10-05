@@ -39,129 +39,129 @@ DDTrackCreatorILD::DDTrackCreatorILD(const Settings &settings, const pandora::Pa
 {
     
     
-    m_nFtdLayers=0;
-    m_ftdInnerRadii.clear();
-    m_ftdOuterRadii.clear();
+  m_nFtdLayers=0;
+  m_ftdInnerRadii.clear();
+  m_ftdOuterRadii.clear();
     
-    //Instead of gear, loop over a provided list of forward (read: endcap) tracking detectors. For ILD this would be FTD
-    ///FIXME: Should we use surfaces instead?
-    for (std::vector<std::string>::const_iterator iter = m_settings.m_endcapTrackerNames.begin(), iterEnd = m_settings.m_endcapTrackerNames.end();iter != iterEnd; ++iter){
-        try
-        {
-            DD4hep::DDRec::ZDiskPetalsData * theExtension = 0;
-  
-            DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
-            DD4hep::Geometry::DetElement theDetector = lcdd.detector(*iter);
-            theExtension = theDetector.extension<DD4hep::DDRec::ZDiskPetalsData>();
-            
-            unsigned int N = theExtension->layers.size();
-            
-            streamlog_out( DEBUG2 ) << " Filling FTD-like parameters from DD4hep for "<< *iter<< "- n layers: " << N<< std::endl;
-
-            for(unsigned int i = 0; i < N; ++i)
-            {
-                
-                DD4hep::DDRec::ZDiskPetalsData::LayerLayout thisLayer  = theExtension->layers[i];
-
-                // Create a disk to represent even number petals front side
-                //FIXME! VERIFY THAT TIS MAKES SENSE!
-                m_ftdInnerRadii.push_back(thisLayer.distanceSensitive);
-                m_ftdOuterRadii.push_back(thisLayer.distanceSensitive+thisLayer.lengthSensitive);
-
-                // Take the mean z position of the staggered petals
-                const double zpos(thisLayer.zPosition);
-                m_ftdZPositions.push_back(zpos);
-                
-                streamlog_out( DEBUG2 ) << "     layer " << i << " - mean z position = " << zpos << std::endl;
-            }
-
-            m_nFtdLayers = m_ftdZPositions.size() ;
-       
-        } catch (std::runtime_error &exception){
-            
-            streamlog_out(WARNING) << "DDTrackCreatorILD exception during Forward Tracking Disk parameter construction for detector "<<*iter<<" : " << exception.what() << std::endl;
-        }
-    }
-    
+  //Instead of gear, loop over a provided list of forward (read: endcap) tracking detectors. For ILD this would be FTD
+  ///FIXME: Should we use surfaces instead?
+  for (std::vector<std::string>::const_iterator iter = m_settings.m_endcapTrackerNames.begin(), iterEnd = m_settings.m_endcapTrackerNames.end();iter != iterEnd; ++iter){
     try
+      {
+	DD4hep::DDRec::ZDiskPetalsData * theExtension = 0;
+  
+	DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
+	DD4hep::Geometry::DetElement theDetector = lcdd.detector(*iter);
+	theExtension = theDetector.extension<DD4hep::DDRec::ZDiskPetalsData>();
+            
+	unsigned int N = theExtension->layers.size();
+            
+	streamlog_out( DEBUG2 ) << " Filling FTD-like parameters from DD4hep for "<< *iter<< "- n layers: " << N<< std::endl;
+
+	for(unsigned int i = 0; i < N; ++i)
+	  {
+                
+	    DD4hep::DDRec::ZDiskPetalsData::LayerLayout thisLayer  = theExtension->layers[i];
+
+	    // Create a disk to represent even number petals front side
+	    //FIXME! VERIFY THAT TIS MAKES SENSE!
+	    m_ftdInnerRadii.push_back(thisLayer.distanceSensitive);
+	    m_ftdOuterRadii.push_back(thisLayer.distanceSensitive+thisLayer.lengthSensitive);
+
+	    // Take the mean z position of the staggered petals
+	    const double zpos(thisLayer.zPosition);
+	    m_ftdZPositions.push_back(zpos);
+                
+	    streamlog_out( DEBUG2 ) << "     layer " << i << " - mean z position = " << zpos << std::endl;
+	  }
+
+	m_nFtdLayers = m_ftdZPositions.size() ;
+       
+      } catch (std::runtime_error &exception){
+            
+      streamlog_out(WARNING) << "DDTrackCreatorILD exception during Forward Tracking Disk parameter construction for detector "<<*iter<<" : " << exception.what() << std::endl;
+    }
+  }
+    
+  try
     {
-        DD4hep::DDRec::FixedPadSizeTPCData * theExtension = 0;
+      DD4hep::DDRec::FixedPadSizeTPCData * theExtension = 0;
 
-        DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
-        DD4hep::Geometry::DetElement theDetector = lcdd.detector(m_settings.m_barrelTrackerNames[0]);
-        theExtension = theDetector.extension<DD4hep::DDRec::FixedPadSizeTPCData>();
+      DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
+      DD4hep::Geometry::DetElement theDetector = lcdd.detector(m_settings.m_barrelTrackerNames[0]);
+      theExtension = theDetector.extension<DD4hep::DDRec::FixedPadSizeTPCData>();
 
-        m_tpcInnerR = theExtension->rMin;
-        m_tpcOuterR = theExtension->rMax;
-        m_tpcMaxRow = theExtension->maxRow;
-        m_tpcZmax   = theExtension->zHalf;
+      m_tpcInnerR = theExtension->rMin;
+      m_tpcOuterR = theExtension->rMax;
+      m_tpcMaxRow = theExtension->maxRow;
+      m_tpcZmax   = theExtension->zHalf;
         
         
-        //FIXME! Add to reco structrure and access
-        m_tpcMembraneMaxZ = 10; 
-        std::cout<<"WARNING! DO NOT MASK! HANDLE m_tpcMembraneMaxZ (currently hardcoded to 10)!"<<std::endl;
+      //FIXME! Add to reco structrure and access
+      m_tpcMembraneMaxZ = 10; 
+      std::cout<<"WARNING! DO NOT MASK! HANDLE m_tpcMembraneMaxZ (currently hardcoded to 10)!"<<std::endl;
          
         
     } catch (std::runtime_error &exception){
-            streamlog_out(WARNING) << "DDTrackCreatorILD exception during TPC parameter construction. Used detector name: "<<m_settings.m_barrelTrackerNames[0] << std::endl;
-    }
+    streamlog_out(WARNING) << "DDTrackCreatorILD exception during TPC parameter construction. Used detector name: "<<m_settings.m_barrelTrackerNames[0] << std::endl;
+  }
   
      
-    // Check tpc parameters
-    if ((std::fabs(m_tpcZmax) < std::numeric_limits<float>::epsilon()) || (std::fabs(m_tpcInnerR) < std::numeric_limits<float>::epsilon())
-        || (std::fabs(m_tpcOuterR - m_tpcInnerR) < std::numeric_limits<float>::epsilon()))
+  // Check tpc parameters
+  if ((std::fabs(m_tpcZmax) < std::numeric_limits<float>::epsilon()) || (std::fabs(m_tpcInnerR) < std::numeric_limits<float>::epsilon())
+      || (std::fabs(m_tpcOuterR - m_tpcInnerR) < std::numeric_limits<float>::epsilon()))
     {
-        throw pandora::StatusCodeException(pandora::STATUS_CODE_INVALID_PARAMETER);
+      throw pandora::StatusCodeException(pandora::STATUS_CODE_INVALID_PARAMETER);
     }
 
-    m_cosTpc = m_tpcZmax / std::sqrt(m_tpcZmax * m_tpcZmax + m_tpcInnerR * m_tpcInnerR);
+  m_cosTpc = m_tpcZmax / std::sqrt(m_tpcZmax * m_tpcZmax + m_tpcInnerR * m_tpcInnerR);
 
-    // Check ftd parameters
-    if ((0 == m_nFtdLayers) || (m_nFtdLayers != m_ftdInnerRadii.size()) || (m_nFtdLayers != m_ftdOuterRadii.size()))
+  // Check ftd parameters
+  if ((0 == m_nFtdLayers) || (m_nFtdLayers != m_ftdInnerRadii.size()) || (m_nFtdLayers != m_ftdOuterRadii.size()))
     {
-        throw pandora::StatusCodeException(pandora::STATUS_CODE_INVALID_PARAMETER);
+      throw pandora::StatusCodeException(pandora::STATUS_CODE_INVALID_PARAMETER);
     }
 
-    for (unsigned int iFtdLayer = 0; iFtdLayer < m_nFtdLayers; ++iFtdLayer)
+  for (unsigned int iFtdLayer = 0; iFtdLayer < m_nFtdLayers; ++iFtdLayer)
     {
-        if ((std::fabs(m_ftdOuterRadii[iFtdLayer]) < std::numeric_limits<float>::epsilon()) ||
-            (std::fabs(m_ftdInnerRadii[iFtdLayer]) < std::numeric_limits<float>::epsilon()))
+      if ((std::fabs(m_ftdOuterRadii[iFtdLayer]) < std::numeric_limits<float>::epsilon()) ||
+	  (std::fabs(m_ftdInnerRadii[iFtdLayer]) < std::numeric_limits<float>::epsilon()))
         {
-            throw pandora::StatusCodeException(pandora::STATUS_CODE_INVALID_PARAMETER);
+	  throw pandora::StatusCodeException(pandora::STATUS_CODE_INVALID_PARAMETER);
         }
     }
 
-    m_tanLambdaFtd = m_ftdZPositions[0] / m_ftdOuterRadii[0];
+  m_tanLambdaFtd = m_ftdZPositions[0] / m_ftdOuterRadii[0];
 
-    // Calculate etd and set parameters
-    // fg: make SET and ETD optional - as they might not be in the model ...
-    //FIXME: THINK OF A UNIVERSAL WAY TO HANDLE EXISTENCE OF ADDITIONAL DETECTORS
+  // Calculate etd and set parameters
+  // fg: make SET and ETD optional - as they might not be in the model ...
+  //FIXME: THINK OF A UNIVERSAL WAY TO HANDLE EXISTENCE OF ADDITIONAL DETECTORS
 
-    streamlog_out(WARNING) << " ETDLayerZ or SETLayerRadius parameters Not being handled!" << std::endl
-                               << "     -> both will be set to " << std::numeric_limits<float>::quiet_NaN() << std::endl;
-    m_minEtdZPosition = std::numeric_limits<float>::quiet_NaN();
-    m_minSetRadius = std::numeric_limits<float>::quiet_NaN();
+  streamlog_out(WARNING) << " ETDLayerZ or SETLayerRadius parameters Not being handled!" << std::endl
+			 << "     -> both will be set to " << std::numeric_limits<float>::quiet_NaN() << std::endl;
+  m_minEtdZPosition = std::numeric_limits<float>::quiet_NaN();
+  m_minSetRadius = std::numeric_limits<float>::quiet_NaN();
     
-//     try
-//     {
-//         const DoubleVector &etdZPositions(marlin::Global::GEAR->getGearParameters("ETD").getDoubleVals("ETDLayerZ"));
-//         const DoubleVector &setInnerRadii(marlin::Global::GEAR->getGearParameters("SET").getDoubleVals("SETLayerRadius"));
-// 
-//         if (etdZPositions.empty() || setInnerRadii.empty())
-//             throw pandora::StatusCodeException(pandora::STATUS_CODE_INVALID_PARAMETER);
-// 
-//         m_minEtdZPosition = *(std::min_element(etdZPositions.begin(), etdZPositions.end()));
-//         m_minSetRadius = *(std::min_element(setInnerRadii.begin(), setInnerRadii.end()));
-//     }
-//     catch(gear::UnknownParameterException &)
-//     {
-//         streamlog_out(WARNING) << " ETDLayerZ or SETLayerRadius parameters missing from GEAR parameters!" << std::endl
-//                                << "     -> both will be set to " << std::numeric_limits<float>::quiet_NaN() << std::endl;
-// 
-//         //fg: Set them to NAN, so that they cannot be used to set   trackParameters.m_reachesCalorimeter = true;
-//         m_minEtdZPosition = std::numeric_limits<float>::quiet_NaN();
-//         m_minSetRadius = std::numeric_limits<float>::quiet_NaN();
-//     }
+  //     try
+  //     {
+  //         const DoubleVector &etdZPositions(marlin::Global::GEAR->getGearParameters("ETD").getDoubleVals("ETDLayerZ"));
+  //         const DoubleVector &setInnerRadii(marlin::Global::GEAR->getGearParameters("SET").getDoubleVals("SETLayerRadius"));
+  // 
+  //         if (etdZPositions.empty() || setInnerRadii.empty())
+  //             throw pandora::StatusCodeException(pandora::STATUS_CODE_INVALID_PARAMETER);
+  // 
+  //         m_minEtdZPosition = *(std::min_element(etdZPositions.begin(), etdZPositions.end()));
+  //         m_minSetRadius = *(std::min_element(setInnerRadii.begin(), setInnerRadii.end()));
+  //     }
+  //     catch(gear::UnknownParameterException &)
+  //     {
+  //         streamlog_out(WARNING) << " ETDLayerZ or SETLayerRadius parameters missing from GEAR parameters!" << std::endl
+  //                                << "     -> both will be set to " << std::numeric_limits<float>::quiet_NaN() << std::endl;
+  // 
+  //         //fg: Set them to NAN, so that they cannot be used to set   trackParameters.m_reachesCalorimeter = true;
+  //         m_minEtdZPosition = std::numeric_limits<float>::quiet_NaN();
+  //         m_minSetRadius = std::numeric_limits<float>::quiet_NaN();
+  //     }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -174,353 +174,363 @@ DDTrackCreatorILD::~DDTrackCreatorILD()
 
 pandora::StatusCode DDTrackCreatorILD::CreateTracks(EVENT::LCEvent *pLCEvent)
 {
-    for (StringVector::const_iterator iter = m_settings.m_trackCollections.begin(), iterEnd = m_settings.m_trackCollections.end();
-        iter != iterEnd; ++iter)
+  for (StringVector::const_iterator iter = m_settings.m_trackCollections.begin(), iterEnd = m_settings.m_trackCollections.end();
+       iter != iterEnd; ++iter)
     {
-        try
+      try
         {
-            const EVENT::LCCollection *pTrackCollection = pLCEvent->getCollection(*iter);
+	  const EVENT::LCCollection *pTrackCollection = pLCEvent->getCollection(*iter);
 
-            for (int i = 0, iMax = pTrackCollection->getNumberOfElements(); i < iMax; ++i)
+	  for (int i = 0, iMax = pTrackCollection->getNumberOfElements(); i < iMax; ++i)
             {
-                    EVENT::Track *pTrack = dynamic_cast<Track*>(pTrackCollection->getElementAt(i));
+	      EVENT::Track *pTrack = dynamic_cast<Track*>(pTrackCollection->getElementAt(i));
 
-                    if (NULL == pTrack)
-                        throw EVENT::Exception("Collection type mismatch");
+	      if (NULL == pTrack)
+		throw EVENT::Exception("Collection type mismatch");
 
-                    int minTrackHits = m_settings.m_minTrackHits;
-                    const float tanLambda(std::fabs(pTrack->getTanLambda()));
+	      int minTrackHits = m_settings.m_minTrackHits;
+	      const float tanLambda(std::fabs(pTrack->getTanLambda()));
 
-                    if (tanLambda > m_tanLambdaFtd)
-                    {
-                        int expectedFtdHits(0);
+	      if (tanLambda > m_tanLambdaFtd)
+		{
+		  int expectedFtdHits(0);
 
-                        for (unsigned int iFtdLayer = 0; iFtdLayer < m_nFtdLayers; ++iFtdLayer)
-                        {
-                            if ((tanLambda > m_ftdZPositions[iFtdLayer] / m_ftdOuterRadii[iFtdLayer]) &&
-                                (tanLambda < m_ftdZPositions[iFtdLayer] / m_ftdInnerRadii[iFtdLayer]))
-                            {
-                                expectedFtdHits++;
-                            }
-                        }
+		  for (unsigned int iFtdLayer = 0; iFtdLayer < m_nFtdLayers; ++iFtdLayer)
+		    {
+		      if ((tanLambda > m_ftdZPositions[iFtdLayer] / m_ftdOuterRadii[iFtdLayer]) &&
+			  (tanLambda < m_ftdZPositions[iFtdLayer] / m_ftdInnerRadii[iFtdLayer]))
+			{
+			  expectedFtdHits++;
+			}
+		    }
 
-                        minTrackHits = std::max(m_settings.m_minFtdTrackHits, expectedFtdHits);
-                    }
+		  minTrackHits = std::max(m_settings.m_minFtdTrackHits, expectedFtdHits);
+		}
 
-                    const int nTrackHits(static_cast<int>(pTrack->getTrackerHits().size()));
+	      const int nTrackHits(static_cast<int>(pTrack->getTrackerHits().size()));
 
-                    if ((nTrackHits < minTrackHits) || (nTrackHits > m_settings.m_maxTrackHits))
-                        continue;
+	      if ((nTrackHits < minTrackHits) || (nTrackHits > m_settings.m_maxTrackHits))
+		continue;
 
-                    // Proceed to create the pandora track
-                    PandoraApi::Track::Parameters trackParameters;
-                    trackParameters.m_d0 = pTrack->getD0();
-                    trackParameters.m_z0 = pTrack->getZ0();
-                    trackParameters.m_pParentAddress = pTrack;
+	      // Proceed to create the pandora track
+	      PandoraApi::Track::Parameters trackParameters;
+	      trackParameters.m_d0 = pTrack->getD0();
+	      trackParameters.m_z0 = pTrack->getZ0();
+	      trackParameters.m_pParentAddress = pTrack;
 
-                    // By default, assume tracks are charged pions
-                    const float signedCurvature(pTrack->getOmega());
-                    trackParameters.m_particleId = (signedCurvature > 0) ? pandora::PI_PLUS : pandora::PI_MINUS;
-                    trackParameters.m_mass = pandora::PdgTable::GetParticleMass(pandora::PI_PLUS);
+	      // By default, assume tracks are charged pions
+	      const float signedCurvature(pTrack->getOmega());
+	      trackParameters.m_particleId = (signedCurvature > 0) ? pandora::PI_PLUS : pandora::PI_MINUS;
+	      trackParameters.m_mass = pandora::PdgTable::GetParticleMass(pandora::PI_PLUS);
 
-                    // Use particle id information from V0 and Kink finders
-                    TrackToPidMap::const_iterator iter = m_trackToPidMap.find(pTrack);
+	      // Use particle id information from V0 and Kink finders
+	      TrackToPidMap::const_iterator iter = m_trackToPidMap.find(pTrack);
 
-                    if(iter != m_trackToPidMap.end())
-                    {
-                        trackParameters.m_particleId = (*iter).second;
-                        trackParameters.m_mass = pandora::PdgTable::GetParticleMass((*iter).second);
-                    }
+	      if(iter != m_trackToPidMap.end())
+		{
+		  trackParameters.m_particleId = (*iter).second;
+		  trackParameters.m_mass = pandora::PdgTable::GetParticleMass((*iter).second);
+		}
 
-                    if (0.f != signedCurvature)
-                        trackParameters.m_charge = static_cast<int>(signedCurvature / std::fabs(signedCurvature));
+	      if (0.f != signedCurvature)
+		trackParameters.m_charge = static_cast<int>(signedCurvature / std::fabs(signedCurvature));
 
-                    this->GetTrackStates(pTrack, trackParameters);
-                    this->TrackReachesECAL(pTrack, trackParameters);
-                    this->DefineTrackPfoUsage(pTrack, trackParameters);
+	      this->GetTrackStates(pTrack, trackParameters);
+	      this->TrackReachesECAL(pTrack, trackParameters);
+	      this->DefineTrackPfoUsage(pTrack, trackParameters);
 
-		    try
-		      {
-			PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Track::Create(*m_pPandora, trackParameters));
-			m_trackVector.push_back(pTrack);
-		      }
-		    catch (pandora::StatusCodeException &statusCodeException)
-		      {
-			streamlog_out(ERROR) << "Failed to extract a track: " << statusCodeException.ToString() << std::endl;
+	      try
+		{
+		  PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Track::Create(*m_pPandora, trackParameters));
+		  m_trackVector.push_back(pTrack);
+		}
+	      catch (pandora::StatusCodeException &statusCodeException)
+		{
+		  streamlog_out(ERROR) << "Failed to extract a track: " << statusCodeException.ToString() << std::endl;
 			
-			streamlog_out( DEBUG5 ) << " failed track : " << *pTrack << std::endl ;
-		      }
-		    catch (EVENT::Exception &exception)
-		      {
-			streamlog_out(WARNING) << "Failed to extract a vertex: " << exception.what() << std::endl;
-		      }
+		  streamlog_out( DEBUG5 ) << " failed track : " << *pTrack << std::endl ;
+		}
+	      catch (EVENT::Exception &exception)
+		{
+		  streamlog_out(WARNING) << "Failed to extract a vertex: " << exception.what() << std::endl;
+		}
             }
         }
-        catch (EVENT::Exception &exception)
+      catch (EVENT::Exception &exception)
         {
-            streamlog_out(WARNING) << "Failed to extract track collection: " << *iter << ", " << exception.what() << std::endl;
+	  streamlog_out(WARNING) << "Failed to extract track collection: " << *iter << ", " << exception.what() << std::endl;
         }
     }
 
-    return pandora::STATUS_CODE_SUCCESS;
+  return pandora::STATUS_CODE_SUCCESS;
 }
 
 bool DDTrackCreatorILD::PassesQualityCuts(const EVENT::Track *const pTrack, const PandoraApi::Track::Parameters &trackParameters) const
 {
-    // First simple sanity checks
-    if (trackParameters.m_trackStateAtCalorimeter.Get().GetPosition().GetMagnitude() < m_settings.m_minTrackECalDistanceFromIp)
-        return false;
+  // First simple sanity checks
+  if (trackParameters.m_trackStateAtCalorimeter.Get().GetPosition().GetMagnitude() < m_settings.m_minTrackECalDistanceFromIp)
+    return false;
 
-    if (pTrack->getOmega() == 0.f)
+  if (pTrack->getOmega() == 0.f)
     {
-        streamlog_out(ERROR) << "Track has Omega = 0 " << std::endl;
-        return false;
+      streamlog_out(ERROR) << "Track has Omega = 0 " << std::endl;
+      return false;
     }
 
-    // Check momentum uncertainty is reasonable to use track
-    const pandora::CartesianVector &momentumAtDca(trackParameters.m_momentumAtDca.Get());
-    const float sigmaPOverP(std::sqrt(pTrack->getCovMatrix()[5]) / std::fabs(pTrack->getOmega()));
+  // Check momentum uncertainty is reasonable to use track
+  const pandora::CartesianVector &momentumAtDca(trackParameters.m_momentumAtDca.Get());
+  const float sigmaPOverP(std::sqrt(pTrack->getCovMatrix()[5]) / std::fabs(pTrack->getOmega()));
 
-    if (sigmaPOverP > m_settings.m_maxTrackSigmaPOverP)
+  if (sigmaPOverP > m_settings.m_maxTrackSigmaPOverP)
     {
-        streamlog_out(WARNING) << " Dropping track : " << momentumAtDca.GetMagnitude() << "+-" << sigmaPOverP * (momentumAtDca.GetMagnitude())
-                               << " chi2 = " <<  pTrack->getChi2() << " " << pTrack->getNdf()
-                               << " from " << pTrack->getTrackerHits().size()  << std::endl ;
+      streamlog_out(WARNING) << " Dropping track : " << momentumAtDca.GetMagnitude() << "+-" << sigmaPOverP * (momentumAtDca.GetMagnitude())
+			     << " chi2 = " <<  pTrack->getChi2() << " " << pTrack->getNdf()
+			     << " from " << pTrack->getTrackerHits().size()  << std::endl ;
 
-	streamlog_out(DEBUG5)  << " track : " << *pTrack
-			       << std::endl;
-        return false;
+      streamlog_out(DEBUG5)  << " track : " << *pTrack
+			     << std::endl;
+      return false;
     }
 
-    // Require reasonable number of TPC hits 
-    if (momentumAtDca.GetMagnitude() > m_settings.m_minMomentumForTrackHitChecks)
+  // Require reasonable number of TPC hits 
+  if (momentumAtDca.GetMagnitude() > m_settings.m_minMomentumForTrackHitChecks)
     {
-        const float pX(fabs(momentumAtDca.GetX()));
-        const float pY(fabs(momentumAtDca.GetY()));
-        const float pZ(fabs(momentumAtDca.GetZ()));
-        const float pT(std::sqrt(pX * pX + pY * pY));
-        const float rInnermostHit(pTrack->getRadiusOfInnermostHit());
+      const float pX(fabs(momentumAtDca.GetX()));
+      const float pY(fabs(momentumAtDca.GetY()));
+      const float pZ(fabs(momentumAtDca.GetZ()));
+      const float pT(std::sqrt(pX * pX + pY * pY));
+      const float rInnermostHit(pTrack->getRadiusOfInnermostHit());
 
-        if ((0.f == pT) || (0.f == pZ) || (rInnermostHit == m_tpcOuterR))
+      if ((0.f == pT) || (0.f == pZ) || (rInnermostHit == m_tpcOuterR))
         {
-            streamlog_out(ERROR) << "Invalid track parameter, pT " << pT << ", pZ " << pZ << ", rInnermostHit " << rInnermostHit << std::endl;
-            return false;
+	  streamlog_out(ERROR) << "Invalid track parameter, pT " << pT << ", pZ " << pZ << ", rInnermostHit " << rInnermostHit << std::endl;
+	  return false;
         }
 
-        float nExpectedTpcHits(0.);
+      float nExpectedTpcHits(0.);
 
-        if (pZ < m_tpcZmax / m_tpcOuterR * pT)
+      if (pZ < m_tpcZmax / m_tpcOuterR * pT)
         {
-            const float innerExpectedHitRadius(std::max(m_tpcInnerR, rInnermostHit));
-            const float frac((m_tpcOuterR - innerExpectedHitRadius) / (m_tpcOuterR - m_tpcInnerR));
-            nExpectedTpcHits = m_tpcMaxRow * frac;
+	  const float innerExpectedHitRadius(std::max(m_tpcInnerR, rInnermostHit));
+	  const float frac((m_tpcOuterR - innerExpectedHitRadius) / (m_tpcOuterR - m_tpcInnerR));
+	  nExpectedTpcHits = m_tpcMaxRow * frac;
         }
 
-        if ((pZ <= m_tpcZmax / m_tpcInnerR * pT) && (pZ >= m_tpcZmax / m_tpcOuterR * pT))
+      if ((pZ <= m_tpcZmax / m_tpcInnerR * pT) && (pZ >= m_tpcZmax / m_tpcOuterR * pT))
         {
-            const float innerExpectedHitRadius(std::max(m_tpcInnerR, rInnermostHit));
-            const float frac((m_tpcZmax * pT / pZ - innerExpectedHitRadius) / (m_tpcOuterR - innerExpectedHitRadius));
-            nExpectedTpcHits = frac * m_tpcMaxRow;
+	  const float innerExpectedHitRadius(std::max(m_tpcInnerR, rInnermostHit));
+	  const float frac((m_tpcZmax * pT / pZ - innerExpectedHitRadius) / (m_tpcOuterR - innerExpectedHitRadius));
+	  nExpectedTpcHits = frac * m_tpcMaxRow;
         }
 
-        // TODO Get TPC membrane information from GEAR when available
-        if (std::fabs(pZ) / momentumAtDca.GetMagnitude() < m_tpcMembraneMaxZ / m_tpcInnerR)
-            nExpectedTpcHits = 0;
+      // TODO Get TPC membrane information from GEAR when available
+      if (std::fabs(pZ) / momentumAtDca.GetMagnitude() < m_tpcMembraneMaxZ / m_tpcInnerR)
+	nExpectedTpcHits = 0;
 
-        const EVENT::IntVec &hitsBySubdetector(pTrack->getSubdetectorHitNumbers());
+      const EVENT::IntVec &hitsBySubdetector(pTrack->getSubdetectorHitNumbers());
 
-        //fg: hit numbers are now given in different order wrt LOI:  
-        // trk->subdetectorHitNumbers()[ 2 * ILDDetID::TPC - 1 ] =  hitsInFit ;  
-        // trk->subdetectorHitNumbers()[ 2 * ILDDetID::TPC - 2 ] =  hitCount ;  
-        // ---- use hitsInFit :
-        const int nTpcHits = hitsBySubdetector[ 2 * lcio::ILDDetID::TPC - 1 ];
-        const int nFtdHits = hitsBySubdetector[ 2 * lcio::ILDDetID::FTD - 1 ];
+      //fg: hit numbers are now given in different order wrt LOI:  
+      // trk->subdetectorHitNumbers()[ 2 * ILDDetID::TPC - 1 ] =  hitsInFit ;  
+      // trk->subdetectorHitNumbers()[ 2 * ILDDetID::TPC - 2 ] =  hitCount ;  
+      // ---- use hitsInFit :
+      const int nTpcHits = hitsBySubdetector[ 2 * lcio::ILDDetID::TPC - 1 ];
+      const int nFtdHits = hitsBySubdetector[ 2 * lcio::ILDDetID::FTD - 1 ];
 
-        const int minTpcHits = static_cast<int>(nExpectedTpcHits * m_settings.m_minBarrelTrackerHitFractionOfExpected);
+      const int minTpcHits = static_cast<int>(nExpectedTpcHits * m_settings.m_minBarrelTrackerHitFractionOfExpected);
 
-        if ((nTpcHits < minTpcHits) && (nFtdHits < m_settings.m_minFtdHitsForBarrelTrackerHitFraction))
+      if ((nTpcHits < minTpcHits) && (nFtdHits < m_settings.m_minFtdHitsForBarrelTrackerHitFraction))
         {
-            streamlog_out(WARNING) << " Dropping track : " << momentumAtDca.GetMagnitude() << " Number of TPC hits = " << nTpcHits
-                                   << " < " << minTpcHits << " nftd = " << nFtdHits << std::endl;
+	  streamlog_out(WARNING) << " Dropping track : " << momentumAtDca.GetMagnitude() << " Number of TPC hits = " << nTpcHits
+				 << " < " << minTpcHits << " nftd = " << nFtdHits << std::endl;
 
-	    streamlog_out(DEBUG5)  << " track : " << *pTrack
-				   << std::endl;
-            return false;
+	  streamlog_out(DEBUG5)  << " track : " << *pTrack
+				 << std::endl;
+	  return false;
         }
     }
 
-    return true;
+  return true;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void DDTrackCreatorILD::DefineTrackPfoUsage(const EVENT::Track *const pTrack, PandoraApi::Track::Parameters &trackParameters) const
 {
-    bool canFormPfo(false);
-    bool canFormClusterlessPfo(false);
+  bool canFormPfo(false);
+  bool canFormClusterlessPfo(false);
 
-    if (trackParameters.m_reachesCalorimeter.Get() && !this->IsParent(pTrack))
+  if (trackParameters.m_reachesCalorimeter.Get() && !this->IsParent(pTrack))
     {
-        const float d0(std::fabs(pTrack->getD0())), z0(std::fabs(pTrack->getZ0()));
+      const float d0(std::fabs(pTrack->getD0())), z0(std::fabs(pTrack->getZ0()));
 
-        EVENT::TrackerHitVec trackerHitvec(pTrack->getTrackerHits());
-        float rInner(std::numeric_limits<float>::max()), zMin(std::numeric_limits<float>::max());
+      EVENT::TrackerHitVec trackerHitvec(pTrack->getTrackerHits());
+      float rInner(std::numeric_limits<float>::max()), zMin(std::numeric_limits<float>::max());
 
-        for (EVENT::TrackerHitVec::const_iterator iter = trackerHitvec.begin(), iterEnd = trackerHitvec.end(); iter != iterEnd; ++iter)
+      for (EVENT::TrackerHitVec::const_iterator iter = trackerHitvec.begin(), iterEnd = trackerHitvec.end(); iter != iterEnd; ++iter)
         {
-            const double *pPosition((*iter)->getPosition());
-            const float x(pPosition[0]), y(pPosition[1]), absoluteZ(std::fabs(pPosition[2]));
-            const float r(std::sqrt(x * x + y * y));
+	  const double *pPosition((*iter)->getPosition());
+	  const float x(pPosition[0]), y(pPosition[1]), absoluteZ(std::fabs(pPosition[2]));
+	  const float r(std::sqrt(x * x + y * y));
 
-            if (r < rInner)
-                rInner = r;
+	  if (r < rInner)
+	    rInner = r;
 
-            if (absoluteZ < zMin)
-                zMin = absoluteZ;
+	  if (absoluteZ < zMin)
+	    zMin = absoluteZ;
         }
 
-        if (this->PassesQualityCuts(pTrack, trackParameters))
+      if (this->PassesQualityCuts(pTrack, trackParameters))
         {
-            const pandora::CartesianVector &momentumAtDca(trackParameters.m_momentumAtDca.Get());
-            const float pX(momentumAtDca.GetX()), pY(momentumAtDca.GetY()), pZ(momentumAtDca.GetZ());
-            const float pT(std::sqrt(pX * pX + pY * pY));
+	  const pandora::CartesianVector &momentumAtDca(trackParameters.m_momentumAtDca.Get());
+	  const float pX(momentumAtDca.GetX()), pY(momentumAtDca.GetY()), pZ(momentumAtDca.GetZ());
+	  const float pT(std::sqrt(pX * pX + pY * pY));
 
-            const float zCutForNonVertexTracks(m_tpcInnerR * std::fabs(pZ / pT) + m_settings.m_zCutForNonVertexTracks);
-            const bool passRzQualityCuts((zMin < zCutForNonVertexTracks) && (rInner < m_tpcInnerR + m_settings.m_maxBarrelTrackerInnerRDistance));
+	  const float zCutForNonVertexTracks(m_tpcInnerR * std::fabs(pZ / pT) + m_settings.m_zCutForNonVertexTracks);
+	  const bool passRzQualityCuts((zMin < zCutForNonVertexTracks) && (rInner < m_tpcInnerR + m_settings.m_maxBarrelTrackerInnerRDistance));
 
-            const bool isV0(this->IsV0(pTrack));
-            const bool isDaughter(this->IsDaughter(pTrack));
+	  const bool isV0(this->IsV0(pTrack));
+	  const bool isDaughter(this->IsDaughter(pTrack));
 
-            // Decide whether track can be associated with a pandora cluster and used to form a charged PFO
-            if ((d0 < m_settings.m_d0TrackCut) && (z0 < m_settings.m_z0TrackCut) && (rInner < m_tpcInnerR + m_settings.m_maxBarrelTrackerInnerRDistance))
+	  // Decide whether track can be associated with a pandora cluster and used to form a charged PFO
+	  if ((d0 < m_settings.m_d0TrackCut) && (z0 < m_settings.m_z0TrackCut) && (rInner < m_tpcInnerR + m_settings.m_maxBarrelTrackerInnerRDistance))
             {
-                canFormPfo = true;
+	      canFormPfo = true;
             }
-            else if (passRzQualityCuts && (0 != m_settings.m_usingNonVertexTracks))
+	  else if (passRzQualityCuts && (0 != m_settings.m_usingNonVertexTracks))
             {
-                canFormPfo = true;
+	      canFormPfo = true;
             }
-            else if (isV0 || isDaughter)
+	  else if (isV0 || isDaughter)
             {
-                canFormPfo = true;
+	      canFormPfo = true;
             }
 
-            // Decide whether track can be used to form a charged PFO, even if track fails to be associated with a pandora cluster
-            const float particleMass(trackParameters.m_mass.Get());
-            const float trackEnergy(std::sqrt(momentumAtDca.GetMagnitudeSquared() + particleMass * particleMass));
+	  // Decide whether track can be used to form a charged PFO, even if track fails to be associated with a pandora cluster
+	  const float particleMass(trackParameters.m_mass.Get());
+	  const float trackEnergy(std::sqrt(momentumAtDca.GetMagnitudeSquared() + particleMass * particleMass));
 
-            if ((0 != m_settings.m_usingUnmatchedVertexTracks) && (trackEnergy < m_settings.m_unmatchedVertexTrackMaxEnergy))
+	  if ((0 != m_settings.m_usingUnmatchedVertexTracks) && (trackEnergy < m_settings.m_unmatchedVertexTrackMaxEnergy))
             {
-                if ((d0 < m_settings.m_d0UnmatchedVertexTrackCut) && (z0 < m_settings.m_z0UnmatchedVertexTrackCut) &&
-                    (rInner < m_tpcInnerR + m_settings.m_maxBarrelTrackerInnerRDistance))
+	      if ((d0 < m_settings.m_d0UnmatchedVertexTrackCut) && (z0 < m_settings.m_z0UnmatchedVertexTrackCut) &&
+		  (rInner < m_tpcInnerR + m_settings.m_maxBarrelTrackerInnerRDistance))
                 {
-                    canFormClusterlessPfo = true;
+		  canFormClusterlessPfo = true;
                 }
-                else if (passRzQualityCuts && (0 != m_settings.m_usingNonVertexTracks) && (0 != m_settings.m_usingUnmatchedNonVertexTracks))
+	      else if (passRzQualityCuts && (0 != m_settings.m_usingNonVertexTracks) && (0 != m_settings.m_usingUnmatchedNonVertexTracks))
                 {
-                    canFormClusterlessPfo = true;
+		  canFormClusterlessPfo = true;
                 }
-                else if (isV0 || isDaughter)
+	      else if (isV0 || isDaughter)
                 {
-                    canFormClusterlessPfo = true;
+		  canFormClusterlessPfo = true;
                 }
             }
         }
-        else if (this->IsDaughter(pTrack) || this->IsV0(pTrack))
+      else if (this->IsDaughter(pTrack) || this->IsV0(pTrack))
         {
-            streamlog_out(WARNING) << "Recovering daughter or v0 track " << trackParameters.m_momentumAtDca.Get().GetMagnitude() << std::endl;
-            canFormPfo = true;
+	  streamlog_out(WARNING) << "Recovering daughter or v0 track " << trackParameters.m_momentumAtDca.Get().GetMagnitude() << std::endl;
+	  canFormPfo = true;
         }
     }
 
-    trackParameters.m_canFormPfo = canFormPfo;
-    trackParameters.m_canFormClusterlessPfo = canFormClusterlessPfo;
+  trackParameters.m_canFormPfo = canFormPfo;
+  trackParameters.m_canFormClusterlessPfo = canFormClusterlessPfo;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void DDTrackCreatorILD::TrackReachesECAL(const EVENT::Track *const pTrack, PandoraApi::Track::Parameters &trackParameters) const
 {
-    // Calculate hit position information
-    float hitZMin(std::numeric_limits<float>::max());
-    float hitZMax(-std::numeric_limits<float>::max());
-    float hitOuterR(-std::numeric_limits<float>::max());
+  //fg: return true  for now - there are quality checks in DefineTrackPfoUsage() ...
+  trackParameters.m_reachesCalorimeter = true;
+  return;
+  
+  // at a later stage we could simply check if there is a valid track state at the calorimeter:
+  // ...
+  
+  
+  
+  
+  // Calculate hit position information
+  float hitZMin(std::numeric_limits<float>::max());
+  float hitZMax(-std::numeric_limits<float>::max());
+  float hitOuterR(-std::numeric_limits<float>::max());
+  
+  int nTpcHits(0);
+  int nFtdHits(0);
+  int maxOccupiedFtdLayer(0);
+  
+  const EVENT::TrackerHitVec &trackerHitVec(pTrack->getTrackerHits());
+  const unsigned int nTrackHits(trackerHitVec.size());
 
-    int nTpcHits(0);
-    int nFtdHits(0);
-    int maxOccupiedFtdLayer(0);
-
-    const EVENT::TrackerHitVec &trackerHitVec(pTrack->getTrackerHits());
-    const unsigned int nTrackHits(trackerHitVec.size());
-
-    for (unsigned int i = 0; i < nTrackHits; ++i)
+  for (unsigned int i = 0; i < nTrackHits; ++i)
     {
-        const float x(static_cast<float>(trackerHitVec[i]->getPosition()[0]));
-        const float y(static_cast<float>(trackerHitVec[i]->getPosition()[1]));
-        const float z(static_cast<float>(trackerHitVec[i]->getPosition()[2]));
-        const float r(std::sqrt(x * x + y * y));
+      const float x(static_cast<float>(trackerHitVec[i]->getPosition()[0]));
+      const float y(static_cast<float>(trackerHitVec[i]->getPosition()[1]));
+      const float z(static_cast<float>(trackerHitVec[i]->getPosition()[2]));
+      const float r(std::sqrt(x * x + y * y));
 
-        if (z > hitZMax)
-            hitZMax = z;
+      if (z > hitZMax)
+	hitZMax = z;
 
-        if (z < hitZMin)
-            hitZMin = z;
+      if (z < hitZMin)
+	hitZMin = z;
 
-        if (r > hitOuterR)
-            hitOuterR = r;
+      if (r > hitOuterR)
+	hitOuterR = r;
 
-        if ((r > m_tpcInnerR) && (r < m_tpcOuterR) && (std::fabs(z) <= m_tpcZmax))
+      if ((r > m_tpcInnerR) && (r < m_tpcOuterR) && (std::fabs(z) <= m_tpcZmax))
         {
-            nTpcHits++;
-            continue;
+	  nTpcHits++;
+	  continue;
         }
 
-        for (unsigned int j = 0; j < m_nFtdLayers; ++j)
+      for (unsigned int j = 0; j < m_nFtdLayers; ++j)
         {
-            if ((r > m_ftdInnerRadii[j]) && (r < m_ftdOuterRadii[j]) &&
-                (std::fabs(z) - m_settings.m_reachesECalFtdZMaxDistance < m_ftdZPositions[j]) &&
-                (std::fabs(z) + m_settings.m_reachesECalFtdZMaxDistance > m_ftdZPositions[j]))
+	  if ((r > m_ftdInnerRadii[j]) && (r < m_ftdOuterRadii[j]) &&
+	      (std::fabs(z) - m_settings.m_reachesECalFtdZMaxDistance < m_ftdZPositions[j]) &&
+	      (std::fabs(z) + m_settings.m_reachesECalFtdZMaxDistance > m_ftdZPositions[j]))
             {
-                if (static_cast<int>(j) > maxOccupiedFtdLayer)
-                    maxOccupiedFtdLayer = static_cast<int>(j);
+	      if (static_cast<int>(j) > maxOccupiedFtdLayer)
+		maxOccupiedFtdLayer = static_cast<int>(j);
 
-                nFtdHits++;
-                break;
+	      nFtdHits++;
+	      break;
             }
         }
     }
 
-    // Look to see if there are hits in etd or set, implying track has reached edge of ecal
-    if ((hitOuterR > m_minSetRadius) || (hitZMax > m_minEtdZPosition))
+  // Look to see if there are hits in etd or set, implying track has reached edge of ecal
+  if ((hitOuterR > m_minSetRadius) || (hitZMax > m_minEtdZPosition))
     {
-        trackParameters.m_reachesCalorimeter = true;
-        return;
+      trackParameters.m_reachesCalorimeter = true;
+      return;
     }
 
-    // Require sufficient hits in tpc or ftd, then compare extremal hit positions with tracker dimensions
-    if ((nTpcHits >= m_settings.m_reachesECalNBarrelTrackerHits) || (nFtdHits >= m_settings.m_reachesECalNFtdHits))
+  // Require sufficient hits in tpc or ftd, then compare extremal hit positions with tracker dimensions
+  if ((nTpcHits >= m_settings.m_reachesECalNBarrelTrackerHits) || (nFtdHits >= m_settings.m_reachesECalNFtdHits))
     {
-        if ((hitOuterR - m_tpcOuterR > m_settings.m_reachesECalBarrelTrackerOuterDistance) ||
-            (std::fabs(hitZMax) - m_tpcZmax > m_settings.m_reachesECalBarrelTrackerZMaxDistance) ||
-            (std::fabs(hitZMin) - m_tpcZmax > m_settings.m_reachesECalBarrelTrackerZMaxDistance) ||
-            (maxOccupiedFtdLayer >= m_settings.m_reachesECalMinFtdLayer))
+      if ((hitOuterR - m_tpcOuterR > m_settings.m_reachesECalBarrelTrackerOuterDistance) ||
+	  (std::fabs(hitZMax) - m_tpcZmax > m_settings.m_reachesECalBarrelTrackerZMaxDistance) ||
+	  (std::fabs(hitZMin) - m_tpcZmax > m_settings.m_reachesECalBarrelTrackerZMaxDistance) ||
+	  (maxOccupiedFtdLayer >= m_settings.m_reachesECalMinFtdLayer))
         {
-            trackParameters.m_reachesCalorimeter = true;
-            return;
+	  trackParameters.m_reachesCalorimeter = true;
+	  return;
         }
     }
 
-    // If track is lowpt, it may curl up and end inside tpc inner radius
-    const pandora::CartesianVector &momentumAtDca(trackParameters.m_momentumAtDca.Get());
-    const float cosAngleAtDca(std::fabs(momentumAtDca.GetZ()) / momentumAtDca.GetMagnitude());
-    const float pX(momentumAtDca.GetX()), pY(momentumAtDca.GetY());
-    const float pT(std::sqrt(pX * pX + pY * pY));
+  // If track is lowpt, it may curl up and end inside tpc inner radius
+  const pandora::CartesianVector &momentumAtDca(trackParameters.m_momentumAtDca.Get());
+  const float cosAngleAtDca(std::fabs(momentumAtDca.GetZ()) / momentumAtDca.GetMagnitude());
+  const float pX(momentumAtDca.GetX()), pY(momentumAtDca.GetY());
+  const float pT(std::sqrt(pX * pX + pY * pY));
 
-    if ((cosAngleAtDca > m_cosTpc) || (pT < m_settings.m_curvatureToMomentumFactor * m_settings.m_bField * m_tpcOuterR))
+  if ((cosAngleAtDca > m_cosTpc) || (pT < m_settings.m_curvatureToMomentumFactor * m_settings.m_bField * m_tpcOuterR))
     {
-        trackParameters.m_reachesCalorimeter = true;
-        return;
+      trackParameters.m_reachesCalorimeter = true;
+      return;
     }
 
-    trackParameters.m_reachesCalorimeter = false;
+  trackParameters.m_reachesCalorimeter = false;
 }
