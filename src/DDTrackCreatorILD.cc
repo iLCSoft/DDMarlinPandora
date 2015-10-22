@@ -235,12 +235,12 @@ pandora::StatusCode DDTrackCreatorILD::CreateTracks(EVENT::LCEvent *pLCEvent)
 	      if (0.f != signedCurvature)
 		trackParameters.m_charge = static_cast<int>(signedCurvature / std::fabs(signedCurvature));
 
-	      this->GetTrackStates(pTrack, trackParameters);
-	      this->TrackReachesECAL(pTrack, trackParameters);
-	      this->DefineTrackPfoUsage(pTrack, trackParameters);
-
-	      try
+	      try //fg: include the next calls in the try block to catch tracks that are yet not fitted properly as ERROR and not exceptions
 		{
+		  this->GetTrackStates(pTrack, trackParameters);
+		  this->TrackReachesECAL(pTrack, trackParameters);
+		  this->DefineTrackPfoUsage(pTrack, trackParameters);
+
 		  PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Track::Create(*m_pPandora, trackParameters));
 		  m_trackVector.push_back(pTrack);
 		}
@@ -276,6 +276,12 @@ bool DDTrackCreatorILD::PassesQualityCuts(const EVENT::Track *const pTrack, cons
       streamlog_out(ERROR) << "Track has Omega = 0 " << std::endl;
       return false;
     }
+
+
+  if( pTrack->getNdf() < 0 ){
+    streamlog_out(ERROR) << "Track is unconstrained - ndf = " <<  pTrack->getNdf()  << std::endl;
+    return false;
+  }
 
   // Check momentum uncertainty is reasonable to use track
   const pandora::CartesianVector &momentumAtDca(trackParameters.m_momentumAtDca.Get());
