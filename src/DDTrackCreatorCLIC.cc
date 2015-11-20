@@ -1,7 +1,7 @@
 /**
  *  @file   MarlinPandora/src/DDTrackCreatorCLIC.cc
  * 
- *  @brief  Implementation of the track creator class for ILD.
+ *  @brief  Implementation of the track creator class for a CLIC all silicon tracker.
  * 
  *  $Log: $
  */
@@ -48,9 +48,25 @@ DDTrackCreatorCLIC::DDTrackCreatorCLIC(const Settings &settings, const pandora::
 
     
     
-    std::cout<<"WARNING! DO NOT MASK! FIXME HANDLE # barrel tracker layers currently hard coded to 6"<<std::endl;
-    m_barrelTrackerLayers = 6;
-    
+    m_barrelTrackerLayers = 0;
+    for (std::vector<std::string>::const_iterator iter = m_settings.m_barrelTrackerNames.begin(), iterEnd = m_settings.m_barrelTrackerNames.end();iter != iterEnd; ++iter){
+        try
+        {
+            DD4hep::DDRec::ZPlanarData * theExtension = 0;
+  
+            DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
+            DD4hep::Geometry::DetElement theDetector = lcdd.detector(*iter);
+            theExtension = theDetector.extension<DD4hep::DDRec::ZPlanarData>();
+            
+            unsigned int N = theExtension->layers.size();
+            m_barrelTrackerLayers=m_barrelTrackerLayers+N;
+            
+            streamlog_out( DEBUG2 ) << " Adding layers for barrel tracker from DD4hep for "<< *iter<< "- n layers: " << N<< " sum up to now: "<<m_barrelTrackerLayers<<std::endl;
+        } catch (std::runtime_error &exception){
+            
+            streamlog_out(WARNING) << "DDTrackCreatorCLIC exception during Barrel Tracker layer sum for "<<*iter<<" : " << exception.what() << std::endl;
+        }
+    }
     
     m_nFtdLayers=0;
     m_ftdInnerRadii.clear();
@@ -97,7 +113,7 @@ DDTrackCreatorCLIC::DDTrackCreatorCLIC(const Settings &settings, const pandora::
     }
     
 
-      for (unsigned int iFtdLayer = 0; iFtdLayer < m_nFtdLayers; ++iFtdLayer)
+    for (unsigned int iFtdLayer = 0; iFtdLayer < m_nFtdLayers; ++iFtdLayer)
     {
         if ((std::fabs(m_ftdOuterRadii[iFtdLayer]) < std::numeric_limits<float>::epsilon()) ||
             (std::fabs(m_ftdInnerRadii[iFtdLayer]) < std::numeric_limits<float>::epsilon()))
@@ -274,6 +290,7 @@ bool DDTrackCreatorCLIC::PassesQualityCuts(const EVENT::Track *const pTrack, con
         const EVENT::IntVec &hitsBySubdetector(pTrack->getSubdetectorHitNumbers());
  
         // ---- use hitsInFit :
+        //FIXME! NEED TO COME UP WITH CONSISTENT CONVENTION FOR INNER/OUTER TRACKER
         const int nTrackerHits = hitsBySubdetector[ 2 * lcio::ILDDetID::TPC - 1 ];
         const int nFtdHits = hitsBySubdetector[ 2 * lcio::ILDDetID::FTD - 1 ];
 
