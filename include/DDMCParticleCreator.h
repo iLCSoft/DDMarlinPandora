@@ -1,13 +1,13 @@
 /**
- *  @file   MarlinPandora/include/MCParticleCreator.h
+ *  @file   DDMarlinPandora/include/DDMCParticleCreator.h
  * 
  *  @brief  Header file for the mc particle creator class.
  * 
  *  $Log: $
  */
 
-#ifndef MC_PARTICLE_CREATOR_H
-#define MC_PARTICLE_CREATOR_H 1
+#ifndef DDMCPARTICLECREATOR_H
+#define DDMCPARTICLECREATOR_H 1
 
 #include "EVENT/LCEvent.h"
 
@@ -17,9 +17,9 @@
 #include "DDTrackCreatorBase.h"
 
 /**
- *  @brief  MCParticleCreator class
+ *  @brief  DDMCParticleCreator class
  */
-class MCParticleCreator
+class DDMCParticleCreator
 {
 public:
     typedef std::vector<std::string> StringVector;
@@ -46,12 +46,12 @@ public:
      *  @param  settings the creator settings
      *  @param  pPandora address of the relevant pandora instance
      */
-     MCParticleCreator(const Settings &settings, const pandora::Pandora *const pPandora);
+     DDMCParticleCreator(const Settings &settings, const pandora::Pandora *const pPandora);
 
     /**
      *  @brief  Destructor
      */
-     ~MCParticleCreator();
+     ~DDMCParticleCreator();
 
     /**
      *  @brief  Create MCParticles
@@ -82,4 +82,4 @@ private:
     const float             m_bField;                           ///< The bfield
 };
 
-#endif // #ifndef MC_PARTICLE_CREATOR_H
+#endif // #ifndef DDMCPARTICLECREATOR_H

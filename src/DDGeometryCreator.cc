@@ -1,5 +1,5 @@
 /**
- *  @file   MarlinPandora/src/DDGeometryCreator.cc
+ *  @file   DDMarlinPandora/src/DDGeometryCreator.cc
  * 
  *  @brief  Implementation of the geometry creator class.
  * 

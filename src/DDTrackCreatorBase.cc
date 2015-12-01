@@ -1,5 +1,5 @@
 /**
- *  @file   MarlinPandora/src/DDTrackCreatorBase.cc
+ *  @file   DDMarlinPandora/src/DDTrackCreatorBase.cc
  * 
  *  @brief  Implementation of the track creator class.
  * 

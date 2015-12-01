@@ -11,7 +11,7 @@
 #include "TFile.h"
 #include "TH1.h"
 #include "TH2.h"
-#include "ScintillatorPpdDigi.h"
+#include "DDScintillatorPpdDigi.h"
 #include "CLHEP/Random/MTwistEngine.h"
 
 using namespace lcio ;
@@ -187,8 +187,8 @@ class DDCaloDigi : public Processor {
   float _hcalTimeResolution;
   bool  _hcalSimpleTimingCut;
   
-  ScintillatorPpdDigi* _scEcalDigi;
-  ScintillatorPpdDigi* _scHcalDigi;
+  DDScintillatorPpdDigi* _scEcalDigi;
+  DDScintillatorPpdDigi* _scHcalDigi;
 
 
   // parameters for extra ECAL digitization effects

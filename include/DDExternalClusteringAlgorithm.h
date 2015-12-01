@@ -1,12 +1,12 @@
 /**
- *  @file   MarlinPandora/include/ExternalClusteringAlgorithm.h
+ *  @file   DDMarlinPandora/include/DDExternalClusteringAlgorithm.h
  * 
  *  @brief  Header file for the external clustering algorithm class.
  * 
  *  $Log: $
  */
-#ifndef EXTERNAL_CLUSTERING_ALGORITHM_H
-#define EXTERNAL_CLUSTERING_ALGORITHM_H 1
+#ifndef DDEXTERNALCLUSTERINGALGORITHM_H
+#define DDEXTERNALCLUSTERINGALGORITHM_H 1
 
 #include "Pandora/Algorithm.h"
 
@@ -15,9 +15,9 @@ namespace pandora { class CaloHit; }
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
- *  @brief  ExternalClusteringAlgorithm class
+ *  @brief  DDExternalClusteringAlgorithm class
  */
-class ExternalClusteringAlgorithm : public pandora::Algorithm
+class DDExternalClusteringAlgorithm : public pandora::Algorithm
 {
 public:
     /**
@@ -32,7 +32,7 @@ public:
     /**
      *  @brief  Default constructor
      */
-    ExternalClusteringAlgorithm();
+    DDExternalClusteringAlgorithm();
 
 private:
     pandora::StatusCode Run();
@@ -46,9 +46,9 @@ private:
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline pandora::Algorithm *ExternalClusteringAlgorithm::Factory::CreateAlgorithm() const
+inline pandora::Algorithm *DDExternalClusteringAlgorithm::Factory::CreateAlgorithm() const
 {
-    return new ExternalClusteringAlgorithm();
+    return new DDExternalClusteringAlgorithm();
 }
 
-#endif // #ifndef EXTERNAL_CLUSTERING_ALGORITHM_H
+#endif // #ifndef DDEXTERNALCLUSTERINGALGORITHM_H

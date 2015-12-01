@@ -12,8 +12,8 @@
 #include "marlin/Processor.h"
 
 
-#include "MCParticleCreator.h"
-#include "PfoCreator.h"
+#include "DDMCParticleCreator.h"
+#include "DDPfoCreator.h"
 #include "DDTrackCreatorBase.h"
 
 #include "DDGeometryCreator.h"
@@ -159,15 +159,15 @@ private:
     DDCaloHitCreator                     *m_pCaloHitCreator;                  ///< The calo hit creator
     DDGeometryCreator                    *m_pGeometryCreator;                 ///< The geometry creator
     DDTrackCreatorBase                   *m_pTrackCreator;                    ///< The track creator
-    MCParticleCreator                  *m_pMCParticleCreator;               ///< The mc particle creator
-    PfoCreator                         *m_pPfoCreator;                      ///< The pfo creator
+    DDMCParticleCreator                  *m_pDDMCParticleCreator;               ///< The mc particle creator
+    DDPfoCreator                         *m_pDDPfoCreator;                      ///< The pfo creator
 
     Settings                            m_settings;                         ///< The settings for the pandora pfa new processor
     DDCaloHitCreator::Settings            m_caloHitCreatorSettings;           ///< The calo hit creator settings
     DDGeometryCreator::Settings           m_geometryCreatorSettings;          ///< The geometry creator settings
-    MCParticleCreator::Settings         m_mcParticleCreatorSettings;        ///< The mc particle creator settings
+    DDMCParticleCreator::Settings         m_mcParticleCreatorSettings;        ///< The mc particle creator settings
     DDTrackCreatorBase::Settings              m_trackCreatorSettings;             ///< The track creator settings
-    PfoCreator::Settings                m_pfoCreatorSettings;               ///< The pfo creator settings
+    DDPfoCreator::Settings                m_pfoCreatorSettings;               ///< The pfo creator settings
 
     typedef std::map<const pandora::Pandora *, EVENT::LCEvent *> PandoraToLCEventMap;
     static PandoraToLCEventMap          m_pandoraToLCEventMap;              ///< The pandora to lc event map

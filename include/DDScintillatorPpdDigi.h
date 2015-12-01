@@ -1,12 +1,12 @@
-#ifndef _ScintillatorPpdDigi_h_
-#define _ScintillatorPpdDigi_h_
+#ifndef _DDScintillatorPpdDigi_h_
+#define _DDScintillatorPpdDigi_h_
 
-class ScintillatorPpdDigi {
+class DDScintillatorPpdDigi {
 
  public:
 
-  ScintillatorPpdDigi();
-  ~ScintillatorPpdDigi(){}
+  DDScintillatorPpdDigi();
+  ~DDScintillatorPpdDigi(){}
 
   // expected # photoelectrons / MIP
   void setPEperMIP(float x)           {_pe_per_mip=x;}

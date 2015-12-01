@@ -1,5 +1,5 @@
 /**
- *  @file   MarlinPandora/src/DDCaloHitCreator.cc
+ *  @file   DDMarlinPandora/src/DDCaloHitCreator.cc
  * 
  *  @brief  Implementation of the calo hit creator class.
  * 

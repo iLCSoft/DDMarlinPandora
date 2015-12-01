@@ -1,5 +1,5 @@
 /**
- *  @file   MarlinPandora/src/DDTrackCreatorCLIC.cc
+ *  @file   DDMarlinPandora/src/DDTrackCreatorCLIC.cc
  * 
  *  @brief  Implementation of the track creator class for a CLIC all silicon tracker.
  * 

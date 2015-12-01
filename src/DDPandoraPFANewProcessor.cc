@@ -1,5 +1,5 @@
 /**
- *  @file   MarlinPandora/src/DDPandoraPFANewProcessor.cc
+ *  @file   DDMarlinPandora/src/DDPandoraPFANewProcessor.cc
  * 
  *  @brief  Implementation of the pandora pfa new processor class.
  * 
@@ -17,7 +17,7 @@
     #include "LCContentFast.h"
 #endif
 
-#include "ExternalClusteringAlgorithm.h"
+#include "DDExternalClusteringAlgorithm.h"
 #include "DDPandoraPFANewProcessor.h"
 
 #include "DD4hep/LCDD.h"
@@ -104,8 +104,8 @@ DDPandoraPFANewProcessor::DDPandoraPFANewProcessor() :
     m_pCaloHitCreator(NULL),
     m_pGeometryCreator(NULL),
     m_pTrackCreator(NULL),
-    m_pMCParticleCreator(NULL),
-    m_pPfoCreator(NULL)
+    m_pDDMCParticleCreator(NULL),
+    m_pDDPfoCreator(NULL)
 {
     _description = "Pandora reconstructs clusters and particle flow objects";
     this->ProcessSteeringFile();
@@ -135,8 +135,8 @@ void DDPandoraPFANewProcessor::init()
             streamlog_out(ERROR) << "Unknown DDTrackCreator: "<<m_settings.m_trackCreatorName << std::endl;
 
 
-        m_pMCParticleCreator = new MCParticleCreator(m_mcParticleCreatorSettings, m_pPandora);
-        m_pPfoCreator = new PfoCreator(m_pfoCreatorSettings, m_pPandora);
+        m_pDDMCParticleCreator = new DDMCParticleCreator(m_mcParticleCreatorSettings, m_pPandora);
+        m_pDDPfoCreator = new DDPfoCreator(m_pfoCreatorSettings, m_pPandora);
 
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, this->RegisterUserComponents());
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pGeometryCreator->CreateGeometry());
@@ -174,15 +174,15 @@ void DDPandoraPFANewProcessor::processEvent(LCEvent *pLCEvent)
         streamlog_out(DEBUG) << "DDPandoraPFANewProcessor - Run " << std::endl;
         (void) m_pandoraToLCEventMap.insert(PandoraToLCEventMap::value_type(m_pPandora, pLCEvent));
 
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pMCParticleCreator->CreateMCParticles(pLCEvent));
+        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pDDMCParticleCreator->CreateMCParticles(pLCEvent));
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pTrackCreator->CreateTrackAssociations(pLCEvent));
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pTrackCreator->CreateTracks(pLCEvent));
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pMCParticleCreator->CreateTrackToMCParticleRelationships(pLCEvent, m_pTrackCreator->GetTrackVector()));
+        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pDDMCParticleCreator->CreateTrackToMCParticleRelationships(pLCEvent, m_pTrackCreator->GetTrackVector()));
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pCaloHitCreator->CreateCaloHits(pLCEvent));
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pMCParticleCreator->CreateCaloHitToMCParticleRelationships(pLCEvent, m_pCaloHitCreator->GetCalorimeterHitVector()));
+        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pDDMCParticleCreator->CreateCaloHitToMCParticleRelationships(pLCEvent, m_pCaloHitCreator->GetCalorimeterHitVector()));
 
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ProcessEvent(*m_pPandora));
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pPfoCreator->CreateParticleFlowObjects(pLCEvent));
+        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pDDPfoCreator->CreateParticleFlowObjects(pLCEvent));
 
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Reset(*m_pPandora));
         this->Reset();
@@ -224,8 +224,8 @@ void DDPandoraPFANewProcessor::end()
     delete m_pGeometryCreator;
     delete m_pCaloHitCreator;
     delete m_pTrackCreator;
-    delete m_pMCParticleCreator;
-    delete m_pPfoCreator;
+    delete m_pDDMCParticleCreator;
+    delete m_pDDPfoCreator;
 
     streamlog_out(MESSAGE) << "DDPandoraPFANewProcessor - End" << std::endl;
 }
@@ -270,7 +270,7 @@ pandora::StatusCode DDPandoraPFANewProcessor::RegisterUserComponents() const
         "NonLinearity", pandora::HADRONIC, m_settings.m_inputEnergyCorrectionPoints, m_settings.m_outputEnergyCorrectionPoints));
 
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::RegisterAlgorithmFactory(*m_pPandora,
-        "ExternalClustering", new ExternalClusteringAlgorithm::Factory));
+        "ExternalClustering", new DDExternalClusteringAlgorithm::Factory));
 
     return pandora::STATUS_CODE_SUCCESS;
 }

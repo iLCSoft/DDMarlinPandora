@@ -646,7 +646,7 @@ void DDCaloDigi::init() {
   }
   
   // set up the scintillator/MPPC digitiser
-  _scEcalDigi = new ScintillatorPpdDigi();
+  _scEcalDigi = new DDScintillatorPpdDigi();
   _scEcalDigi->setPEperMIP(_ecal_PPD_pe_per_mip);
   _scEcalDigi->setCalibMIP(_calibEcalMip);
   _scEcalDigi->setNPix(_ecal_PPD_n_pixels);
@@ -656,7 +656,7 @@ void DDCaloDigi::init() {
   cout << "ECAL sc digi:" << endl;
   _scEcalDigi->printParameters();
 
-  _scHcalDigi = new ScintillatorPpdDigi();
+  _scHcalDigi = new DDScintillatorPpdDigi();
   _scHcalDigi->setPEperMIP(_hcal_PPD_pe_per_mip);
   _scHcalDigi->setCalibMIP(_calibHcalMip);
   _scHcalDigi->setNPix(_hcal_PPD_n_pixels);
