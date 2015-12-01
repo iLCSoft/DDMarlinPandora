@@ -1,13 +1,13 @@
 /**
- *  @file   MarlinPandora/include/DDPandoraPFANewProcessor.h
+ *  @file   DDMarlinPandora/include/DDPandoraPFANewProcessor.h
  * 
  *  @brief  Header file for the pandora pfa new processor class.
  * 
  *  $Log: $
  */
 
-#ifndef PANDORA_PFA_NEW_PROCESSOR_H
-#define PANDORA_PFA_NEW_PROCESSOR_H 1
+#ifndef DDPANDORAPFANEWPROCESSOR_H
+#define DDPANDORAPFANEWPROCESSOR_H 1
 
 #include "marlin/Processor.h"
 
@@ -180,4 +180,4 @@ inline marlin::Processor *DDPandoraPFANewProcessor::newProcessor()
     return new DDPandoraPFANewProcessor;
 }
 
-#endif // #ifndef PANDORA_PFA_NEW_PROCESSOR_H
+#endif // #ifndef DDPANDORAPFANEWPROCESSOR_H

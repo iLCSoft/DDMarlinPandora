@@ -1,5 +1,5 @@
 /**
- *  @file   MarlinPandora/include/DDTrackCreatorCLIC.h
+ *  @file   DDMarlinPandora/include/DDTrackCreatorCLIC.h
  * 
  *  @brief  Header file for the ILD implementation of the track creator class.
  * 

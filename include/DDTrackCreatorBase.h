@@ -1,5 +1,5 @@
 /**
- *  @file   MarlinPandora/include/DDTrackCreatorBase.h
+ *  @file   DDMarlinPandora/include/DDTrackCreatorBase.h
  * 
  *  @brief  Header file for the track creator base class.
  * 

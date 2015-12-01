@@ -1,5 +1,5 @@
 /**
- *  @file   MarlinPandora/include/DDGeometryCreator.h
+ *  @file   DDMarlinPandora/include/DDGeometryCreator.h
  * 
  *  @brief  Header file for the geometry creator class.
  * 
