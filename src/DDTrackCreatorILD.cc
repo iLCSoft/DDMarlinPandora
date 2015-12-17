@@ -1,5 +1,5 @@
 /**
- *  @file   DDMarlinPandora/src/DDTrackCreatorILD.cc
+ *  @file   MarlinPandora/src/DDTrackCreatorILD.cc
  * 
  *  @brief  Implementation of the track creator class for ILD.
  * 
@@ -65,11 +65,11 @@ DDTrackCreatorILD::DDTrackCreatorILD(const Settings &settings, const pandora::Pa
 
 	    // Create a disk to represent even number petals front side
 	    //FIXME! VERIFY THAT TIS MAKES SENSE!
-	    m_ftdInnerRadii.push_back(thisLayer.distanceSensitive);
-	    m_ftdOuterRadii.push_back(thisLayer.distanceSensitive+thisLayer.lengthSensitive);
+	    m_ftdInnerRadii.push_back(thisLayer.distanceSensitive/dd4hep::mm);
+	    m_ftdOuterRadii.push_back(thisLayer.distanceSensitive/dd4hep::mm+thisLayer.lengthSensitive/dd4hep::mm);
 
 	    // Take the mean z position of the staggered petals
-	    const double zpos(thisLayer.zPosition);
+	    const double zpos(thisLayer.zPosition/dd4hep::mm);
 	    m_ftdZPositions.push_back(zpos);
                 
 	    streamlog_out( DEBUG2 ) << "     layer " << i << " - mean z position = " << zpos << std::endl;
@@ -91,10 +91,10 @@ DDTrackCreatorILD::DDTrackCreatorILD(const Settings &settings, const pandora::Pa
       DD4hep::Geometry::DetElement theDetector = lcdd.detector(m_settings.m_barrelTrackerNames[0]);
       theExtension = theDetector.extension<DD4hep::DDRec::FixedPadSizeTPCData>();
 
-      m_tpcInnerR = theExtension->rMin;
-      m_tpcOuterR = theExtension->rMax;
+      m_tpcInnerR = theExtension->rMin/dd4hep::mm ;
+      m_tpcOuterR = theExtension->rMax/dd4hep::mm ;
       m_tpcMaxRow = theExtension->maxRow;
-      m_tpcZmax   = theExtension->zHalf;
+      m_tpcZmax   = theExtension->zHalf/dd4hep::mm ;
         
         
       //FIXME! Add to reco structrure and access
