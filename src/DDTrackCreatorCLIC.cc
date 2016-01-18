@@ -94,11 +94,11 @@ DDTrackCreatorCLIC::DDTrackCreatorCLIC(const Settings &settings, const pandora::
 
                 // Create a disk to represent even number petals front side
                 //FIXME! VERIFY THAT TIS MAKES SENSE!
-                m_ftdInnerRadii.push_back(thisLayer.distanceSensitive);
-                m_ftdOuterRadii.push_back(thisLayer.distanceSensitive+thisLayer.lengthSensitive);
+                m_ftdInnerRadii.push_back(thisLayer.distanceSensitive/dd4hep::mm);
+                m_ftdOuterRadii.push_back(thisLayer.distanceSensitive/dd4hep::mm+thisLayer.lengthSensitive/dd4hep::mm);
 
                 // Take the mean z position of the staggered petals
-                const double zpos(thisLayer.zPosition);
+                const double zpos(thisLayer.zPosition/dd4hep::mm);
                 m_ftdZPositions.push_back(zpos);
                 
                 streamlog_out( DEBUG2 ) << "     layer " << i << " - mean z position = " << zpos << std::endl;
@@ -142,7 +142,9 @@ pandora::StatusCode DDTrackCreatorCLIC::CreateTracks(EVENT::LCEvent *pLCEvent)
         try
         {
             const EVENT::LCCollection *pTrackCollection = pLCEvent->getCollection(*iter);
-
+            
+            
+            ///FIXME: Should really move to using surfaces
             for (int i = 0, iMax = pTrackCollection->getNumberOfElements(); i < iMax; ++i)
             {
                     EVENT::Track *pTrack = dynamic_cast<Track*>(pTrackCollection->getElementAt(i));
@@ -159,6 +161,8 @@ pandora::StatusCode DDTrackCreatorCLIC::CreateTracks(EVENT::LCEvent *pLCEvent)
 
                         for (unsigned int iFtdLayer = 0; iFtdLayer < m_nFtdLayers; ++iFtdLayer)
                         {
+                            
+                            //FIXME: Does not take into account spiral endcap
                             if ((tanLambda > m_ftdZPositions[iFtdLayer] / m_ftdOuterRadii[iFtdLayer]) &&
                                 (tanLambda < m_ftdZPositions[iFtdLayer] / m_ftdInnerRadii[iFtdLayer]))
                             {
@@ -167,6 +171,8 @@ pandora::StatusCode DDTrackCreatorCLIC::CreateTracks(EVENT::LCEvent *pLCEvent)
                         }
 
                         minTrackHits = std::max(m_settings.m_minFtdTrackHits, expectedFtdHits);
+                        
+                        streamlog_out(DEBUG0)<<"XXX minTrackHits: "<<minTrackHits<<" m_minFtdTrackHits: "<<m_settings.m_minFtdTrackHits<<" expectedFtdHits: "<<expectedFtdHits<<std::endl;
                     }
 
                     const int nTrackHits(static_cast<int>(pTrack->getTrackerHits().size()));
