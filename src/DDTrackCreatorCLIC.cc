@@ -47,14 +47,14 @@ DDTrackCreatorCLIC::DDTrackCreatorCLIC(const Settings &settings, const pandora::
     m_cosTracker = m_trackerZmax / std::sqrt(m_trackerZmax * m_trackerZmax + m_trackerInnerR * m_trackerInnerR);
 
     
-    
+    DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
+
     m_barrelTrackerLayers = 0;
     for (std::vector<std::string>::const_iterator iter = m_settings.m_barrelTrackerNames.begin(), iterEnd = m_settings.m_barrelTrackerNames.end();iter != iterEnd; ++iter){
         try
         {
             DD4hep::DDRec::ZPlanarData * theExtension = 0;
   
-            DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
             DD4hep::Geometry::DetElement theDetector = lcdd.detector(*iter);
             theExtension = theDetector.extension<DD4hep::DDRec::ZPlanarData>();
             
@@ -79,7 +79,6 @@ DDTrackCreatorCLIC::DDTrackCreatorCLIC(const Settings &settings, const pandora::
         {
             DD4hep::DDRec::ZDiskPetalsData * theExtension = 0;
   
-            DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
             DD4hep::Geometry::DetElement theDetector = lcdd.detector(*iter);
             theExtension = theDetector.extension<DD4hep::DDRec::ZDiskPetalsData>();
             
@@ -152,33 +151,37 @@ pandora::StatusCode DDTrackCreatorCLIC::CreateTracks(EVENT::LCEvent *pLCEvent)
                     if (NULL == pTrack)
                         throw EVENT::Exception("Collection type mismatch");
 
-                    int minTrackHits = m_settings.m_minTrackHits;
-                    const float tanLambda(std::fabs(pTrack->getTanLambda()));
+                        streamlog_out(DEBUG0)<<" Warning! Ignoring expected number of hits and other hit number cuts. Should eventually change!"<<std::endl;
 
-                    if (tanLambda > m_tanLambdaFtd)
-                    {
-                        int expectedFtdHits(0);
-
-                        for (unsigned int iFtdLayer = 0; iFtdLayer < m_nFtdLayers; ++iFtdLayer)
-                        {
-                            
-                            //FIXME: Does not take into account spiral endcap
-                            if ((tanLambda > m_ftdZPositions[iFtdLayer] / m_ftdOuterRadii[iFtdLayer]) &&
-                                (tanLambda < m_ftdZPositions[iFtdLayer] / m_ftdInnerRadii[iFtdLayer]))
-                            {
-                                expectedFtdHits++;
-                            }
-                        }
-
-                        minTrackHits = std::max(m_settings.m_minFtdTrackHits, expectedFtdHits);
-                        
-                        streamlog_out(DEBUG0)<<"XXX minTrackHits: "<<minTrackHits<<" m_minFtdTrackHits: "<<m_settings.m_minFtdTrackHits<<" expectedFtdHits: "<<expectedFtdHits<<std::endl;
-                    }
-
-                    const int nTrackHits(static_cast<int>(pTrack->getTrackerHits().size()));
-
-                    if ((nTrackHits < minTrackHits) || (nTrackHits > m_settings.m_maxTrackHits))
-                        continue;
+//                     int minTrackHits = m_settings.m_minTrackHits;
+//                     const float tanLambda(std::fabs(pTrack->getTanLambda()));
+// 
+//                     if (tanLambda > m_tanLambdaFtd)
+//                     {
+//                         int expectedFtdHits(0);
+// 
+//                         for (unsigned int iFtdLayer = 0; iFtdLayer < m_nFtdLayers; ++iFtdLayer)
+//                         {
+//                             
+//                             //FIXME: Does not take into account spiral endcap
+//                             if ((tanLambda > m_ftdZPositions[iFtdLayer] / m_ftdOuterRadii[iFtdLayer]) &&
+//                                 (tanLambda < m_ftdZPositions[iFtdLayer] / m_ftdInnerRadii[iFtdLayer]))
+//                             {
+//                                 expectedFtdHits++;
+//                             }
+//                         }
+// 
+//                         minTrackHits = std::max(m_settings.m_minFtdTrackHits, expectedFtdHits);
+//                         
+//                         streamlog_out(DEBUG0)<<"XXX minTrackHits: "<<minTrackHits<<" m_minFtdTrackHits: "<<m_settings.m_minFtdTrackHits<<" expectedFtdHits: "<<expectedFtdHits<<std::endl;
+//                     }
+// 
+//                     const int nTrackHits(static_cast<int>(pTrack->getTrackerHits().size()));
+// 
+//                     if ((nTrackHits < minTrackHits) || (nTrackHits > m_settings.m_maxTrackHits)){
+//                         streamlog_out(DEBUG0)<<"XXX Dropping track due to nTrackHits= "<<nTrackHits<<" . minTrackHits: "<<minTrackHits<<" maxTrackHits: "<<m_settings.m_maxTrackHits<<std::endl;
+//                         continue;
+//                     }
 
                     // Proceed to create the pandora track
                     PandoraApi::Track::Parameters trackParameters;
@@ -223,6 +226,9 @@ pandora::StatusCode DDTrackCreatorCLIC::CreateTracks(EVENT::LCEvent *pLCEvent)
 			streamlog_out(WARNING) << "Failed to extract a vertex: " << exception.what() << std::endl;
 		      }
             }
+            
+            streamlog_out( DEBUG5 ) << "After treating collection : " << *iter<<" with "<<pTrackCollection->getNumberOfElements()<<" tracks, the track vector size is "<< m_trackVector.size()<< std::endl ;
+
         }
         catch (EVENT::Exception &exception)
         {
@@ -235,9 +241,14 @@ pandora::StatusCode DDTrackCreatorCLIC::CreateTracks(EVENT::LCEvent *pLCEvent)
 
 bool DDTrackCreatorCLIC::PassesQualityCuts(const EVENT::Track *const pTrack, const PandoraApi::Track::Parameters &trackParameters) const
 {
+    
     // First simple sanity checks
-    if (trackParameters.m_trackStateAtCalorimeter.Get().GetPosition().GetMagnitude() < m_settings.m_minTrackECalDistanceFromIp)
+    if (trackParameters.m_trackStateAtCalorimeter.Get().GetPosition().GetMagnitude() < m_settings.m_minTrackECalDistanceFromIp){
+        streamlog_out(WARNING) << " Dropping track! Distance at ECAL: " << trackParameters.m_trackStateAtCalorimeter.Get().GetPosition().GetMagnitude()<<std::endl;
+	streamlog_out(DEBUG5)  << " track : " << *pTrack
+			       << std::endl;
         return false;
+    }
 
     if (pTrack->getOmega() == 0.f)
     {
@@ -260,6 +271,9 @@ bool DDTrackCreatorCLIC::PassesQualityCuts(const EVENT::Track *const pTrack, con
         return false;
     }
 
+    streamlog_out( DEBUG5 ) << " TEMPORARILY ACCEPT TRACK WITHOUT CUTS (should change!)" << *pTrack << std::endl ;
+    return true;
+    
     // Require reasonable number of Tracker hits 
     if (momentumAtDca.GetMagnitude() > m_settings.m_minMomentumForTrackHitChecks)
     {
@@ -296,16 +310,31 @@ bool DDTrackCreatorCLIC::PassesQualityCuts(const EVENT::Track *const pTrack, con
         const EVENT::IntVec &hitsBySubdetector(pTrack->getSubdetectorHitNumbers());
  
         // ---- use hitsInFit :
-        //FIXME! NEED TO COME UP WITH CONSISTENT CONVENTION FOR INNER/OUTER TRACKER
-        const int nTrackerHits = hitsBySubdetector[ 2 * lcio::ILDDetID::TPC - 1 ];
-        const int nFtdHits = hitsBySubdetector[ 2 * lcio::ILDDetID::FTD - 1 ];
+        //Use names to access detectors and then access their ids to get hits in fit by ID
+        //(new way of storing hits in MarlinTrkUtils)
+        
+        //Initialize hits to 0
+        int nBarrelTrackerHits = 0;
+        DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
+        for (std::vector<std::string>::const_iterator iter = m_settings.m_barrelTrackerNames.begin(), iterEnd = m_settings.m_barrelTrackerNames.end();iter != iterEnd; ++iter){
+              DD4hep::Geometry::DetElement theDetector = lcdd.detector(*iter);
+              int detId = theDetector.id();
+              nBarrelTrackerHits+=hitsBySubdetector[2*detId-2]; //Offset is 2 of hits in fit
+        }
+        
+        int nEndcapTrackerHits = 0;
+        for (std::vector<std::string>::const_iterator iter = m_settings.m_endcapTrackerNames.begin(), iterEnd = m_settings.m_endcapTrackerNames.end();iter != iterEnd; ++iter){
+              DD4hep::Geometry::DetElement theDetector = lcdd.detector(*iter);
+              int detId = theDetector.id();
+              nEndcapTrackerHits +=hitsBySubdetector[2*detId-2]; //Offset is 2 of hits in fit
+        }
 
         const int minTrackerHits = static_cast<int>(nExpectedTrackerHits * m_settings.m_minBarrelTrackerHitFractionOfExpected);
 
-        if ((nTrackerHits < minTrackerHits) && (nFtdHits < m_settings.m_minFtdHitsForBarrelTrackerHitFraction))
+        if ((nBarrelTrackerHits < minTrackerHits) && (nEndcapTrackerHits < m_settings.m_minFtdHitsForBarrelTrackerHitFraction))
         {
-            streamlog_out(WARNING) << " Dropping track : " << momentumAtDca.GetMagnitude() << " Number of Tracker hits = " << nTrackerHits
-                                   << " < " << minTrackerHits << " nftd = " << nFtdHits << std::endl;
+            streamlog_out(WARNING) << " Dropping track : " << momentumAtDca.GetMagnitude() << " Number of Tracker hits = " << nBarrelTrackerHits
+                                   << " < " << minTrackerHits << " nftd = " << nEndcapTrackerHits << std::endl;
 
 	    streamlog_out(DEBUG5)  << " track : " << *pTrack
 				   << std::endl;
