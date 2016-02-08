@@ -68,9 +68,9 @@ DDTrackCreatorCLIC::DDTrackCreatorCLIC(const Settings &settings, const pandora::
         }
     }
     
-    m_nFtdLayers=0;
-    m_ftdInnerRadii.clear();
-    m_ftdOuterRadii.clear();
+    m_nEndcapDiskLayers=0;
+    m_endcapDiskInnerRadii.clear();
+    m_endcapDiskOuterRadii.clear();
     
     //Instead of gear, loop over a provided list of forward (read: endcap) tracking detectors. For ILD this would be FTD
     ///FIXME: Should we use surfaces instead?
@@ -93,17 +93,17 @@ DDTrackCreatorCLIC::DDTrackCreatorCLIC(const Settings &settings, const pandora::
 
                 // Create a disk to represent even number petals front side
                 //FIXME! VERIFY THAT TIS MAKES SENSE!
-                m_ftdInnerRadii.push_back(thisLayer.distanceSensitive/dd4hep::mm);
-                m_ftdOuterRadii.push_back(thisLayer.distanceSensitive/dd4hep::mm+thisLayer.lengthSensitive/dd4hep::mm);
+                m_endcapDiskInnerRadii.push_back(thisLayer.distanceSensitive/dd4hep::mm);
+                m_endcapDiskOuterRadii.push_back(thisLayer.distanceSensitive/dd4hep::mm+thisLayer.lengthSensitive/dd4hep::mm);
 
                 // Take the mean z position of the staggered petals
                 const double zpos(thisLayer.zPosition/dd4hep::mm);
-                m_ftdZPositions.push_back(zpos);
+                m_endcapDiskZPositions.push_back(zpos);
                 
                 streamlog_out( DEBUG2 ) << "     layer " << i << " - mean z position = " << zpos << std::endl;
             }
 
-            m_nFtdLayers = m_ftdZPositions.size() ;
+            m_nEndcapDiskLayers = m_endcapDiskZPositions.size() ;
        
         } catch (std::runtime_error &exception){
             
@@ -112,16 +112,16 @@ DDTrackCreatorCLIC::DDTrackCreatorCLIC(const Settings &settings, const pandora::
     }
     
 
-    for (unsigned int iFtdLayer = 0; iFtdLayer < m_nFtdLayers; ++iFtdLayer)
+    for (unsigned int iEndcapDiskLayer = 0; iEndcapDiskLayer < m_nEndcapDiskLayers; ++iEndcapDiskLayer)
     {
-        if ((std::fabs(m_ftdOuterRadii[iFtdLayer]) < std::numeric_limits<float>::epsilon()) ||
-            (std::fabs(m_ftdInnerRadii[iFtdLayer]) < std::numeric_limits<float>::epsilon()))
+        if ((std::fabs(m_endcapDiskOuterRadii[iEndcapDiskLayer]) < std::numeric_limits<float>::epsilon()) ||
+            (std::fabs(m_endcapDiskInnerRadii[iEndcapDiskLayer]) < std::numeric_limits<float>::epsilon()))
         {
             throw pandora::StatusCodeException(pandora::STATUS_CODE_INVALID_PARAMETER);
         }
     }
 
-    m_tanLambdaFtd = m_ftdZPositions[0] / m_ftdOuterRadii[0];
+    m_tanLambdaEndcapDisk = m_endcapDiskZPositions[0] / m_endcapDiskOuterRadii[0];
 
 }
 
@@ -156,24 +156,24 @@ pandora::StatusCode DDTrackCreatorCLIC::CreateTracks(EVENT::LCEvent *pLCEvent)
 //                     int minTrackHits = m_settings.m_minTrackHits;
 //                     const float tanLambda(std::fabs(pTrack->getTanLambda()));
 // 
-//                     if (tanLambda > m_tanLambdaFtd)
+//                     if (tanLambda > m_tanLambdaEndcapDisk)
 //                     {
-//                         int expectedFtdHits(0);
+//                         int expectedEndcapDiskHits(0);
 // 
-//                         for (unsigned int iFtdLayer = 0; iFtdLayer < m_nFtdLayers; ++iFtdLayer)
+//                         for (unsigned int iEndcapDiskLayer = 0; iEndcapDiskLayer < m_nEndcapDiskLayers; ++iEndcapDiskLayer)
 //                         {
 //                             
 //                             //FIXME: Does not take into account spiral endcap
-//                             if ((tanLambda > m_ftdZPositions[iFtdLayer] / m_ftdOuterRadii[iFtdLayer]) &&
-//                                 (tanLambda < m_ftdZPositions[iFtdLayer] / m_ftdInnerRadii[iFtdLayer]))
+//                             if ((tanLambda > m_endcapDiskZPositions[iEndcapDiskLayer] / m_endcapDiskOuterRadii[iEndcapDiskLayer]) &&
+//                                 (tanLambda < m_endcapDiskZPositions[iEndcapDiskLayer] / m_endcapDiskInnerRadii[iEndcapDiskLayer]))
 //                             {
-//                                 expectedFtdHits++;
+//                                 expectedEndcapDiskHits++;
 //                             }
 //                         }
 // 
-//                         minTrackHits = std::max(m_settings.m_minFtdTrackHits, expectedFtdHits);
+//                         minTrackHits = std::max(m_settings.m_minEndcapDiskTrackHits, expectedEndcapDiskHits);
 //                         
-//                         streamlog_out(DEBUG0)<<"XXX minTrackHits: "<<minTrackHits<<" m_minFtdTrackHits: "<<m_settings.m_minFtdTrackHits<<" expectedFtdHits: "<<expectedFtdHits<<std::endl;
+//                         streamlog_out(DEBUG0)<<"XXX minTrackHits: "<<minTrackHits<<" m_minEndcapDiskTrackHits: "<<m_settings.m_minEndcapDiskTrackHits<<" expectedEndcapDiskHits: "<<expectedEndcapDiskHits<<std::endl;
 //                     }
 // 
 //                     const int nTrackHits(static_cast<int>(pTrack->getTrackerHits().size()));
@@ -319,14 +319,14 @@ bool DDTrackCreatorCLIC::PassesQualityCuts(const EVENT::Track *const pTrack, con
         for (std::vector<std::string>::const_iterator iter = m_settings.m_barrelTrackerNames.begin(), iterEnd = m_settings.m_barrelTrackerNames.end();iter != iterEnd; ++iter){
               DD4hep::Geometry::DetElement theDetector = lcdd.detector(*iter);
               int detId = theDetector.id();
-              nBarrelTrackerHits+=hitsBySubdetector[2*detId-2]; //Offset is 2 of hits in fit
+              nBarrelTrackerHits+=hitsBySubdetector[2*detId-2]; //Offset is 2 for hits in fit
         }
         
         int nEndcapTrackerHits = 0;
         for (std::vector<std::string>::const_iterator iter = m_settings.m_endcapTrackerNames.begin(), iterEnd = m_settings.m_endcapTrackerNames.end();iter != iterEnd; ++iter){
               DD4hep::Geometry::DetElement theDetector = lcdd.detector(*iter);
               int detId = theDetector.id();
-              nEndcapTrackerHits +=hitsBySubdetector[2*detId-2]; //Offset is 2 of hits in fit
+              nEndcapTrackerHits +=hitsBySubdetector[2*detId-2]; //Offset is 2 for hits in fit
         }
 
         const int minTrackerHits = static_cast<int>(nExpectedTrackerHits * m_settings.m_minBarrelTrackerHitFractionOfExpected);
@@ -334,7 +334,7 @@ bool DDTrackCreatorCLIC::PassesQualityCuts(const EVENT::Track *const pTrack, con
         if ((nBarrelTrackerHits < minTrackerHits) && (nEndcapTrackerHits < m_settings.m_minFtdHitsForBarrelTrackerHitFraction))
         {
             streamlog_out(WARNING) << " Dropping track : " << momentumAtDca.GetMagnitude() << " Number of Tracker hits = " << nBarrelTrackerHits
-                                   << " < " << minTrackerHits << " nftd = " << nEndcapTrackerHits << std::endl;
+                                   << " < " << minTrackerHits << " nendcapDisk = " << nEndcapTrackerHits << std::endl;
 
 	    streamlog_out(DEBUG5)  << " track : " << *pTrack
 				   << std::endl;
@@ -440,8 +440,8 @@ void DDTrackCreatorCLIC::TrackReachesECAL(const EVENT::Track *const pTrack, Pand
     float hitOuterR(-std::numeric_limits<float>::max());
 
     int nTrackerHits(0);
-    int nFtdHits(0);
-    int maxOccupiedFtdLayer(0);
+    int nEndcapDiskHits(0);
+    int maxOccupiedEndcapDiskLayer(0);
 
     const EVENT::TrackerHitVec &trackerHitVec(pTrack->getTrackerHits());
     const unsigned int nTrackHits(trackerHitVec.size());
@@ -468,28 +468,28 @@ void DDTrackCreatorCLIC::TrackReachesECAL(const EVENT::Track *const pTrack, Pand
             continue;
         }
 
-        for (unsigned int j = 0; j < m_nFtdLayers; ++j)
+        for (unsigned int j = 0; j < m_nEndcapDiskLayers; ++j)
         {
-            if ((r > m_ftdInnerRadii[j]) && (r < m_ftdOuterRadii[j]) &&
-                (std::fabs(z) - m_settings.m_reachesECalFtdZMaxDistance < m_ftdZPositions[j]) &&
-                (std::fabs(z) + m_settings.m_reachesECalFtdZMaxDistance > m_ftdZPositions[j]))
+            if ((r > m_endcapDiskInnerRadii[j]) && (r < m_endcapDiskOuterRadii[j]) &&
+                (std::fabs(z) - m_settings.m_reachesECalFtdZMaxDistance < m_endcapDiskZPositions[j]) &&
+                (std::fabs(z) + m_settings.m_reachesECalFtdZMaxDistance > m_endcapDiskZPositions[j]))
             {
-                if (static_cast<int>(j) > maxOccupiedFtdLayer)
-                    maxOccupiedFtdLayer = static_cast<int>(j);
+                if (static_cast<int>(j) > maxOccupiedEndcapDiskLayer)
+                    maxOccupiedEndcapDiskLayer = static_cast<int>(j);
 
-                nFtdHits++;
+                nEndcapDiskHits++;
                 break;
             }
         }
     }
 
-    // Require sufficient hits in tpc or ftd, then compare extremal hit positions with tracker dimensions
-    if ((nTrackerHits >= m_settings.m_reachesECalNBarrelTrackerHits) || (nFtdHits >= m_settings.m_reachesECalNFtdHits))
+    // Require sufficient hits in barrel or endcap trackers, then compare extremal hit positions with tracker dimensions
+    if ((nTrackerHits >= m_settings.m_reachesECalNBarrelTrackerHits) || (nEndcapDiskHits >= m_settings.m_reachesECalNFtdHits))
     {
         if ((hitOuterR - m_trackerOuterR > m_settings.m_reachesECalBarrelTrackerOuterDistance) ||
             (std::fabs(hitZMax) - m_trackerZmax > m_settings.m_reachesECalBarrelTrackerZMaxDistance) ||
             (std::fabs(hitZMin) - m_trackerZmax > m_settings.m_reachesECalBarrelTrackerZMaxDistance) ||
-            (maxOccupiedFtdLayer >= m_settings.m_reachesECalMinFtdLayer))
+            (maxOccupiedEndcapDiskLayer >= m_settings.m_reachesECalMinFtdLayer))
         {
             trackParameters.m_reachesCalorimeter = true;
             return;

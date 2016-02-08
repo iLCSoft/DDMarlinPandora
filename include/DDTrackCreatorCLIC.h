@@ -51,13 +51,13 @@ protected:
     float                   m_trackerZmax;                  ///< max extent of the tracker along z
     float                   m_cosTracker;
     
-    DoubleVector            m_ftdInnerRadii;                ///< List of ftd inner radii
-    DoubleVector            m_ftdOuterRadii;                ///< List of ftd outer radii
-    DoubleVector            m_ftdZPositions;                ///< List of ftd z positions
-    unsigned int            m_nFtdLayers;                   ///< Number of ftd layers
+    DoubleVector            m_endcapDiskInnerRadii;                ///< List of endcapDisk inner radii
+    DoubleVector            m_endcapDiskOuterRadii;                ///< List of endcapDisk outer radii
+    DoubleVector            m_endcapDiskZPositions;                ///< List of endcapDisk z positions
+    unsigned int            m_nEndcapDiskLayers;                   ///< Number of endcapDisk layers
     unsigned int            m_barrelTrackerLayers;          ///< Number of barrel tracker layers
 
-    float                   m_tanLambdaFtd;                 ///< Tan lambda for first ftd layer
+    float                   m_tanLambdaEndcapDisk;                 ///< Tan lambda for first endcapDisk layer
     
     /**
      *  @brief  Whether track passes the quality cuts required in order to be used to form a pfo. Detector specific
