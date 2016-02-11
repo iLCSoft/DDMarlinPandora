@@ -1,7 +1,13 @@
 
 DDMarlinPandora: Development package to integrate with DD4hep
 
-N.Nikiforou 11/02/2016:
+N.Nikiforou 11/02/2016 (pm):
+  - Major overhaul using the detector type flags throught the package. No more string processor parameters
+    to access detectors.
+  - Protected some more against uncaught exceptions, but still more work needed
+  - Added more static helper functions to access extensions by data type flags
+
+N.Nikiforou 11/02/2016 (am):
   - Modified DDTrackCreatorILD to use det type flags. Dropped tracker/vertex detector name parameters
   - Modified DDTrackCreatorILD to actually access hits in fit (offset 2) which is the definition now. 
     

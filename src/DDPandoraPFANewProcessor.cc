@@ -43,12 +43,21 @@ double getFieldFromLCDD(){
   
 }
 
-double getCoilOuterR(std::string detname){
-  DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
-  DD4hep::Geometry::DetElement coilDE = lcdd.detector(detname) ;
-  //access the detelement and create a shape from the envelope since only minimal info needed
-  DD4hep::Geometry::Tube coilTube = DD4hep::Geometry::Tube( coilDE.volume().solid() )  ;
-  return coilTube->GetRmax()/ dd4hep::mm;
+double getCoilOuterR(){
+    
+  try{
+    DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
+    const std::vector< DD4hep::Geometry::DetElement>& theDetectors = DD4hep::Geometry::DetectorSelector(lcdd).detectors(  DD4hep::DetType::COIL ) ;
+    //access the detelement and create a shape from the envelope since only minimal info needed
+    DD4hep::Geometry::Tube coilTube = DD4hep::Geometry::Tube( theDetectors.at(0).volume().solid() )  ;
+    return coilTube->GetRmax()/ dd4hep::mm;
+  } catch ( std::exception & e ) {
+      
+          streamlog_out(ERROR)<< "BIG WARNING! CANNOT GET EXTENSION FOR COIL: "<<e.what()<<" MAKE SURE YOU CHANGE THIS!"<< std::endl;
+
+  }
+  
+  return 0;
 }
 
 DD4hep::DDRec::LayeredCalorimeterData * getExtension(std::string detectorName){
@@ -58,7 +67,7 @@ DD4hep::DDRec::LayeredCalorimeterData * getExtension(std::string detectorName){
   
   try {
     DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
-    DD4hep::Geometry::DetElement theDetector = lcdd.detector(detectorName);
+    const DD4hep::Geometry::DetElement & theDetector = lcdd.detector(detectorName);
     theExtension = theDetector.extension<DD4hep::DDRec::LayeredCalorimeterData>();
     //     std::cout<< "DEBUG: in getExtension(\""<<detectorName<<"\"): size of layers: "<<theExtension->layers.size()<<" positions not shown. "<<std::endl;
     
@@ -68,7 +77,27 @@ DD4hep::DDRec::LayeredCalorimeterData * getExtension(std::string detectorName){
     //     std::cout<<std::endl;
   } catch ( ... ){
     
-    std::cout << "BIG WARNING! EXTENSION DOES NOT EXIST FOR " << detectorName<<". MAKE SURE YOU CHANGE THIS!"<< std::endl;
+    streamlog_out(ERROR) << "BIG WARNING! EXTENSION DOES NOT EXIST FOR " << detectorName<<". MAKE SURE YOU CHANGE THIS!"<< std::endl;
+  }
+  
+  return theExtension;
+}
+
+
+DD4hep::DDRec::LayeredCalorimeterData * getExtension(unsigned int includeFlag, unsigned int excludeFlag=0) {
+  
+  
+  DD4hep::DDRec::LayeredCalorimeterData * theExtension = 0;
+  
+  try {
+    DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
+    const std::vector< DD4hep::Geometry::DetElement>& theDetectors = DD4hep::Geometry::DetectorSelector(lcdd).detectors(  includeFlag, excludeFlag ) ;
+    //Should only be one for this purpose. Consider catching exception
+    theExtension = theDetectors.at(0).extension<DD4hep::DDRec::LayeredCalorimeterData>();
+
+  } catch ( ... ){
+    
+    streamlog_out(ERROR) << "BIG WARNING! EXTENSION OR DET ELEMENT DOES NOT EXIST FOR " << DD4hep::DetType(includeFlag)<<". MAKE SURE YOU CHANGE THIS!"<< std::endl;
   }
   
   return theExtension;
@@ -701,69 +730,6 @@ void DDPandoraPFANewProcessor::ProcessSteeringFile()
     
     
     ///EXTRA PARAMETERS FROM NIKIFOROS
-    registerProcessorParameter("ECalBarrelDetectorName",
-                               "The name of the ECal Barrel detector",
-                               m_settings.m_ecalBarrelName,
-                               std::string("ECalBarrel"));
-    
-    registerProcessorParameter("ECalEndcapDetectorName",
-                               "The name of the ECal Endcap detector",
-                               m_settings.m_ecalEndcapName,
-                               std::string("ECalEndcap"));
-    
-    std::vector<std::string> defaultECalOtherNames;
-    defaultECalOtherNames.push_back("ECalPlug");
-    defaultECalOtherNames.push_back("LumiCal");
-    
-    registerProcessorParameter("ECalOtherDetectorNames",
-                               "The names of the other ECal detectors",
-                               m_settings.m_ecalOtherNames,
-                               defaultECalOtherNames);
-    
-    registerProcessorParameter("HCalBarrelDetectorName",
-                               "The name of the HCal Barrel detector",
-                               m_settings.m_hcalBarrelName,
-                               std::string("HCalBarrel"));
-    
-    registerProcessorParameter("HCalEndcapDetectorName",
-                               "The name of the HCal Endcap detector",
-                               m_settings.m_hcalEndcapName,
-                               std::string("HCalEndcap"));
-    
-    std::vector<std::string> defaultHCalOtherNames;
-    defaultHCalOtherNames.push_back("HCalRing");
-    
-    registerProcessorParameter("HCalOtherDetectorNames",
-                               "The names of the Other HCal detectors",
-                               m_settings.m_hcalOtherNames,
-                               defaultHCalOtherNames);
-  
-    registerProcessorParameter("MuonBarrelDetectorName",
-                               "The name of the Muon Barrel detector",
-                               m_settings.m_muonBarrelName,
-                               std::string("YokeBarrel"));
-    
-    registerProcessorParameter("MuonEndcapDetectorName",
-                               "The name of the Muon Endcap detector",
-                               m_settings.m_muonEndcapName,
-                               std::string("YokeEndcap"));
-    
-    std::vector<std::string> defaultMuonOtherNames;
-    std::cout<< "WARNING! DO NOT MASK! REMEMBER TO HANDLE DEFAULT MUON OTHER SUBDETs" << std::endl;
-
-    
-//     defaultMuonOtherNames.push_back("YokePlug");
-    
-    registerProcessorParameter("MuonOtherDetectorNames",
-                               "The names of the Other Muon detectors",
-                               m_settings.m_muonOtherNames,
-                               defaultMuonOtherNames);
-    
-  registerProcessorParameter("CoilName",
-                               "The name of the Coil",
-                               m_settings.m_coilName,
-                               std::string("Solenoid")); 
-  
     registerProcessorParameter("TrackCreatorName",
                                "The name of the DDTrackCreator implementation",
                                m_settings.m_trackCreatorName,
@@ -780,52 +746,43 @@ void DDPandoraPFANewProcessor::FinaliseSteeringParameters()
     m_trackCreatorSettings.m_prongSplitVertexCollections.insert(m_trackCreatorSettings.m_prongSplitVertexCollections.end(),m_trackCreatorSettings.m_splitVertexCollections.begin(),m_trackCreatorSettings.m_splitVertexCollections.end());
     
     m_trackCreatorSettings.m_bField=getFieldFromLCDD();
-    m_trackCreatorSettings.m_eCalBarrelInnerSymmetry=getExtension(m_settings.m_ecalBarrelName)->inner_symmetry;
-    m_trackCreatorSettings.m_eCalBarrelInnerPhi0=getExtension(m_settings.m_ecalBarrelName)->inner_phi0/dd4hep::rad;
-    m_trackCreatorSettings.m_eCalBarrelInnerR=getExtension(m_settings.m_ecalBarrelName)->extent[0]/dd4hep::mm;
-    m_trackCreatorSettings.m_eCalEndCapInnerZ=getExtension(m_settings.m_ecalEndcapName)->extent[2]/dd4hep::mm;
     
-    m_caloHitCreatorSettings.m_eCalBarrelOuterZ=getExtension(m_settings.m_ecalBarrelName)->extent[3]/dd4hep::mm;
-    m_caloHitCreatorSettings.m_hCalBarrelOuterZ=getExtension(m_settings.m_hcalBarrelName)->extent[3]/dd4hep::mm;
-    m_caloHitCreatorSettings.m_muonBarrelOuterZ=getExtension(m_settings.m_muonBarrelName)->extent[3]/dd4hep::mm;
-    m_caloHitCreatorSettings.m_coilOuterR=getCoilOuterR(m_settings.m_coilName); 
-    m_caloHitCreatorSettings.m_eCalBarrelInnerPhi0=getExtension(m_settings.m_ecalBarrelName)->inner_phi0/dd4hep::rad;
-    m_caloHitCreatorSettings.m_eCalBarrelInnerSymmetry=getExtension(m_settings.m_ecalBarrelName)->inner_symmetry;
-    m_caloHitCreatorSettings.m_hCalBarrelInnerPhi0=getExtension(m_settings.m_hcalBarrelName)->inner_phi0/dd4hep::rad;
-    m_caloHitCreatorSettings.m_hCalBarrelInnerSymmetry=getExtension(m_settings.m_hcalBarrelName)->inner_symmetry;
-    m_caloHitCreatorSettings.m_muonBarrelInnerPhi0=getExtension(m_settings.m_muonBarrelName)->inner_phi0/dd4hep::rad;
-    m_caloHitCreatorSettings.m_muonBarrelInnerSymmetry=getExtension(m_settings.m_muonBarrelName)->inner_symmetry;
-    m_caloHitCreatorSettings.m_hCalEndCapOuterR=getExtension(m_settings.m_hcalEndcapName)->extent[1]/dd4hep::mm;
-    m_caloHitCreatorSettings.m_hCalEndCapOuterZ=getExtension(m_settings.m_hcalEndcapName)->extent[3]/dd4hep::mm;
-    m_caloHitCreatorSettings.m_hCalBarrelOuterR=getExtension(m_settings.m_hcalBarrelName)->extent[1]/dd4hep::mm;
-    m_caloHitCreatorSettings.m_hCalBarrelOuterPhi0=getExtension(m_settings.m_hcalBarrelName)->outer_phi0/dd4hep::rad;
-    m_caloHitCreatorSettings.m_hCalBarrelOuterSymmetry=getExtension(m_settings.m_hcalBarrelName)->outer_symmetry;
-    m_caloHitCreatorSettings.m_hCalEndCapInnerSymmetryOrder = getExtension(m_settings.m_hcalEndcapName)->inner_symmetry;;
-    m_caloHitCreatorSettings.m_hCalEndCapInnerPhiCoordinate = getExtension(m_settings.m_hcalEndcapName)->inner_phi0/dd4hep::rad;;
-    
- 
-    m_caloHitCreatorSettings.m_ecalBarrelName = m_settings.m_ecalBarrelName;                  
-    m_caloHitCreatorSettings.m_ecalEndcapName = m_settings.m_ecalEndcapName;                  
-    m_caloHitCreatorSettings.m_ecalOtherNames= m_settings.m_ecalOtherNames;        
-    m_caloHitCreatorSettings.m_hcalBarrelName = m_settings.m_hcalBarrelName;                  
-    m_caloHitCreatorSettings.m_hcalEndcapName = m_settings.m_hcalEndcapName;                  
-    m_caloHitCreatorSettings.m_hcalOtherNames= m_settings.m_hcalOtherNames;        
-    m_caloHitCreatorSettings.m_muonBarrelName = m_settings.m_muonBarrelName;                  
-    m_caloHitCreatorSettings.m_muonEndcapName = m_settings.m_muonEndcapName;                  
-    m_caloHitCreatorSettings.m_muonOtherNames= m_settings.m_muonOtherNames;  
-    m_caloHitCreatorSettings.m_coilName= m_settings.m_coilName;   
+    //Get ECal Barrel extension by type, ignore plugs and rings 
+    const DD4hep::DDRec::LayeredCalorimeterData * eCalBarrelExtension= getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::ELECTROMAGNETIC | DD4hep::DetType::BARREL), ( DD4hep::DetType::AUXILIARY ) );
+    //Get ECal Endcap extension by type, ignore plugs and rings 
+    const DD4hep::DDRec::LayeredCalorimeterData * eCalEndcapExtension= getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::ELECTROMAGNETIC | DD4hep::DetType::ENDCAP), ( DD4hep::DetType::AUXILIARY ) );
+    //Get HCal Barrel extension by type, ignore plugs and rings 
+    const DD4hep::DDRec::LayeredCalorimeterData * hCalBarrelExtension= getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::BARREL), ( DD4hep::DetType::AUXILIARY ) );
+      //Get HCal Endcap extension by type, ignore plugs and rings 
+    const DD4hep::DDRec::LayeredCalorimeterData * hCalEndcapExtension= getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::ENDCAP), ( DD4hep::DetType::AUXILIARY ) );
+    //Get Muon Barrel extension by type, ignore plugs and rings 
+    const DD4hep::DDRec::LayeredCalorimeterData * muonBarrelExtension= getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::MUON | DD4hep::DetType::BARREL), ( DD4hep::DetType::AUXILIARY ) );
+    //Get Muon Endcap extension by type, ignore plugs and rings 
+    const DD4hep::DDRec::LayeredCalorimeterData * muonEndcapExtension= getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::MUON | DD4hep::DetType::ENDCAP), ( DD4hep::DetType::AUXILIARY ) );   
     
     
-    m_geometryCreatorSettings.m_ecalBarrelName = m_settings.m_ecalBarrelName;                  
-    m_geometryCreatorSettings.m_ecalEndcapName = m_settings.m_ecalEndcapName;                  
-    m_geometryCreatorSettings.m_ecalOtherNames= m_settings.m_ecalOtherNames;        
-    m_geometryCreatorSettings.m_hcalBarrelName = m_settings.m_hcalBarrelName;                  
-    m_geometryCreatorSettings.m_hcalEndcapName = m_settings.m_hcalEndcapName;                  
-    m_geometryCreatorSettings.m_hcalOtherNames= m_settings.m_hcalOtherNames;        
-    m_geometryCreatorSettings.m_muonBarrelName = m_settings.m_muonBarrelName;                  
-    m_geometryCreatorSettings.m_muonEndcapName = m_settings.m_muonEndcapName;                  
-    m_geometryCreatorSettings.m_muonOtherNames= m_settings.m_muonOtherNames;   
-    m_geometryCreatorSettings.m_coilName= m_settings.m_coilName;   
+    m_trackCreatorSettings.m_eCalBarrelInnerSymmetry        =   eCalBarrelExtension->inner_symmetry;
+    m_trackCreatorSettings.m_eCalBarrelInnerPhi0            =   eCalBarrelExtension->inner_phi0/dd4hep::rad;
+    m_trackCreatorSettings.m_eCalBarrelInnerR               =   eCalBarrelExtension->extent[0]/dd4hep::mm;
+    m_trackCreatorSettings.m_eCalEndCapInnerZ               =   eCalBarrelExtension->extent[2]/dd4hep::mm;
+                                                            
+    m_caloHitCreatorSettings.m_eCalBarrelOuterZ             =   eCalBarrelExtension->extent[3]/dd4hep::mm;
+    m_caloHitCreatorSettings.m_hCalBarrelOuterZ             =   hCalBarrelExtension->extent[3]/dd4hep::mm;
+    m_caloHitCreatorSettings.m_muonBarrelOuterZ             =   muonBarrelExtension->extent[3]/dd4hep::mm;
+    m_caloHitCreatorSettings.m_coilOuterR                   =   getCoilOuterR(); 
+    m_caloHitCreatorSettings.m_eCalBarrelInnerPhi0          =   eCalBarrelExtension->inner_phi0/dd4hep::rad;
+    m_caloHitCreatorSettings.m_eCalBarrelInnerSymmetry      =   eCalBarrelExtension->inner_symmetry;
+    m_caloHitCreatorSettings.m_hCalBarrelInnerPhi0          =   hCalBarrelExtension->inner_phi0/dd4hep::rad;
+    m_caloHitCreatorSettings.m_hCalBarrelInnerSymmetry      =   hCalBarrelExtension->inner_symmetry;
+    m_caloHitCreatorSettings.m_muonBarrelInnerPhi0          =   muonBarrelExtension->inner_phi0/dd4hep::rad;
+    m_caloHitCreatorSettings.m_muonBarrelInnerSymmetry      =   muonBarrelExtension->inner_symmetry;
+    m_caloHitCreatorSettings.m_hCalEndCapOuterR             =   hCalEndcapExtension->extent[1]/dd4hep::mm;
+    m_caloHitCreatorSettings.m_hCalEndCapOuterZ             =   hCalEndcapExtension->extent[3]/dd4hep::mm;
+    m_caloHitCreatorSettings.m_hCalBarrelOuterR             =   hCalBarrelExtension->extent[1]/dd4hep::mm;
+    m_caloHitCreatorSettings.m_hCalBarrelOuterPhi0          =   hCalBarrelExtension->outer_phi0/dd4hep::rad;
+    m_caloHitCreatorSettings.m_hCalBarrelOuterSymmetry      =   hCalBarrelExtension->outer_symmetry;
+    m_caloHitCreatorSettings.m_hCalEndCapInnerSymmetryOrder =   hCalEndcapExtension->inner_symmetry;;
+    m_caloHitCreatorSettings.m_hCalEndCapInnerPhiCoordinate =   hCalEndcapExtension->inner_phi0/dd4hep::rad;;
     
     // Get the magnetic field
     DD4hep::Geometry::LCDD& lcdd = DD4hep::Geometry::LCDD::getInstance();

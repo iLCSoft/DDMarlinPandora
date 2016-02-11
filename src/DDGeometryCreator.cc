@@ -20,6 +20,7 @@
 
 //Forward declarations. See DDPandoraPFANewProcessor.cc
 DD4hep::DDRec::LayeredCalorimeterData * getExtension(std::string detectorName);
+DD4hep::DDRec::LayeredCalorimeterData * getExtension(unsigned int includeFlag, unsigned int excludeFlag=0);
 
 std::vector<double> getTrackingRegionExtent();
   
@@ -84,12 +85,12 @@ void DDGeometryCreator::SetMandatorySubDetectorParameters(SubDetectorTypeMap &su
     PandoraApi::Geometry::SubDetector::Parameters eCalBarrelParameters, eCalEndCapParameters, hCalBarrelParameters, hCalEndCapParameters,
         muonBarrelParameters, muonEndCapParameters;
 
-    this->SetDefaultSubDetectorParameters(*const_cast<DD4hep::DDRec::LayeredCalorimeterData*>(getExtension(m_settings.m_ecalBarrelName)), "ECalBarrel", pandora::ECAL_BARREL, eCalBarrelParameters);
-    this->SetDefaultSubDetectorParameters(*const_cast<DD4hep::DDRec::LayeredCalorimeterData*>(getExtension(m_settings.m_ecalEndcapName)), "ECalEndCap", pandora::ECAL_ENDCAP, eCalEndCapParameters);
-    this->SetDefaultSubDetectorParameters(*const_cast<DD4hep::DDRec::LayeredCalorimeterData*>(getExtension(m_settings.m_hcalBarrelName)), "HCalBarrel", pandora::HCAL_BARREL, hCalBarrelParameters);
-    this->SetDefaultSubDetectorParameters(*const_cast<DD4hep::DDRec::LayeredCalorimeterData*>(getExtension(m_settings.m_hcalEndcapName)), "HCalEndCap", pandora::HCAL_ENDCAP, hCalEndCapParameters);
-    this->SetDefaultSubDetectorParameters(*const_cast<DD4hep::DDRec::LayeredCalorimeterData*>(getExtension(m_settings.m_muonBarrelName)), "MuonBarrel", pandora::MUON_BARREL, muonBarrelParameters);
-    this->SetDefaultSubDetectorParameters(*const_cast<DD4hep::DDRec::LayeredCalorimeterData*>(getExtension(m_settings.m_muonEndcapName)), "MuonEndCap", pandora::MUON_ENDCAP, muonEndCapParameters);
+    this->SetDefaultSubDetectorParameters(*const_cast<DD4hep::DDRec::LayeredCalorimeterData*>(getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::ELECTROMAGNETIC | DD4hep::DetType::BARREL), ( DD4hep::DetType::AUXILIARY ) )), "ECalBarrel", pandora::ECAL_BARREL, eCalBarrelParameters);
+    this->SetDefaultSubDetectorParameters(*const_cast<DD4hep::DDRec::LayeredCalorimeterData*>(getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::ELECTROMAGNETIC | DD4hep::DetType::ENDCAP), ( DD4hep::DetType::AUXILIARY ) )), "ECalEndCap", pandora::ECAL_ENDCAP, eCalEndCapParameters);
+    this->SetDefaultSubDetectorParameters(*const_cast<DD4hep::DDRec::LayeredCalorimeterData*>(getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::BARREL), ( DD4hep::DetType::AUXILIARY ) )), "HCalBarrel", pandora::HCAL_BARREL, hCalBarrelParameters);
+    this->SetDefaultSubDetectorParameters(*const_cast<DD4hep::DDRec::LayeredCalorimeterData*>(getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::ENDCAP), ( DD4hep::DetType::AUXILIARY ) )), "HCalEndCap", pandora::HCAL_ENDCAP, hCalEndCapParameters);
+    this->SetDefaultSubDetectorParameters(*const_cast<DD4hep::DDRec::LayeredCalorimeterData*>(getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::MUON | DD4hep::DetType::BARREL), ( DD4hep::DetType::AUXILIARY ) )), "MuonBarrel", pandora::MUON_BARREL, muonBarrelParameters);
+    this->SetDefaultSubDetectorParameters(*const_cast<DD4hep::DDRec::LayeredCalorimeterData*>(getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::MUON | DD4hep::DetType::ENDCAP), ( DD4hep::DetType::AUXILIARY ) )), "MuonEndCap", pandora::MUON_ENDCAP, muonEndCapParameters);
 
     subDetectorTypeMap[pandora::ECAL_BARREL] = eCalBarrelParameters;
     subDetectorTypeMap[pandora::ECAL_ENDCAP] = eCalEndCapParameters;
@@ -114,41 +115,55 @@ void DDGeometryCreator::SetMandatorySubDetectorParameters(SubDetectorTypeMap &su
     trackerParameters.m_nLayers = 0;
     subDetectorTypeMap[pandora::INNER_TRACKER] = trackerParameters;
 
-    PandoraApi::Geometry::SubDetector::Parameters coilParameters;
     
     ///FIXME:Implement a parameter for the Coil/Solenoid name
     ///NOTE: Is this the way to go, or should we go with reco structure?
-    DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
-    DD4hep::Geometry::DetElement coilDE = lcdd.detector(m_settings.m_coilName);
-    //access the detelement and create a shape from the envelope since only minimal info needed
-    DD4hep::Geometry::Tube coilTube = DD4hep::Geometry::Tube( coilDE.volume().solid() )  ;
-    
-    
-    coilParameters.m_subDetectorName = "Coil";
-    coilParameters.m_subDetectorType = pandora::COIL;
-    coilParameters.m_innerRCoordinate = coilTube->GetRmin()/ dd4hep::mm; 
-    coilParameters.m_innerZCoordinate = 0.f;
-    coilParameters.m_innerPhiCoordinate = 0.f;
-    coilParameters.m_innerSymmetryOrder = 0;
-    coilParameters.m_outerRCoordinate = coilTube->GetRmax()/ dd4hep::mm;
-    coilParameters.m_outerZCoordinate = coilTube->GetDZ()/ dd4hep::mm;
-    coilParameters.m_outerPhiCoordinate = 0.f;
-    coilParameters.m_outerSymmetryOrder = 0;
-    coilParameters.m_isMirroredInZ = true;
-    coilParameters.m_nLayers = 0;
-    subDetectorTypeMap[pandora::COIL] = coilParameters;
+    try{
+        
+        PandoraApi::Geometry::SubDetector::Parameters coilParameters;
+
+            
+        DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
+        const std::vector< DD4hep::Geometry::DetElement>& theDetectors = DD4hep::Geometry::DetectorSelector(lcdd).detectors(  DD4hep::DetType::COIL ) ;
+        //access the detelement and create a shape from the envelope since only minimal info needed
+        DD4hep::Geometry::Tube coilTube = DD4hep::Geometry::Tube( theDetectors.at(0).volume().solid() )  ;
+
+
+        coilParameters.m_subDetectorName = "Coil";
+        coilParameters.m_subDetectorType = pandora::COIL;
+        coilParameters.m_innerRCoordinate = coilTube->GetRmin()/ dd4hep::mm; 
+        coilParameters.m_innerZCoordinate = 0.f;
+        coilParameters.m_innerPhiCoordinate = 0.f;
+        coilParameters.m_innerSymmetryOrder = 0;
+        coilParameters.m_outerRCoordinate = coilTube->GetRmax()/ dd4hep::mm;
+        coilParameters.m_outerZCoordinate = coilTube->GetDZ()/ dd4hep::mm;
+        coilParameters.m_outerPhiCoordinate = 0.f;
+        coilParameters.m_outerSymmetryOrder = 0;
+        coilParameters.m_isMirroredInZ = true;
+        coilParameters.m_nLayers = 0;
+        subDetectorTypeMap[pandora::COIL] = coilParameters;
+    } catch ( std::exception & e ) {
+        
+        streamlog_out(ERROR) << "Failed to access COIL parameters: "<<e.what()<<std::endl;
+        
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void DDGeometryCreator::SetAdditionalSubDetectorParameters(SubDetectorNameMap &subDetectorNameMap) const
 {
-  for (std::vector<std::string>::const_iterator iter = m_settings.m_ecalOtherNames.begin(), iterEnd = m_settings.m_ecalOtherNames.end();iter != iterEnd; ++iter){
-  
-    try
+    
+  DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
+  const std::vector< DD4hep::Geometry::DetElement>& theECalOtherDetectors = DD4hep::Geometry::DetectorSelector(lcdd).detectors(DD4hep::DetType::CALORIMETER | DD4hep::DetType::ELECTROMAGNETIC | DD4hep::DetType::AUXILIARY ) ;
+  for (std::vector< DD4hep::Geometry::DetElement>::const_iterator iter = theECalOtherDetectors.begin(), iterEnd = theECalOtherDetectors.end();iter != iterEnd; ++iter){
+   try
     {
+        const DD4hep::Geometry::DetElement& theDetector = *iter;
+        const DD4hep::DDRec::LayeredCalorimeterData * theExtension = theDetector.extension<DD4hep::DDRec::LayeredCalorimeterData>();
+
         PandoraApi::Geometry::SubDetector::Parameters parameters;
-        this->SetDefaultSubDetectorParameters(*const_cast<DD4hep::DDRec::LayeredCalorimeterData*>(getExtension(*iter)), *iter, pandora::SUB_DETECTOR_OTHER, parameters);
+        this->SetDefaultSubDetectorParameters(*const_cast<DD4hep::DDRec::LayeredCalorimeterData*>(theExtension),theDetector.name(), pandora::SUB_DETECTOR_OTHER, parameters);
         subDetectorNameMap[parameters.m_subDetectorName.Get()] = parameters;
     }
     catch (std::runtime_error &exception)
@@ -157,31 +172,37 @@ void DDGeometryCreator::SetAdditionalSubDetectorParameters(SubDetectorNameMap &s
     }
   }
   
-  for (std::vector<std::string>::const_iterator iter = m_settings.m_hcalOtherNames.begin(), iterEnd = m_settings.m_hcalOtherNames.end();iter != iterEnd; ++iter){
-    
-    try
+  const std::vector< DD4hep::Geometry::DetElement>& theHCalOtherDetectors = DD4hep::Geometry::DetectorSelector(lcdd).detectors(DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::AUXILIARY ) ;
+  for (std::vector< DD4hep::Geometry::DetElement>::const_iterator iter = theHCalOtherDetectors.begin(), iterEnd = theHCalOtherDetectors.end();iter != iterEnd; ++iter){
+   try
     {
-      PandoraApi::Geometry::SubDetector::Parameters parameters;
-      this->SetDefaultSubDetectorParameters(*const_cast<DD4hep::DDRec::LayeredCalorimeterData*>(getExtension(*iter)), *iter, pandora::SUB_DETECTOR_OTHER, parameters);
-      subDetectorNameMap[parameters.m_subDetectorName.Get()] = parameters;
+        const DD4hep::Geometry::DetElement& theDetector = *iter;
+        const DD4hep::DDRec::LayeredCalorimeterData * theExtension = theDetector.extension<DD4hep::DDRec::LayeredCalorimeterData>();
+
+        PandoraApi::Geometry::SubDetector::Parameters parameters;
+        this->SetDefaultSubDetectorParameters(*const_cast<DD4hep::DDRec::LayeredCalorimeterData*>(theExtension),theDetector.name(), pandora::SUB_DETECTOR_OTHER, parameters);
+        subDetectorNameMap[parameters.m_subDetectorName.Get()] = parameters;
     }
     catch (std::runtime_error &exception)
     {
-      streamlog_out(WARNING) << "Marlin pandora geometry creator during Other HCal construction: " << exception.what() << std::endl;
+        streamlog_out(WARNING) << "Marlin pandora geometry creator during Other HCal construction: " << exception.what() << std::endl;
     }
   }
   
-  for (std::vector<std::string>::const_iterator iter = m_settings.m_muonOtherNames.begin(), iterEnd = m_settings.m_muonOtherNames.end();iter != iterEnd; ++iter){
-    
-    try
+  const std::vector< DD4hep::Geometry::DetElement>& theMuonOtherDetectors = DD4hep::Geometry::DetectorSelector(lcdd).detectors(DD4hep::DetType::CALORIMETER | DD4hep::DetType::MUON| DD4hep::DetType::AUXILIARY ) ;
+  for (std::vector< DD4hep::Geometry::DetElement>::const_iterator iter = theMuonOtherDetectors.begin(), iterEnd = theMuonOtherDetectors.end();iter != iterEnd; ++iter){
+   try
     {
-      PandoraApi::Geometry::SubDetector::Parameters parameters;
-      this->SetDefaultSubDetectorParameters(*const_cast<DD4hep::DDRec::LayeredCalorimeterData*>(getExtension(*iter)), *iter, pandora::SUB_DETECTOR_OTHER, parameters);
-      subDetectorNameMap[parameters.m_subDetectorName.Get()] = parameters;
+        const DD4hep::Geometry::DetElement& theDetector = *iter;
+        const DD4hep::DDRec::LayeredCalorimeterData * theExtension = theDetector.extension<DD4hep::DDRec::LayeredCalorimeterData>();
+
+        PandoraApi::Geometry::SubDetector::Parameters parameters;
+        this->SetDefaultSubDetectorParameters(*const_cast<DD4hep::DDRec::LayeredCalorimeterData*>(theExtension),theDetector.name(), pandora::SUB_DETECTOR_OTHER, parameters);
+        subDetectorNameMap[parameters.m_subDetectorName.Get()] = parameters;
     }
     catch (std::runtime_error &exception)
     {
-      streamlog_out(WARNING) << "Marlin pandora geometry creator during Other Muon construction: " << exception.what() << std::endl;
+        streamlog_out(WARNING) << "Marlin pandora geometry creator during Other Muon construction: " << exception.what() << std::endl;
     }
   }
 
@@ -255,7 +276,7 @@ pandora::StatusCode DDGeometryCreator::CreateHCalBarrelBoxGaps() const
 
     std::string detectorName = lcdd.header().name();
     
-    const DD4hep::DDRec::LayeredCalorimeterData * hCalBarrelParameters = getExtension(m_settings.m_hcalBarrelName);
+    const DD4hep::DDRec::LayeredCalorimeterData * hCalBarrelParameters = getExtension(( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::BARREL), ( DD4hep::DetType::AUXILIARY ));
 
     const unsigned int innerSymmetryOrder(hCalBarrelParameters->inner_symmetry);
     const unsigned int outerSymmetryOrder(hCalBarrelParameters->outer_symmetry);
@@ -298,7 +319,7 @@ pandora::StatusCode DDGeometryCreator::CreateHCalEndCapBoxGaps() const
 {
   
     
-    const DD4hep::DDRec::LayeredCalorimeterData * hCalEndCapParameters = getExtension(m_settings.m_hcalEndcapName);
+    const DD4hep::DDRec::LayeredCalorimeterData * hCalEndCapParameters = getExtension(( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::ENDCAP), ( DD4hep::DetType::AUXILIARY ));
 
     const float staveGap(hCalEndCapParameters->gap0/dd4hep::mm);
     const float innerRadius(hCalEndCapParameters->extent[0]/dd4hep::mm);
@@ -325,7 +346,7 @@ pandora::StatusCode DDGeometryCreator::CreateHCalBarrelConcentricGaps() const
 {
     
     
-    const DD4hep::DDRec::LayeredCalorimeterData *hCalBarrelParameters = getExtension(m_settings.m_hcalBarrelName);
+    const DD4hep::DDRec::LayeredCalorimeterData *hCalBarrelParameters = getExtension(( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::BARREL), ( DD4hep::DetType::AUXILIARY ));
     const float gapWidth(hCalBarrelParameters->gap0/dd4hep::mm);
 
     PandoraApi::Geometry::ConcentricGap::Parameters gapParameters;

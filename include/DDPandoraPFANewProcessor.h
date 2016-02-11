@@ -55,20 +55,7 @@ public:
         FloatVector     m_outputEnergyCorrectionPoints;     ///< The output energy points for non-linearity energy correction
         
         ///ADDED BY NIKIFOROS
-        std::string     m_ecalBarrelName;                   ///< The ECal barrel detector name 
-        std::string     m_ecalEndcapName;                   ///< The ECal endcap detector name 
-        std::vector<std::string>  m_ecalOtherNames;         ///< Additional ECal detector names 
-        
-        std::string     m_hcalBarrelName;                   ///< The HCal barrel detector name 
-        std::string     m_hcalEndcapName;                   ///< The HCal endcap detector name 
-        std::vector<std::string>  m_hcalOtherNames;         ///< Additional HCal detector names 
-        
-        std::string     m_muonBarrelName;                   ///< The Muon barrel detector name 
-        std::string     m_muonEndcapName;                   ///< The Muon endcap detector name 
-        std::vector<std::string>  m_muonOtherNames;         ///< Additional Muon detector names 
-        
-        std::string     m_coilName;                   ///< The detector name for the coil
-        
+        //Detector names not needed anymore, accessed by det type flags
         std::string     m_trackCreatorName;                 ///< The name of the DDTrackCreator implementation to use
 
         

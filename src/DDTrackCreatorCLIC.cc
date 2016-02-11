@@ -51,6 +51,7 @@ DDTrackCreatorCLIC::DDTrackCreatorCLIC(const Settings &settings, const pandora::
     
     DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
     
+    //Maybe we need to veto the vertex? That was done in the ILD case
     const std::vector< DD4hep::Geometry::DetElement>& barrelDets = DD4hep::Geometry::DetectorSelector(lcdd).detectors(  ( DD4hep::DetType::TRACKER | DD4hep::DetType::BARREL )) ;
 
     m_barrelTrackerLayers = 0;

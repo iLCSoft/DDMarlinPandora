@@ -25,6 +25,7 @@
 //forward declarations. See in DDPandoraPFANewProcessor.cc
 
 DD4hep::DDRec::LayeredCalorimeterData * getExtension(std::string detectorName);
+DD4hep::DDRec::LayeredCalorimeterData * getExtension(unsigned int includeFlag, unsigned int excludeFlag=0);
 
 double getCoilOuterR();
 
@@ -34,9 +35,9 @@ DDCaloHitCreator::DDCaloHitCreator(const Settings &settings, const pandora::Pand
     m_pPandora(pPandora)
 {
     
-    const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& barrelLayers= getExtension(m_settings.m_hcalBarrelName)->layers;
+    const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& barrelLayers= getExtension(( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::BARREL), ( DD4hep::DetType::AUXILIARY ))->layers;
     
-    const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension(m_settings.m_hcalEndcapName)->layers;
+    const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension(( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::ENDCAP), ( DD4hep::DetType::AUXILIARY ))->layers;
     
     ///Take thicknesses from last layer (was like that before with gear)
     m_hCalEndCapLayerThickness =(endcapLayers.back().inner_thickness+endcapLayers.back().outer_thickness)/dd4hep::mm;
@@ -84,8 +85,8 @@ pandora::StatusCode DDCaloHitCreator::CreateECalCaloHits(const EVENT::LCEvent *c
                 continue;
 
             
-            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& barrelLayers= getExtension(m_settings.m_ecalEndcapName)->layers;
-            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension(m_settings.m_ecalEndcapName)->layers;
+            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& barrelLayers= getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::ELECTROMAGNETIC | DD4hep::DetType::BARREL), ( DD4hep::DetType::AUXILIARY ) )->layers;
+            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::ELECTROMAGNETIC | DD4hep::DetType::ENDCAP), ( DD4hep::DetType::AUXILIARY ) )->layers;
             
 
             UTIL::CellIDDecoder<CalorimeterHit> cellIdDecoder(pCaloHitCollection);
@@ -209,8 +210,8 @@ pandora::StatusCode DDCaloHitCreator::CreateHCalCaloHits(const EVENT::LCEvent *c
                 continue;
 
             
-            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& barrelLayers= getExtension(m_settings.m_hcalBarrelName)->layers;
-            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension(m_settings.m_hcalEndcapName)->layers;
+            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& barrelLayers= getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::BARREL), ( DD4hep::DetType::AUXILIARY ) )->layers;
+            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC| DD4hep::DetType::ENDCAP), ( DD4hep::DetType::AUXILIARY ) )->layers;
             
             
             
@@ -289,10 +290,10 @@ pandora::StatusCode DDCaloHitCreator::CreateMuonCaloHits(const EVENT::LCEvent *c
             if (0 == nElements)
                 continue;
 
-            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& barrelLayers= getExtension(m_settings.m_muonEndcapName)->layers;
-            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension(m_settings.m_muonEndcapName)->layers;
+            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& barrelLayers= getExtension(( DD4hep::DetType::CALORIMETER | DD4hep::DetType::MUON| DD4hep::DetType::BARREL), ( DD4hep::DetType::AUXILIARY ))->layers;
+            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension(( DD4hep::DetType::CALORIMETER | DD4hep::DetType::MUON| DD4hep::DetType::ENDCAP), ( DD4hep::DetType::AUXILIARY ))->layers;
             ///FIXME: WHAT ABOUT MORE MUON SYSTEMS?
-            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& plugLayers= getExtension(m_settings.m_muonOtherNames[0])->layers;
+            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& plugLayers= getExtension(( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::AUXILIARY ))->layers;
             UTIL::CellIDDecoder<CalorimeterHit> cellIdDecoder(pCaloHitCollection);
             const std::string layerCodingString(pCaloHitCollection->getParameters().getStringVal(LCIO::CellIDEncoding));
             const std::string layerCoding("layer");
@@ -390,7 +391,7 @@ pandora::StatusCode DDCaloHitCreator::CreateLCalCaloHits(const EVENT::LCEvent *c
                 continue;
             
             ///FIXME: WHAT ABOUT OTHER ECALS?
-            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension(m_settings.m_ecalOtherNames[1])->layers;
+            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension( DD4hep::DetType::CALORIMETER |  DD4hep::DetType::ENDCAP  | DD4hep::DetType::ELECTROMAGNETIC |  DD4hep::DetType::FORWARD)->layers;
         
 
             UTIL::CellIDDecoder<CalorimeterHit> cellIdDecoder(pCaloHitCollection);
@@ -463,7 +464,7 @@ pandora::StatusCode DDCaloHitCreator::CreateLHCalCaloHits(const EVENT::LCEvent *
 
             
             ///FIXME! WHAT ABOUT MORE HCALS?
-            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension(m_settings.m_hcalOtherNames[0])->layers;
+            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension(DD4hep::DetType::CALORIMETER |  DD4hep::DetType::ENDCAP  | DD4hep::DetType::HADRONIC|  DD4hep::DetType::FORWARD)->layers;
             
             UTIL::CellIDDecoder<CalorimeterHit> cellIdDecoder(pCaloHitCollection);
             const std::string layerCodingString(pCaloHitCollection->getParameters().getStringVal(LCIO::CellIDEncoding));
