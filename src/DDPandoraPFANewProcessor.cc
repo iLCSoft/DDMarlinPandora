@@ -701,31 +701,6 @@ void DDPandoraPFANewProcessor::ProcessSteeringFile()
     
     
     ///EXTRA PARAMETERS FROM NIKIFOROS
-    
-    registerProcessorParameter("VertexBarrelDetectorName",
-                               "The name of the Vertex Barrel detector",
-                               m_settings.m_vertexBarrelDetectorName,
-                               std::string("VertexBarrel"));
-                               
-    std::vector<std::string> defaultTrackerBarrelNames;
-    defaultTrackerBarrelNames.push_back("InnerTrackerBarrel");
-    defaultTrackerBarrelNames.push_back("OuterTrackerBarrel");
-    
-    registerProcessorParameter("TrackerBarrelDetectorNames",
-                              "Detector names of the Trackers in the Barrel starting from the innermost one",
-                              m_settings.m_barrelTrackerNames,
-                              defaultTrackerBarrelNames);
-    
-    std::vector<std::string> defaultTrackerEndcapNames;
-    defaultTrackerEndcapNames.push_back("VertexEndcap");
-    defaultTrackerEndcapNames.push_back("InnerTrackerEndcap");
-    defaultTrackerEndcapNames.push_back("OuterTrackerEndcap");
-    
-    registerProcessorParameter("TrackerEndcapDetectorNames",
-                               "Detector names of the Trackers in the Endcap starting from the innermost one",
-                              m_settings.m_endcapTrackerNames,
-                              defaultTrackerEndcapNames);
-    
     registerProcessorParameter("ECalBarrelDetectorName",
                                "The name of the ECal Barrel detector",
                                m_settings.m_ecalBarrelName,
@@ -809,11 +784,6 @@ void DDPandoraPFANewProcessor::FinaliseSteeringParameters()
     m_trackCreatorSettings.m_eCalBarrelInnerPhi0=getExtension(m_settings.m_ecalBarrelName)->inner_phi0/dd4hep::rad;
     m_trackCreatorSettings.m_eCalBarrelInnerR=getExtension(m_settings.m_ecalBarrelName)->extent[0]/dd4hep::mm;
     m_trackCreatorSettings.m_eCalEndCapInnerZ=getExtension(m_settings.m_ecalEndcapName)->extent[2]/dd4hep::mm;
-    m_trackCreatorSettings.m_vertexBarrelDetectorName = m_settings.m_vertexBarrelDetectorName;        
-    m_trackCreatorSettings.m_barrelTrackerNames = m_settings.m_barrelTrackerNames;     
-    m_trackCreatorSettings.m_endcapTrackerNames = m_settings.m_endcapTrackerNames; 
-    
-    
     
     m_caloHitCreatorSettings.m_eCalBarrelOuterZ=getExtension(m_settings.m_ecalBarrelName)->extent[3]/dd4hep::mm;
     m_caloHitCreatorSettings.m_hCalBarrelOuterZ=getExtension(m_settings.m_hcalBarrelName)->extent[3]/dd4hep::mm;
@@ -833,9 +803,7 @@ void DDPandoraPFANewProcessor::FinaliseSteeringParameters()
     m_caloHitCreatorSettings.m_hCalEndCapInnerSymmetryOrder = getExtension(m_settings.m_hcalEndcapName)->inner_symmetry;;
     m_caloHitCreatorSettings.m_hCalEndCapInnerPhiCoordinate = getExtension(m_settings.m_hcalEndcapName)->inner_phi0/dd4hep::rad;;
     
-    m_caloHitCreatorSettings.m_vertexBarrelDetectorName = m_settings.m_vertexBarrelDetectorName;        
-    m_caloHitCreatorSettings.m_barrelTrackerNames = m_settings.m_barrelTrackerNames;     
-    m_caloHitCreatorSettings.m_endcapTrackerNames = m_settings.m_endcapTrackerNames;     
+ 
     m_caloHitCreatorSettings.m_ecalBarrelName = m_settings.m_ecalBarrelName;                  
     m_caloHitCreatorSettings.m_ecalEndcapName = m_settings.m_ecalEndcapName;                  
     m_caloHitCreatorSettings.m_ecalOtherNames= m_settings.m_ecalOtherNames;        
@@ -848,9 +816,6 @@ void DDPandoraPFANewProcessor::FinaliseSteeringParameters()
     m_caloHitCreatorSettings.m_coilName= m_settings.m_coilName;   
     
     
-    m_geometryCreatorSettings.m_vertexBarrelDetectorName = m_settings.m_vertexBarrelDetectorName;        
-    m_geometryCreatorSettings.m_barrelTrackerNames = m_settings.m_barrelTrackerNames;     
-    m_geometryCreatorSettings.m_endcapTrackerNames = m_settings.m_endcapTrackerNames;     
     m_geometryCreatorSettings.m_ecalBarrelName = m_settings.m_ecalBarrelName;                  
     m_geometryCreatorSettings.m_ecalEndcapName = m_settings.m_ecalEndcapName;                  
     m_geometryCreatorSettings.m_ecalOtherNames= m_settings.m_ecalOtherNames;        

@@ -109,11 +109,9 @@ public:
         float             m_eCalBarrelInnerPhi0;          ///< ECal barrel inner phi 0
         float             m_eCalBarrelInnerR;             ///< ECal barrel inner radius
         float             m_eCalEndCapInnerZ;             ///< ECal endcap inner z
-        
-        ///Added by Nikiforos
-        std::string     m_vertexBarrelDetectorName;               ///< The vertex barrel detector name 
-        std::vector<std::string> m_barrelTrackerNames;      ///< The Barrel Tracking detector names 
-        std::vector<std::string> m_endcapTrackerNames;      ///< The Endcap Tracking detector names 
+
+        //Tracking Detector names not needed anymore, accessed by det type flag
+
         
     };
 

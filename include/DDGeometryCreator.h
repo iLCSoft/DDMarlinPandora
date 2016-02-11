@@ -35,9 +35,6 @@ public:
         ///NN: Extra geometry variables removed since all accessible from DDRec
         
         ///Added by Nikiforos
-        std::string     m_vertexBarrelDetectorName;               ///< The vertex barrel detector name 
-        std::vector<std::string> m_barrelTrackerNames;      ///< The Barrel Tracking detector names 
-        std::vector<std::string> m_endcapTrackerNames;      ///< The Endcap Tracking detector names 
         std::string     m_ecalBarrelName;                   ///< The ECal barrel detector name 
         std::string     m_ecalEndcapName;                   ///< The ECal endcap detector name 
         std::vector<std::string>  m_ecalOtherNames;         ///< Additional ECal detector names 

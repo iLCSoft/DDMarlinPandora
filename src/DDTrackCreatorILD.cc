@@ -26,7 +26,8 @@
 #include "DD4hep/LCDD.h"
 #include "DD4hep/DD4hepUnits.h"
 #include "DDRec/DetectorData.h"
-
+#include "DD4hep/DetType.h"
+#include "DD4hep/DetectorSelector.h"
 
 
 //forward declarations. See in DDPandoraPFANewProcessor.cc
@@ -45,13 +46,14 @@ DDTrackCreatorILD::DDTrackCreatorILD(const Settings &settings, const pandora::Pa
     
   //Instead of gear, loop over a provided list of forward (read: endcap) tracking detectors. For ILD this would be FTD
   ///FIXME: Should we use surfaces instead?
-  for (std::vector<std::string>::const_iterator iter = m_settings.m_endcapTrackerNames.begin(), iterEnd = m_settings.m_endcapTrackerNames.end();iter != iterEnd; ++iter){
+  DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
+  const std::vector< DD4hep::Geometry::DetElement>& endcapDets = DD4hep::Geometry::DetectorSelector(lcdd).detectors(  ( DD4hep::DetType::TRACKER | DD4hep::DetType::ENDCAP )) ;
+  for (std::vector< DD4hep::Geometry::DetElement>::const_iterator iter = endcapDets.begin(), iterEnd = endcapDets.end();iter != iterEnd; ++iter){
     try
       {
 	DD4hep::DDRec::ZDiskPetalsData * theExtension = 0;
   
-	DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
-	DD4hep::Geometry::DetElement theDetector = lcdd.detector(*iter);
+        const DD4hep::Geometry::DetElement& theDetector = *iter;
 	theExtension = theDetector.extension<DD4hep::DDRec::ZDiskPetalsData>();
             
 	unsigned int N = theExtension->layers.size();
@@ -79,17 +81,18 @@ DDTrackCreatorILD::DDTrackCreatorILD(const Settings &settings, const pandora::Pa
        
       } catch (std::runtime_error &exception){
             
-      streamlog_out(WARNING) << "DDTrackCreatorILD exception during Forward Tracking Disk parameter construction for detector "<<*iter<<" : " << exception.what() << std::endl;
+      streamlog_out(WARNING) << "DDTrackCreatorILD exception during Forward Tracking Disk parameter construction for detector "<<const_cast<DD4hep::Geometry::DetElement&>(*iter).name()<<" : " << exception.what() << std::endl;
     }
   }
     
   try
     {
       DD4hep::DDRec::FixedPadSizeTPCData * theExtension = 0;
+      //Get the TPC, make sure not to get the vertex
+      const std::vector< DD4hep::Geometry::DetElement>& tpcDets= DD4hep::Geometry::DetectorSelector(lcdd).detectors(  ( DD4hep::DetType::TRACKER |  DD4hep::DetType::BARREL  | DD4hep::DetType::GASEOUS ), DD4hep::DetType::VERTEX) ;
 
-      DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
-      DD4hep::Geometry::DetElement theDetector = lcdd.detector(m_settings.m_barrelTrackerNames[0]);
-      theExtension = theDetector.extension<DD4hep::DDRec::FixedPadSizeTPCData>();
+      //There should only be one TPC
+      theExtension = tpcDets[0].extension<DD4hep::DDRec::FixedPadSizeTPCData>();
 
       m_tpcInnerR = theExtension->rMin/dd4hep::mm ;
       m_tpcOuterR = theExtension->rMax/dd4hep::mm ;
@@ -103,7 +106,7 @@ DDTrackCreatorILD::DDTrackCreatorILD(const Settings &settings, const pandora::Pa
          
         
     } catch (std::runtime_error &exception){
-    streamlog_out(WARNING) << "DDTrackCreatorILD exception during TPC parameter construction. Used detector name: "<<m_settings.m_barrelTrackerNames[0] << std::endl;
+    streamlog_out(WARNING) << "DDTrackCreatorILD exception during TPC parameter construction."<< std::endl;
   }
   
      
@@ -339,8 +342,8 @@ bool DDTrackCreatorILD::PassesQualityCuts(const EVENT::Track *const pTrack, cons
       // trk->subdetectorHitNumbers()[ 2 * ILDDetID::TPC - 1 ] =  hitsInFit ;  
       // trk->subdetectorHitNumbers()[ 2 * ILDDetID::TPC - 2 ] =  hitCount ;  
       // ---- use hitsInFit :
-      const int nTpcHits = hitsBySubdetector[ 2 * lcio::ILDDetID::TPC - 1 ];
-      const int nFtdHits = hitsBySubdetector[ 2 * lcio::ILDDetID::FTD - 1 ];
+      const int nTpcHits = hitsBySubdetector[ 2 * lcio::ILDDetID::TPC - 2 ];
+      const int nFtdHits = hitsBySubdetector[ 2 * lcio::ILDDetID::FTD - 2 ];
 
       const int minTpcHits = static_cast<int>(nExpectedTpcHits * m_settings.m_minBarrelTrackerHitFractionOfExpected);
 
