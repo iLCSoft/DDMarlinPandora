@@ -58,7 +58,7 @@ DDTrackCreatorILD::DDTrackCreatorILD(const Settings &settings, const pandora::Pa
             
 	unsigned int N = theExtension->layers.size();
             
-	streamlog_out( DEBUG2 ) << " Filling FTD-like parameters from DD4hep for "<< *iter<< "- n layers: " << N<< std::endl;
+	streamlog_out( DEBUG2 ) << " Filling FTD-like parameters from DD4hep for "<< theDetector.name() << "- n layers: " << N<< std::endl;
 
 	for(unsigned int i = 0; i < N; ++i)
 	  {
@@ -338,9 +338,6 @@ bool DDTrackCreatorILD::PassesQualityCuts(const EVENT::Track *const pTrack, cons
 
       const EVENT::IntVec &hitsBySubdetector(pTrack->getSubdetectorHitNumbers());
 
-      //fg: hit numbers are now given in different order wrt LOI:  
-      // trk->subdetectorHitNumbers()[ 2 * ILDDetID::TPC - 1 ] =  hitsInFit ;  
-      // trk->subdetectorHitNumbers()[ 2 * ILDDetID::TPC - 2 ] =  hitCount ;  
       // ---- use hitsInFit :
       const int nTpcHits = hitsBySubdetector[ 2 * lcio::ILDDetID::TPC - 2 ];
       const int nFtdHits = hitsBySubdetector[ 2 * lcio::ILDDetID::FTD - 2 ];
@@ -372,6 +369,9 @@ void DDTrackCreatorILD::DefineTrackPfoUsage(const EVENT::Track *const pTrack, Pa
     {
       const float d0(std::fabs(pTrack->getD0())), z0(std::fabs(pTrack->getZ0()));
 
+      streamlog_out(DEBUG3)  << " -- DefineTrackPfoUsage called for track : " << UTIL::lcshort( pTrack )
+			     << std::endl;
+
       EVENT::TrackerHitVec trackerHitvec(pTrack->getTrackerHits());
       float rInner(std::numeric_limits<float>::max()), zMin(std::numeric_limits<float>::max());
 
@@ -390,6 +390,7 @@ void DDTrackCreatorILD::DefineTrackPfoUsage(const EVENT::Track *const pTrack, Pa
 
       if (this->PassesQualityCuts(pTrack, trackParameters))
         {
+
 	  const pandora::CartesianVector &momentumAtDca(trackParameters.m_momentumAtDca.Get());
 	  const float pX(momentumAtDca.GetX()), pY(momentumAtDca.GetY()), pZ(momentumAtDca.GetZ());
 	  const float pT(std::sqrt(pX * pX + pY * pY));
@@ -399,6 +400,11 @@ void DDTrackCreatorILD::DefineTrackPfoUsage(const EVENT::Track *const pTrack, Pa
 
 	  const bool isV0(this->IsV0(pTrack));
 	  const bool isDaughter(this->IsDaughter(pTrack));
+
+	  streamlog_out(DEBUG3)  << " -- track passed quality cuts and has : " 
+				 << " passRzQualityCuts " << passRzQualityCuts
+				 << " isV0 " << isV0
+				 << " isDaughter " << isDaughter << std::endl ;
 
 	  // Decide whether track can be associated with a pandora cluster and used to form a charged PFO
 	  if ((d0 < m_settings.m_d0TrackCut) && (z0 < m_settings.m_z0TrackCut) && (rInner < m_tpcInnerR + m_settings.m_maxBarrelTrackerInnerRDistance))
@@ -413,6 +419,7 @@ void DDTrackCreatorILD::DefineTrackPfoUsage(const EVENT::Track *const pTrack, Pa
             {
 	      canFormPfo = true;
             }
+
 
 	  // Decide whether track can be used to form a charged PFO, even if track fails to be associated with a pandora cluster
 	  const float particleMass(trackParameters.m_mass.Get());
@@ -434,12 +441,16 @@ void DDTrackCreatorILD::DefineTrackPfoUsage(const EVENT::Track *const pTrack, Pa
 		  canFormClusterlessPfo = true;
                 }
             }
+
         }
       else if (this->IsDaughter(pTrack) || this->IsV0(pTrack))
         {
 	  streamlog_out(WARNING) << "Recovering daughter or v0 track " << trackParameters.m_momentumAtDca.Get().GetMagnitude() << std::endl;
 	  canFormPfo = true;
         }
+      
+      streamlog_out(DEBUG3)  << " -- track canFormPfo = " << canFormPfo << " -  canFormClusterlessPfo = " << canFormClusterlessPfo << std::endl;
+
     }
 
   trackParameters.m_canFormPfo = canFormPfo;
