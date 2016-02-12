@@ -1,6 +1,11 @@
 
 DDMarlinPandora: Development package to integrate with DD4hep
 
+N.Nikiforou 12/02/2016:
+  - Changed handling of Coil parameters: now the info is accessed from LayeredCalorimeterData 
+    extensions attached to the drivers (Solenoid for CLICdp, SCoil02 for ILD).
+  - Removed/commented out obsolete and unused auxilliary static functions
+
 N.Nikiforou 11/02/2016 (pm):
   - Major overhaul using the detector type flags throught the package. No more string processor parameters
     to access detectors.

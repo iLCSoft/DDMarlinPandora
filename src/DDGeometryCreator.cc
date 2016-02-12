@@ -19,7 +19,7 @@
 #include <utility>
 
 //Forward declarations. See DDPandoraPFANewProcessor.cc
-DD4hep::DDRec::LayeredCalorimeterData * getExtension(std::string detectorName);
+// DD4hep::DDRec::LayeredCalorimeterData * getExtension(std::string detectorName);
 DD4hep::DDRec::LayeredCalorimeterData * getExtension(unsigned int includeFlag, unsigned int excludeFlag=0);
 
 std::vector<double> getTrackingRegionExtent();
@@ -122,21 +122,18 @@ void DDGeometryCreator::SetMandatorySubDetectorParameters(SubDetectorTypeMap &su
         
         PandoraApi::Geometry::SubDetector::Parameters coilParameters;
 
-            
-        DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
-        const std::vector< DD4hep::Geometry::DetElement>& theDetectors = DD4hep::Geometry::DetectorSelector(lcdd).detectors(  DD4hep::DetType::COIL ) ;
-        //access the detelement and create a shape from the envelope since only minimal info needed
-        DD4hep::Geometry::Tube coilTube = DD4hep::Geometry::Tube( theDetectors.at(0).volume().solid() )  ;
+        const DD4hep::DDRec::LayeredCalorimeterData * coilExtension= getExtension( ( DD4hep::DetType::COIL ) );   
+
 
 
         coilParameters.m_subDetectorName = "Coil";
         coilParameters.m_subDetectorType = pandora::COIL;
-        coilParameters.m_innerRCoordinate = coilTube->GetRmin()/ dd4hep::mm; 
+        coilParameters.m_innerRCoordinate = coilExtension->extent[0]/ dd4hep::mm; 
         coilParameters.m_innerZCoordinate = 0.f;
         coilParameters.m_innerPhiCoordinate = 0.f;
         coilParameters.m_innerSymmetryOrder = 0;
-        coilParameters.m_outerRCoordinate = coilTube->GetRmax()/ dd4hep::mm;
-        coilParameters.m_outerZCoordinate = coilTube->GetDZ()/ dd4hep::mm;
+        coilParameters.m_outerRCoordinate = coilExtension->extent[1]/ dd4hep::mm;
+        coilParameters.m_outerZCoordinate = coilExtension->extent[3]/ dd4hep::mm;
         coilParameters.m_outerPhiCoordinate = 0.f;
         coilParameters.m_outerSymmetryOrder = 0;
         coilParameters.m_isMirroredInZ = true;

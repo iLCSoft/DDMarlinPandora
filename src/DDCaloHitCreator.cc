@@ -24,10 +24,10 @@
 
 //forward declarations. See in DDPandoraPFANewProcessor.cc
 
-DD4hep::DDRec::LayeredCalorimeterData * getExtension(std::string detectorName);
+// DD4hep::DDRec::LayeredCalorimeterData * getExtension(std::string detectorName);
 DD4hep::DDRec::LayeredCalorimeterData * getExtension(unsigned int includeFlag, unsigned int excludeFlag=0);
 
-double getCoilOuterR();
+// double getCoilOuterR();
 
 ///FIXME: HANDLE PROBLEM WHEN EXTENSION IS MISSING
 DDCaloHitCreator::DDCaloHitCreator(const Settings &settings, const pandora::Pandora *const pPandora) :

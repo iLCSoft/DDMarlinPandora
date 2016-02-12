@@ -32,9 +32,6 @@
 
 
 //forward declarations. See in DDPandoraPFANewProcessor.cc
-double getFieldFromLCDD(); 
-DD4hep::DDRec::LayeredCalorimeterData * getExtension(std::string detectorName);
-
 std::vector<double> getTrackingRegionExtent();
 
 DDTrackCreatorCLIC::DDTrackCreatorCLIC(const Settings &settings, const pandora::Pandora *const pPandora) : DDTrackCreatorBase(settings,pPandora)

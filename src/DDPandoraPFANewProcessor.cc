@@ -43,45 +43,48 @@ double getFieldFromLCDD(){
   
 }
 
-double getCoilOuterR(){
-    
-  try{
-    DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
-    const std::vector< DD4hep::Geometry::DetElement>& theDetectors = DD4hep::Geometry::DetectorSelector(lcdd).detectors(  DD4hep::DetType::COIL ) ;
-    //access the detelement and create a shape from the envelope since only minimal info needed
-    DD4hep::Geometry::Tube coilTube = DD4hep::Geometry::Tube( theDetectors.at(0).volume().solid() )  ;
-    return coilTube->GetRmax()/ dd4hep::mm;
-  } catch ( std::exception & e ) {
-      
-          streamlog_out(ERROR)<< "BIG WARNING! CANNOT GET EXTENSION FOR COIL: "<<e.what()<<" MAKE SURE YOU CHANGE THIS!"<< std::endl;
+//Not needed anymore; to be removed
+// double getCoilOuterR(){
+//     
+//   try{
+//     DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
+//     const std::vector< DD4hep::Geometry::DetElement>& theDetectors = DD4hep::Geometry::DetectorSelector(lcdd).detectors(  DD4hep::DetType::COIL ) ;
+//     //access the detelement and create a shape from the envelope since only minimal info needed
+//     DD4hep::Geometry::Tube coilTube = DD4hep::Geometry::Tube( theDetectors.at(0).volume().solid() )  ;
+//     return coilTube->GetRmax()/ dd4hep::mm;
+//   } catch ( std::exception & e ) {
+//       
+//           streamlog_out(ERROR)<< "BIG WARNING! CANNOT GET EXTENSION FOR COIL: "<<e.what()<<" MAKE SURE YOU CHANGE THIS!"<< std::endl;
+// 
+//   }
+//   
+//   return 0;
+// }
 
-  }
-  
-  return 0;
-}
 
-DD4hep::DDRec::LayeredCalorimeterData * getExtension(std::string detectorName){
-  
-  
-  DD4hep::DDRec::LayeredCalorimeterData * theExtension = 0;
-  
-  try {
-    DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
-    const DD4hep::Geometry::DetElement & theDetector = lcdd.detector(detectorName);
-    theExtension = theDetector.extension<DD4hep::DDRec::LayeredCalorimeterData>();
-    //     std::cout<< "DEBUG: in getExtension(\""<<detectorName<<"\"): size of layers: "<<theExtension->layers.size()<<" positions not shown. "<<std::endl;
-    
-    //     for(int i=0; i< theExtension->layers.size(); i++){
-    //       std::cout<<theExtension->layers[i].distance/dd4hep::mm<<" ";
-    //     }
-    //     std::cout<<std::endl;
-  } catch ( ... ){
-    
-    streamlog_out(ERROR) << "BIG WARNING! EXTENSION DOES NOT EXIST FOR " << detectorName<<". MAKE SURE YOU CHANGE THIS!"<< std::endl;
-  }
-  
-  return theExtension;
-}
+///Not needed anymore. To be removed
+// DD4hep::DDRec::LayeredCalorimeterData * getExtension(std::string detectorName){
+//   
+//   
+//   DD4hep::DDRec::LayeredCalorimeterData * theExtension = 0;
+//   
+//   try {
+//     DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
+//     const DD4hep::Geometry::DetElement & theDetector = lcdd.detector(detectorName);
+//     theExtension = theDetector.extension<DD4hep::DDRec::LayeredCalorimeterData>();
+//     //     std::cout<< "DEBUG: in getExtension(\""<<detectorName<<"\"): size of layers: "<<theExtension->layers.size()<<" positions not shown. "<<std::endl;
+//     
+//     //     for(int i=0; i< theExtension->layers.size(); i++){
+//     //       std::cout<<theExtension->layers[i].distance/dd4hep::mm<<" ";
+//     //     }
+//     //     std::cout<<std::endl;
+//   } catch ( ... ){
+//     
+//     streamlog_out(ERROR) << "BIG WARNING! EXTENSION DOES NOT EXIST FOR " << detectorName<<". MAKE SURE YOU CHANGE THIS!"<< std::endl;
+//   }
+//   
+//   return theExtension;
+// }
 
 
 DD4hep::DDRec::LayeredCalorimeterData * getExtension(unsigned int includeFlag, unsigned int excludeFlag=0) {
@@ -760,6 +763,9 @@ void DDPandoraPFANewProcessor::FinaliseSteeringParameters()
     //Get Muon Endcap extension by type, ignore plugs and rings 
     const DD4hep::DDRec::LayeredCalorimeterData * muonEndcapExtension= getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::MUON | DD4hep::DetType::ENDCAP), ( DD4hep::DetType::AUXILIARY ) );   
     
+    //Get COIL extension
+    const DD4hep::DDRec::LayeredCalorimeterData * coilExtension= getExtension( ( DD4hep::DetType::COIL ) );   
+  
     
     m_trackCreatorSettings.m_eCalBarrelInnerSymmetry        =   eCalBarrelExtension->inner_symmetry;
     m_trackCreatorSettings.m_eCalBarrelInnerPhi0            =   eCalBarrelExtension->inner_phi0/dd4hep::rad;
@@ -769,7 +775,7 @@ void DDPandoraPFANewProcessor::FinaliseSteeringParameters()
     m_caloHitCreatorSettings.m_eCalBarrelOuterZ             =   eCalBarrelExtension->extent[3]/dd4hep::mm;
     m_caloHitCreatorSettings.m_hCalBarrelOuterZ             =   hCalBarrelExtension->extent[3]/dd4hep::mm;
     m_caloHitCreatorSettings.m_muonBarrelOuterZ             =   muonBarrelExtension->extent[3]/dd4hep::mm;
-    m_caloHitCreatorSettings.m_coilOuterR                   =   getCoilOuterR(); 
+    m_caloHitCreatorSettings.m_coilOuterR                   =   coilExtension->extent[1]/dd4hep::mm;
     m_caloHitCreatorSettings.m_eCalBarrelInnerPhi0          =   eCalBarrelExtension->inner_phi0/dd4hep::rad;
     m_caloHitCreatorSettings.m_eCalBarrelInnerSymmetry      =   eCalBarrelExtension->inner_symmetry;
     m_caloHitCreatorSettings.m_hCalBarrelInnerPhi0          =   hCalBarrelExtension->inner_phi0/dd4hep::rad;
