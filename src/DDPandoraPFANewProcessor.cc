@@ -22,6 +22,7 @@
 
 #include "DD4hep/LCDD.h"
 #include "DD4hep/DD4hepUnits.h"
+#include "DD4hep/DetType.h"
 #include "DDRec/DetectorData.h"
 
 #include "DDTrackCreatorILD.h"
@@ -92,16 +93,25 @@ DD4hep::DDRec::LayeredCalorimeterData * getExtension(unsigned int includeFlag, u
   
   DD4hep::DDRec::LayeredCalorimeterData * theExtension = 0;
   
-  try {
-    DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
-    const std::vector< DD4hep::Geometry::DetElement>& theDetectors = DD4hep::Geometry::DetectorSelector(lcdd).detectors(  includeFlag, excludeFlag ) ;
-    //Should only be one for this purpose. Consider catching exception
-    theExtension = theDetectors.at(0).extension<DD4hep::DDRec::LayeredCalorimeterData>();
-
-  } catch ( ... ){
+  DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
+  const std::vector< DD4hep::Geometry::DetElement>& theDetectors = DD4hep::Geometry::DetectorSelector(lcdd).detectors(  includeFlag, excludeFlag ) ;
+  
+  
+  streamlog_out( DEBUG2 ) << " getExtension :  includeFlag: " << DD4hep::DetType( includeFlag ) << " excludeFlag: " << DD4hep::DetType( excludeFlag ) 
+			  << "  found : " << theDetectors.size() << "  - first det: " << theDetectors.at(0).name() << std::endl ;
+  
+  if( theDetectors.size()  != 1 ){
     
-    streamlog_out(ERROR) << "BIG WARNING! EXTENSION OR DET ELEMENT DOES NOT EXIST FOR " << DD4hep::DetType(includeFlag)<<". MAKE SURE YOU CHANGE THIS!"<< std::endl;
+    std::stringstream es ;
+    es << " getExtension: selection is not unique (or empty)  includeFlag: " << DD4hep::DetType( includeFlag ) << " excludeFlag: " << DD4hep::DetType( excludeFlag ) 
+       << " --- found detectors : " ;
+    for( unsigned i=0, N= theDetectors.size(); i<N ; ++i ){
+      es << theDetectors.at(i).name() << ", " ; 
+    }
+    throw std::runtime_error( es.str() ) ;
   }
+  
+  theExtension = theDetectors.at(0).extension<DD4hep::DDRec::LayeredCalorimeterData>();
   
   return theExtension;
 }
@@ -751,17 +761,23 @@ void DDPandoraPFANewProcessor::FinaliseSteeringParameters()
     m_trackCreatorSettings.m_bField=getFieldFromLCDD();
     
     //Get ECal Barrel extension by type, ignore plugs and rings 
-    const DD4hep::DDRec::LayeredCalorimeterData * eCalBarrelExtension= getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::ELECTROMAGNETIC | DD4hep::DetType::BARREL), ( DD4hep::DetType::AUXILIARY ) );
+    const DD4hep::DDRec::LayeredCalorimeterData * eCalBarrelExtension= getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::ELECTROMAGNETIC | DD4hep::DetType::BARREL), 
+										     ( DD4hep::DetType::AUXILIARY  |  DD4hep::DetType::FORWARD ) );
     //Get ECal Endcap extension by type, ignore plugs and rings 
-    const DD4hep::DDRec::LayeredCalorimeterData * eCalEndcapExtension= getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::ELECTROMAGNETIC | DD4hep::DetType::ENDCAP), ( DD4hep::DetType::AUXILIARY ) );
+    const DD4hep::DDRec::LayeredCalorimeterData * eCalEndcapExtension= getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::ELECTROMAGNETIC | DD4hep::DetType::ENDCAP), 
+										     ( DD4hep::DetType::AUXILIARY |  DD4hep::DetType::FORWARD  ) );
     //Get HCal Barrel extension by type, ignore plugs and rings 
-    const DD4hep::DDRec::LayeredCalorimeterData * hCalBarrelExtension= getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::BARREL), ( DD4hep::DetType::AUXILIARY ) );
+    const DD4hep::DDRec::LayeredCalorimeterData * hCalBarrelExtension= getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::BARREL), 
+										     ( DD4hep::DetType::AUXILIARY |  DD4hep::DetType::FORWARD ) );
       //Get HCal Endcap extension by type, ignore plugs and rings 
-    const DD4hep::DDRec::LayeredCalorimeterData * hCalEndcapExtension= getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::ENDCAP), ( DD4hep::DetType::AUXILIARY ) );
+    const DD4hep::DDRec::LayeredCalorimeterData * hCalEndcapExtension= getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::ENDCAP), 
+										     ( DD4hep::DetType::AUXILIARY |  DD4hep::DetType::FORWARD ) );
     //Get Muon Barrel extension by type, ignore plugs and rings 
-    const DD4hep::DDRec::LayeredCalorimeterData * muonBarrelExtension= getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::MUON | DD4hep::DetType::BARREL), ( DD4hep::DetType::AUXILIARY ) );
-    //Get Muon Endcap extension by type, ignore plugs and rings 
-    const DD4hep::DDRec::LayeredCalorimeterData * muonEndcapExtension= getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::MUON | DD4hep::DetType::ENDCAP), ( DD4hep::DetType::AUXILIARY ) );   
+    const DD4hep::DDRec::LayeredCalorimeterData * muonBarrelExtension= getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::MUON | DD4hep::DetType::BARREL), 
+										     ( DD4hep::DetType::AUXILIARY |  DD4hep::DetType::FORWARD ) );
+    //fg: muon endcap is not used :
+    // //Get Muon Endcap extension by type, ignore plugs and rings 
+    // const DD4hep::DDRec::LayeredCalorimeterData * muonEndcapExtension= getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::MUON | DD4hep::DetType::ENDCAP), ( DD4hep::DetType::AUXILIARY ) );   
     
     //Get COIL extension
     const DD4hep::DDRec::LayeredCalorimeterData * coilExtension= getExtension( ( DD4hep::DetType::COIL ) );   
@@ -770,7 +786,7 @@ void DDPandoraPFANewProcessor::FinaliseSteeringParameters()
     m_trackCreatorSettings.m_eCalBarrelInnerSymmetry        =   eCalBarrelExtension->inner_symmetry;
     m_trackCreatorSettings.m_eCalBarrelInnerPhi0            =   eCalBarrelExtension->inner_phi0/dd4hep::rad;
     m_trackCreatorSettings.m_eCalBarrelInnerR               =   eCalBarrelExtension->extent[0]/dd4hep::mm;
-    m_trackCreatorSettings.m_eCalEndCapInnerZ               =   eCalBarrelExtension->extent[2]/dd4hep::mm;
+    m_trackCreatorSettings.m_eCalEndCapInnerZ               =   eCalEndcapExtension->extent[2]/dd4hep::mm;
                                                             
     m_caloHitCreatorSettings.m_eCalBarrelOuterZ             =   eCalBarrelExtension->extent[3]/dd4hep::mm;
     m_caloHitCreatorSettings.m_hCalBarrelOuterZ             =   hCalBarrelExtension->extent[3]/dd4hep::mm;

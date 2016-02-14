@@ -85,12 +85,12 @@ void DDGeometryCreator::SetMandatorySubDetectorParameters(SubDetectorTypeMap &su
     PandoraApi::Geometry::SubDetector::Parameters eCalBarrelParameters, eCalEndCapParameters, hCalBarrelParameters, hCalEndCapParameters,
         muonBarrelParameters, muonEndCapParameters;
 
-    this->SetDefaultSubDetectorParameters(*const_cast<DD4hep::DDRec::LayeredCalorimeterData*>(getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::ELECTROMAGNETIC | DD4hep::DetType::BARREL), ( DD4hep::DetType::AUXILIARY ) )), "ECalBarrel", pandora::ECAL_BARREL, eCalBarrelParameters);
-    this->SetDefaultSubDetectorParameters(*const_cast<DD4hep::DDRec::LayeredCalorimeterData*>(getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::ELECTROMAGNETIC | DD4hep::DetType::ENDCAP), ( DD4hep::DetType::AUXILIARY ) )), "ECalEndCap", pandora::ECAL_ENDCAP, eCalEndCapParameters);
-    this->SetDefaultSubDetectorParameters(*const_cast<DD4hep::DDRec::LayeredCalorimeterData*>(getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::BARREL), ( DD4hep::DetType::AUXILIARY ) )), "HCalBarrel", pandora::HCAL_BARREL, hCalBarrelParameters);
-    this->SetDefaultSubDetectorParameters(*const_cast<DD4hep::DDRec::LayeredCalorimeterData*>(getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::ENDCAP), ( DD4hep::DetType::AUXILIARY ) )), "HCalEndCap", pandora::HCAL_ENDCAP, hCalEndCapParameters);
-    this->SetDefaultSubDetectorParameters(*const_cast<DD4hep::DDRec::LayeredCalorimeterData*>(getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::MUON | DD4hep::DetType::BARREL), ( DD4hep::DetType::AUXILIARY ) )), "MuonBarrel", pandora::MUON_BARREL, muonBarrelParameters);
-    this->SetDefaultSubDetectorParameters(*const_cast<DD4hep::DDRec::LayeredCalorimeterData*>(getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::MUON | DD4hep::DetType::ENDCAP), ( DD4hep::DetType::AUXILIARY ) )), "MuonEndCap", pandora::MUON_ENDCAP, muonEndCapParameters);
+    this->SetDefaultSubDetectorParameters(*const_cast<DD4hep::DDRec::LayeredCalorimeterData*>(getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::ELECTROMAGNETIC | DD4hep::DetType::BARREL), ( DD4hep::DetType::AUXILIARY  |  DD4hep::DetType::FORWARD ) )), "ECalBarrel", pandora::ECAL_BARREL, eCalBarrelParameters);
+    this->SetDefaultSubDetectorParameters(*const_cast<DD4hep::DDRec::LayeredCalorimeterData*>(getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::ELECTROMAGNETIC | DD4hep::DetType::ENDCAP), ( DD4hep::DetType::AUXILIARY  |  DD4hep::DetType::FORWARD ) )), "ECalEndCap", pandora::ECAL_ENDCAP, eCalEndCapParameters);
+    this->SetDefaultSubDetectorParameters(*const_cast<DD4hep::DDRec::LayeredCalorimeterData*>(getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::BARREL), ( DD4hep::DetType::AUXILIARY  |  DD4hep::DetType::FORWARD ) )), "HCalBarrel", pandora::HCAL_BARREL, hCalBarrelParameters);
+    this->SetDefaultSubDetectorParameters(*const_cast<DD4hep::DDRec::LayeredCalorimeterData*>(getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::ENDCAP), ( DD4hep::DetType::AUXILIARY  |  DD4hep::DetType::FORWARD ) )), "HCalEndCap", pandora::HCAL_ENDCAP, hCalEndCapParameters);
+    this->SetDefaultSubDetectorParameters(*const_cast<DD4hep::DDRec::LayeredCalorimeterData*>(getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::MUON | DD4hep::DetType::BARREL), ( DD4hep::DetType::AUXILIARY  |  DD4hep::DetType::FORWARD ) )), "MuonBarrel", pandora::MUON_BARREL, muonBarrelParameters);
+    this->SetDefaultSubDetectorParameters(*const_cast<DD4hep::DDRec::LayeredCalorimeterData*>(getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::MUON | DD4hep::DetType::ENDCAP), ( DD4hep::DetType::AUXILIARY  |  DD4hep::DetType::FORWARD ) )), "MuonEndCap", pandora::MUON_ENDCAP, muonEndCapParameters);
 
     subDetectorTypeMap[pandora::ECAL_BARREL] = eCalBarrelParameters;
     subDetectorTypeMap[pandora::ECAL_ENDCAP] = eCalEndCapParameters;
@@ -273,7 +273,7 @@ pandora::StatusCode DDGeometryCreator::CreateHCalBarrelBoxGaps() const
 
     std::string detectorName = lcdd.header().name();
     
-    const DD4hep::DDRec::LayeredCalorimeterData * hCalBarrelParameters = getExtension(( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::BARREL), ( DD4hep::DetType::AUXILIARY ));
+    const DD4hep::DDRec::LayeredCalorimeterData * hCalBarrelParameters = getExtension(( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::BARREL), ( DD4hep::DetType::AUXILIARY  |  DD4hep::DetType::FORWARD ));
 
     const unsigned int innerSymmetryOrder(hCalBarrelParameters->inner_symmetry);
     const unsigned int outerSymmetryOrder(hCalBarrelParameters->outer_symmetry);
@@ -316,7 +316,7 @@ pandora::StatusCode DDGeometryCreator::CreateHCalEndCapBoxGaps() const
 {
   
     
-    const DD4hep::DDRec::LayeredCalorimeterData * hCalEndCapParameters = getExtension(( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::ENDCAP), ( DD4hep::DetType::AUXILIARY ));
+    const DD4hep::DDRec::LayeredCalorimeterData * hCalEndCapParameters = getExtension(( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::ENDCAP), ( DD4hep::DetType::AUXILIARY  |  DD4hep::DetType::FORWARD ));
 
     const float staveGap(hCalEndCapParameters->gap0/dd4hep::mm);
     const float innerRadius(hCalEndCapParameters->extent[0]/dd4hep::mm);
@@ -343,7 +343,7 @@ pandora::StatusCode DDGeometryCreator::CreateHCalBarrelConcentricGaps() const
 {
     
     
-    const DD4hep::DDRec::LayeredCalorimeterData *hCalBarrelParameters = getExtension(( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::BARREL), ( DD4hep::DetType::AUXILIARY ));
+    const DD4hep::DDRec::LayeredCalorimeterData *hCalBarrelParameters = getExtension(( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::BARREL), ( DD4hep::DetType::AUXILIARY  |  DD4hep::DetType::FORWARD ));
     const float gapWidth(hCalBarrelParameters->gap0/dd4hep::mm);
 
     PandoraApi::Geometry::ConcentricGap::Parameters gapParameters;
