@@ -11,7 +11,7 @@ PROJECT( DDMarlinPandora )
 
 # project version# continuing from MarlinPandora version 2.0.0 revision 1934
 SET( DDMarlinPandora_VERSION_MAJOR 00 )
-SET( DDMarlinPandora_VERSION_MINOR 01 )
+SET( DDMarlinPandora_VERSION_MINOR 02 )
 SET( DDMarlinPandora_VERSION_PATCH 00 )
 
 

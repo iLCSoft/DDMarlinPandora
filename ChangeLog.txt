@@ -1,6 +1,24 @@
 
 DDMarlinPandora: Development package to integrate with DD4hep
 
+  --------
+ | v00-02 |
+  --------
+
+F.Gaede
+ - enforce unique selection in getExtension(include,exclude)
+   - throws exception if not unique
+ - bug fix: eCalBarrelExtension -> eCalEndcapExtension
+   for setting m_eCalEndCapInnerZ 
+ - added DetType::FORWARD to excludeFlags for main calorimeters 
+ - added DetType::AUXILIARY to excludeFlag for LCal ( exclude BeamCal )
+ - DDTrackCreatorILD.cc :
+   - added dd4hep units to parameters extracted from DD4hep 
+   - protect against poor tracks ( ndf <0 or missing/poor parameters)
+   - added debug printout for track selection
+
+
+
 N.Nikiforou 12/02/2016:
   - Changed handling of Coil parameters: now the info is accessed from LayeredCalorimeterData 
     extensions attached to the drivers (Solenoid for CLICdp, SCoil02 for ILD).
