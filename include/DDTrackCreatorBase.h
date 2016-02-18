@@ -72,8 +72,6 @@ public:
         int             m_minFtdTrackHits;                      ///< Track quality cut: the minimum number of FTD track hits for FTD only tracks
         int             m_maxTrackHits;                         ///< Track quality cut: the maximum number of track hits
 
-        int             m_useOldTrackStateCalculation;          ///< Whether to calculate track states manually, rather than copy stored fitter values
-
         float           m_d0TrackCut;                           ///< Track d0 cut used to determine whether track can be used to form pfo
         float           m_z0TrackCut;                           ///< Track z0 cut used to determine whether track can be used to form pfo
 
@@ -275,24 +273,11 @@ protected:
     void CopyTrackState(const TrackState *const pTrackState, pandora::InputTrackState &inputTrackState) const;
 
     /**
-     *  @brief  Obtain track states at start and end of track and the momentum at the dca
+     *  @brief  Obtain track time when it reaches ECAL
      * 
      *  @param  pTrack the lcio track
-     *  @param  trackParameters the track parameters
      */
-    void GetTrackStatesOld(const EVENT::Track *const pTrack, PandoraApi::Track::Parameters &trackParameters) const;
-
-    /**
-     *  @brief  Project helix to the surface of the ecal
-     * 
-     *  @param  pHelix helix fit to be projected to ecal surface
-     *  @param  signPz sign w.r.t. increasing z direction
-     *  @param  trackParameters the track parameters
-     */
-    void GetECalProjectionOld(const pandora::Helix *const pHelix, const int signPz, PandoraApi::Track::Parameters &trackParameters) const;
-
-
-
+    float CalculateTrackTimeAtCalorimeter(const EVENT::Track *const pTrack) const;
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

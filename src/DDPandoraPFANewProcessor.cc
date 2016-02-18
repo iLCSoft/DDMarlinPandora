@@ -423,6 +423,37 @@ void DDPandoraPFANewProcessor::ProcessSteeringFile()
                              "PFO Collection Name",
                              m_pfoCreatorSettings.m_pfoCollectionName,
                              std::string("PandoraPFANewPFOs"));
+    registerOutputCollection(LCIO::VERTEX,
+                             "StartVertexCollectionName",
+                             "Start Vertex Collection Name",
+                             m_pfoCreatorSettings.m_startVertexCollectionName,
+                             std::string("PandoraPFANewStartVertices"));
+
+    registerProcessorParameter("StartVertexAlgorithmName",
+                            "The algorithm name for filling start vertex",
+                            m_pfoCreatorSettings.m_startVertexAlgName,
+                            std::string("PandoraPFANew"));
+
+    // Energy resolution parameters
+    registerProcessorParameter("EMStochasticTerm",
+                            "The stochastic term for EM shower",
+                            m_pfoCreatorSettings.m_emStochasticTerm,
+                            float(0.17));
+
+    registerProcessorParameter("HadStochasticTerm",
+                            "The stochastic term for Hadronic shower",
+                            m_pfoCreatorSettings.m_hadStochasticTerm,
+                            float(0.6));
+
+    registerProcessorParameter("EMConstantTerm",
+                            "The constant term for EM shower",
+                            m_pfoCreatorSettings.m_emConstantTerm,
+                            float(0.01));
+
+    registerProcessorParameter("HadConstantTerm",
+                            "The constant term for Hadronic shower",
+                            m_pfoCreatorSettings.m_hadConstantTerm,
+                            float(0.03));
 
     // Calibration constants
     registerProcessorParameter("ECalToMipCalibration",
@@ -532,11 +563,6 @@ void DDPandoraPFANewProcessor::ProcessSteeringFile()
                             "Track quality cut: the maximum number of track hits",
                             m_trackCreatorSettings.m_maxTrackHits,
                             int(5000));
-
-   registerProcessorParameter("UseOldTrackStateCalculation",
-                            "Whether to calculate track states manually, rather than copy stored fitter values",
-                            m_trackCreatorSettings.m_useOldTrackStateCalculation,
-                            int(0));
 
     // Track PFO usage parameters
     registerProcessorParameter("D0TrackCut",

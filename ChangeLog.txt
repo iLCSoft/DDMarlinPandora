@@ -1,9 +1,14 @@
 
 DDMarlinPandora: Development package to integrate with DD4hep
 
+
+N. Nikiforou 17/02/2016
+ - Merged changes from MalrinPandora 02-02-00 up to today (7c88d10)
+
   --------
  | v00-02 |
   --------
+
 
 F.Gaede
  - enforce unique selection in getExtension(include,exclude)

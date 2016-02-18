@@ -62,9 +62,9 @@ MESSAGE( STATUS "DDMarlinPandora CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS} " )
 ### DEPENDENCIES ############################################################
 
 FIND_PACKAGE( Marlin 1.0 REQUIRED )
-FIND_PACKAGE( MarlinUtil REQUIRED )
-FIND_PACKAGE( PandoraSDK 02.00.00 REQUIRED )
-FIND_PACKAGE( LCContent 02.00.00 REQUIRED )
+FIND_PACKAGE( MarlinUtil 01.10 REQUIRED )
+FIND_PACKAGE( PandoraSDK 02.02.00 REQUIRED )
+FIND_PACKAGE( LCContent 02.02.00 REQUIRED )
 FIND_PACKAGE( DD4hep REQUIRED )
 FIND_PACKAGE( ROOT REQUIRED )
 
@@ -78,7 +78,7 @@ FOREACH( pkg Marlin MarlinUtil PandoraSDK LCContent DD4hep ROOT)
 ENDFOREACH()
 
 IF( PANDORA_MONITORING )
-    FIND_PACKAGE( PandoraMonitoring 02.00.00 REQUIRED )
+    FIND_PACKAGE( PandoraMonitoring 02.02.00 REQUIRED )
     IF( PandoraMonitoring_FOUND )
         INCLUDE_DIRECTORIES( ${PandoraMonitoring_INCLUDE_DIRS} )
         LINK_LIBRARIES( ${PandoraMonitoring_LIBRARIES} )
