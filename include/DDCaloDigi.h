@@ -22,6 +22,7 @@ const int MAX_STAVES =  16;
 
 /** === DDCaloDigi Processor === <br>
  *  Simple calorimeter digitizer Processor. <br>
+ *  Ported from ILDCaloDigi to use DD4hep
  *  Takes SimCalorimeterHit Collections and <br>
  *  produces CalorimeterHit Collections. <br>
  *  Simulated energy depositions in active <br>
