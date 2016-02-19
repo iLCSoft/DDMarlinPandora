@@ -762,7 +762,7 @@ void DDCaloDigi::processEvent( LCEvent * evt ) {
           int cellid1 = hit->getCellID1();
           int layer = idDecoder(hit)["layer"];
           int stave = idDecoder(hit)["stave"];
-          int module= 0; //FIXME idDecoder(hit)["module"]; //NOT PART OF ID SPEC
+          int module= idDecoder(hit)["module"]; 
 
           // check that layer and assumed layer type are compatible
 	  checkConsistency(colName, layer);
