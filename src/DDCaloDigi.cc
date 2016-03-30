@@ -1277,7 +1277,8 @@ void DDCaloDigi::fillECALGaps( ) {
               // calculate difference in hit postions in z and along stave
               float dx = xi-xj;
               float dy = yi-yj;
-              float dt = fabs(dx*_barrelStaveDir[is][0] + dy*_barrelStaveDir[is][1]);
+              //float dt = fabs(dx*_barrelStaveDir[is][0] + dy*_barrelStaveDir[is][1]);
+	      float dt = sqrt(dx*dx + dy*dy); // more generic 
               // flags for evidence for gaps
               bool zgap = false;   // in z direction
               bool tgap = false;   // along stave
