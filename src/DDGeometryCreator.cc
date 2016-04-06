@@ -15,6 +15,8 @@
 #include "DD4hep/LCDD.h"
 #include "DD4hep/DD4hepUnits.h"
 #include "DDRec/DetectorData.h"
+#include "DD4hep/DetType.h"
+
 
 #include <utility>
 

@@ -24,6 +24,7 @@
 #include "DD4hep/DD4hepUnits.h"
 #include "DD4hep/DetType.h"
 #include "DDRec/DetectorData.h"
+#include "DD4hep/DetectorSelector.h"
 
 #include "DDTrackCreatorILD.h"
 #include "DDTrackCreatorCLIC.h"
