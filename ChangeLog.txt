@@ -4,6 +4,12 @@ DDMarlinPandora: Development package to integrate with DD4hep
   --------
  | v00-03 |
   --------
+
+N. Nikiforou 06/04/2016 
+ - Merged changes from MarlinPandora/TrackCreator (committed by Bono on Feb 24 wit git commit 0917739) to DDTrackCreatorILD
+ - Merged changes from MarlinPandora/CaloHitCreator (committed by Bono on Mar 30 wit git commit 6b381cf) to DDCaloHitCreator
+    -Note: commits in MarlinPandora in-between the two revisions npted above have been reverted in the last commit
+
 N. Nikiforou 19/02/2016
  - Merged changes from ILDCaloDigi (MarlinReco rev. 5432) into DDCaloDigi. 
    It incorporates changes to ILDCaloDigy by Daniel. The introduction of

@@ -563,6 +563,14 @@ void DDCaloHitCreator::GetEndCapCaloHitProperties(const EVENT::CalorimeterHit *c
     caloHitParameters.m_nCellRadiationLengths = nRadLengths;
     caloHitParameters.m_nCellInteractionLengths = nIntLengths;
     
+    if (caloHitParameters.m_nCellRadiationLengths.Get() < std::numeric_limits<float>::epsilon() || caloHitParameters.m_nCellInteractionLengths.Get() < std::numeric_limits<float>::epsilon())
+    {
+        streamlog_out(WARNING) << "CaloHitCreator::GetEndCapCaloHitProperties Calo hit has 0 radiation length or interaction length: \
+            not creating a Pandora calo hit." << std::endl;
+        throw pandora::StatusCodeException(pandora::STATUS_CODE_INVALID_PARAMETER);
+    }
+
+    
     //FIXME! do we need this?
     absorberCorrection = 1.;
     for (unsigned int i = 0, iMax = layers.size(); i < iMax; ++i)
@@ -572,10 +580,10 @@ void DDCaloHitCreator::GetEndCapCaloHitProperties(const EVENT::CalorimeterHit *c
         if (i>0)
             absorberThickness += (layers[i-1].outer_thickness - layers[i-1].sensitive_thickness/2.0)/dd4hep::mm;
 
-        if (absorberThickness <= 0.)
+        if (absorberThickness < std::numeric_limits<float>::epsilon())
             continue;
 
-        if (layerAbsorberThickness > 0.)
+        if (layerAbsorberThickness > std::numeric_limits<float>::epsilon())
             absorberCorrection = absorberThickness / layerAbsorberThickness;
 
         break;
@@ -617,7 +625,13 @@ void DDCaloHitCreator::GetBarrelCaloHitProperties(const EVENT::CalorimeterHit *c
     caloHitParameters.m_nCellRadiationLengths = nRadLengths;
     caloHitParameters.m_nCellInteractionLengths = nIntLengths;
 
-    
+    if (caloHitParameters.m_nCellRadiationLengths.Get() < std::numeric_limits<float>::epsilon() || caloHitParameters.m_nCellInteractionLengths.Get() < std::numeric_limits<float>::epsilon())
+    {
+        streamlog_out(WARNING) << "CaloHitCreator::GetBarrelCaloHitProperties Calo hit has 0 radiation length or interaction length: \
+            not creating a Pandora calo hit." << std::endl;
+        throw pandora::StatusCodeException(pandora::STATUS_CODE_INVALID_PARAMETER);
+    }
+
     //FIXME! do we need this?
     absorberCorrection = 1.;
     for (unsigned int i = 0, iMax = layers.size(); i < iMax; ++i)
@@ -627,10 +641,10 @@ void DDCaloHitCreator::GetBarrelCaloHitProperties(const EVENT::CalorimeterHit *c
         if (i>0)
             absorberThickness += (layers[i-1].outer_thickness - layers[i-1].sensitive_thickness/2.0)/dd4hep::mm;
 
-        if (absorberThickness <= 0.)
+        if (absorberThickness < std::numeric_limits<float>::epsilon())
             continue;
 
-        if (layerAbsorberThickness > 0.)
+        if (layerAbsorberThickness > std::numeric_limits<float>::epsilon())
             absorberCorrection = absorberThickness / layerAbsorberThickness;
 
         break;
