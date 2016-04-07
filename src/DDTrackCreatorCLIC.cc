@@ -210,6 +210,11 @@ pandora::StatusCode DDTrackCreatorCLIC::CreateTracks(EVENT::LCEvent *pLCEvent)
                     if (0.f != signedCurvature)
                         trackParameters.m_charge = static_cast<int>(signedCurvature / std::fabs(signedCurvature));
 
+                    
+                    //FIXME: Should consider adding a try-catch block to check against cases where a track has invalid parameters
+                    //like very small omega. Especially for omega<epsilon=1e-7, pandora throws a pandora::StatusCodeException &statusCodeException
+                    //which is not caught.
+                    
                     this->GetTrackStates(pTrack, trackParameters);
                     this->TrackReachesECAL(pTrack, trackParameters);
                     this->DefineTrackPfoUsage(pTrack, trackParameters);
@@ -238,6 +243,8 @@ pandora::StatusCode DDTrackCreatorCLIC::CreateTracks(EVENT::LCEvent *pLCEvent)
         {
             streamlog_out(WARNING) << "Failed to extract track collection: " << *iter << ", " << exception.what() << std::endl;
         }
+        
+        
     }
 
     return pandora::STATUS_CODE_SUCCESS;
