@@ -11,7 +11,7 @@ PROJECT( DDMarlinPandora )
 
 # project version# continuing from MarlinPandora version 2.0.0 revision 1934
 SET( DDMarlinPandora_VERSION_MAJOR 00 )
-SET( DDMarlinPandora_VERSION_MINOR 04 )
+SET( DDMarlinPandora_VERSION_MINOR 05 )
 SET( DDMarlinPandora_VERSION_PATCH 00 )
 
 
@@ -31,27 +31,20 @@ INSTALL_DIRECTORY( ./include DESTINATION . FILES_MATCHING PATTERN "*.h" )
 
 AUX_SOURCE_DIRECTORY( ./src/ DDMarlinPandora_SRCS )
 
-IF( NOT CMAKE_CXX_FLAGS )
-    SET( CMAKE_CXX_FLAGS "-std=c++11" )
-    SET( PROCEED_WITHOUT_CXX_FLAGS ON )
-ENDIF()
+if (NOT CMAKE_CXX_FLAGS)
+    set(CMAKE_CXX_FLAGS "-std=c++11")
+endif()
 
-INCLUDE( CheckCXXCompilerFlag )
+include(CheckCXXCompilerFlag)
+unset(COMPILER_SUPPORTS_CXX_FLAGS CACHE)
+CHECK_CXX_COMPILER_FLAG(${CMAKE_CXX_FLAGS} COMPILER_SUPPORTS_CXX_FLAGS)
 
-UNSET( COMPILER_SUPPORTS_CXX_FLAGS CACHE )
-CHECK_CXX_COMPILER_FLAG( ${CMAKE_CXX_FLAGS} COMPILER_SUPPORTS_CXX_FLAGS )
-IF( NOT COMPILER_SUPPORTS_CXX_FLAGS )
-    MESSAGE( STATUS "The compiler ${CMAKE_CXX_COMPILER} does not support cxx flags ${CMAKE_CXX_FLAGS}" )
-    IF( NOT PROCEED_WITHOUT_CXX_FLAGS )
-        MESSAGE( FATAL_ERROR "CMake abort." )
-    ENDIF()
-    MESSAGE( STATUS "Proceed without cxx flags ${CMAKE_CXX_FLAGS}" )
-    UNSET( CMAKE_CXX_FLAGS )
-ENDIF()
+if(NOT COMPILER_SUPPORTS_CXX_FLAGS)
+    message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} does not support cxx flags ${CMAKE_CXX_FLAGS}")
+endif()
 
 if( APPLE )
     SET( CMAKE_CXX_FLAGS "-Wall -pedantic -Wno-long-long -Wno-sign-compare -fno-strict-aliasing ${CMAKE_CXX_FLAGS}" )
-
 else()
     SET( CMAKE_CXX_FLAGS "-Wall -pedantic -Wno-long-long -Wno-sign-compare -fno-strict-aliasing ${CMAKE_CXX_FLAGS}" )
 endif()
@@ -63,8 +56,8 @@ MESSAGE( STATUS "DDMarlinPandora CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS} " )
 
 FIND_PACKAGE( Marlin 1.0 REQUIRED )
 FIND_PACKAGE( MarlinUtil 01.10 REQUIRED )
-FIND_PACKAGE( PandoraSDK 02.02.00 REQUIRED )
-FIND_PACKAGE( LCContent 02.02.00 REQUIRED )
+FIND_PACKAGE( PandoraSDK 03.00.00 REQUIRED )
+FIND_PACKAGE( LCContent 03.00.00 REQUIRED )
 FIND_PACKAGE( DD4hep REQUIRED )
 FIND_PACKAGE( ROOT REQUIRED )
 
@@ -78,7 +71,7 @@ FOREACH( pkg Marlin MarlinUtil PandoraSDK LCContent DD4hep ROOT)
 ENDFOREACH()
 
 IF( PANDORA_MONITORING )
-    FIND_PACKAGE( PandoraMonitoring 02.02.00 REQUIRED )
+    FIND_PACKAGE( PandoraMonitoring 03.00.00 REQUIRED )
     IF( PandoraMonitoring_FOUND )
         INCLUDE_DIRECTORIES( ${PandoraMonitoring_INCLUDE_DIRS} )
         LINK_LIBRARIES( ${PandoraMonitoring_LIBRARIES} )

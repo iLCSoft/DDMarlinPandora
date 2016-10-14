@@ -13,9 +13,6 @@
 #include "Api/PandoraApi.h"
 
 #include "LCContent.h"
-#if __cplusplus > 199711L
-    #include "LCContentFast.h"
-#endif
 
 #include "DDExternalClusteringAlgorithm.h"
 #include "DDPandoraPFANewProcessor.h"
@@ -300,10 +297,6 @@ const EVENT::LCEvent *DDPandoraPFANewProcessor::GetCurrentEvent(const pandora::P
 pandora::StatusCode DDPandoraPFANewProcessor::RegisterUserComponents() const
 {
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LCContent::RegisterAlgorithms(*m_pPandora));
-#if __cplusplus > 199711L
-    PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LCContentFast::RegisterAlgorithms(*m_pPandora));
-#endif
-
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LCContent::RegisterBasicPlugins(*m_pPandora));
 
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LCContent::RegisterBFieldPlugin(*m_pPandora,

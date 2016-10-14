@@ -246,8 +246,8 @@ void DDGeometryCreator::SetDefaultSubDetectorParameters(const DD4hep::DDRec::Lay
         layerParameters.m_closestDistanceToIp = (theLayer.distance+theLayer.inner_thickness)/dd4hep::mm; //Distance to center of sensitive element
         layerParameters.m_nRadiationLengths = totalNumberOfRadLengths;
         layerParameters.m_nInteractionLengths = totalNumberOfIntLengths;
-        
-        parameters.m_layerParametersList.push_back(layerParameters);
+
+        parameters.m_layerParametersVector.push_back(layerParameters);
     }
 }
 
