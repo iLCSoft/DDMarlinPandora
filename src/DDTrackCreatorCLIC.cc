@@ -155,7 +155,7 @@ pandora::StatusCode DDTrackCreatorCLIC::CreateTracks(EVENT::LCEvent *pLCEvent)
                     if (NULL == pTrack)
                         throw EVENT::Exception("Collection type mismatch");
 
-                        streamlog_out(DEBUG0)<<" Warning! Ignoring expected number of hits and other hit number cuts. Should eventually change!"<<std::endl;
+		    streamlog_out(DEBUG0)<<" Warning! Ignoring expected number of hits and other hit number cuts. Should eventually change!"<<std::endl;
 
 //                     int minTrackHits = m_settings.m_minTrackHits;
 //                     const float tanLambda(std::fabs(pTrack->getTanLambda()));
@@ -199,28 +199,31 @@ pandora::StatusCode DDTrackCreatorCLIC::CreateTracks(EVENT::LCEvent *pLCEvent)
                     trackParameters.m_mass = pandora::PdgTable::GetParticleMass(pandora::PI_PLUS);
 
                     // Use particle id information from V0 and Kink finders
-                    TrackToPidMap::const_iterator iter = m_trackToPidMap.find(pTrack);
+                    TrackToPidMap::const_iterator trackPIDiter = m_trackToPidMap.find(pTrack);
 
-                    if(iter != m_trackToPidMap.end())
+                    if(trackPIDiter != m_trackToPidMap.end())
                     {
-                        trackParameters.m_particleId = (*iter).second;
-                        trackParameters.m_mass = pandora::PdgTable::GetParticleMass((*iter).second);
+                        trackParameters.m_particleId = trackPIDiter->second;
+                        trackParameters.m_mass = pandora::PdgTable::GetParticleMass(trackPIDiter->second);
                     }
 
                     if (0.f != signedCurvature)
                         trackParameters.m_charge = static_cast<int>(signedCurvature / std::fabs(signedCurvature));
 
                     
-                    //FIXME: Should consider adding a try-catch block to check against cases where a track has invalid parameters
-                    //like very small omega. Especially for omega<epsilon=1e-7, pandora throws a pandora::StatusCodeException &statusCodeException
-                    //which is not caught.
-                    
-                    this->GetTrackStates(pTrack, trackParameters);
-                    this->TrackReachesECAL(pTrack, trackParameters);
-                    this->DefineTrackPfoUsage(pTrack, trackParameters);
-
 		    try
 		      {
+			//FIXME: Should consider adding a try-catch block to check
+			//against cases where a track has invalid parameters like
+			//very small omega. Especially for omega<epsilon=1e-7,
+			//pandora throws a pandora::StatusCodeException
+			//&statusCodeException which is not caught.
+			//FIXED: if an exception happens we ignore the track
+
+			this->GetTrackStates(pTrack, trackParameters);
+			this->TrackReachesECAL(pTrack, trackParameters);
+			this->DefineTrackPfoUsage(pTrack, trackParameters);
+
 			PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Track::Create(*m_pPandora, trackParameters));
 			m_trackVector.push_back(pTrack);
 		      }
