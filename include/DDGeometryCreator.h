@@ -132,7 +132,7 @@ private:
         float maxZ, float gapWidth, pandora::CartesianVector vertexOffset = pandora::CartesianVector(0, 0, 0)) const;
 
     const Settings          m_settings;                     ///< The geometry creator settings
-    const pandora::Pandora *m_pPandora;                     ///< Address of the pandora object to create the geometry
+    const pandora::Pandora &m_pPandora;                     ///< Address of the pandora object to create the geometry
 };
 
 #endif // #ifndef GEOMETRY_CREATOR_H

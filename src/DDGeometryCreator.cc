@@ -10,12 +10,12 @@
 #include "marlin/Processor.h"
 
 #include "DDGeometryCreator.h"
-#include "DDPandoraPFANewProcessor.h"
 
 #include "DD4hep/LCDD.h"
 #include "DD4hep/DD4hepUnits.h"
 #include "DDRec/DetectorData.h"
 #include "DD4hep/DetType.h"
+#include "DD4hep/DetectorSelector.h"
 
 
 #include <utility>
@@ -29,7 +29,7 @@ std::vector<double> getTrackingRegionExtent();
 
 DDGeometryCreator::DDGeometryCreator(const Settings &settings, const pandora::Pandora *const pPandora) :
     m_settings(settings),
-    m_pPandora(pPandora)
+    m_pPandora(*pPandora)
 {
 }
 
@@ -63,12 +63,12 @@ pandora::StatusCode DDGeometryCreator::CreateGeometry() const
             this->SetILDSpecificGeometry(subDetectorTypeMap, subDetectorNameMap);
 
         for (SubDetectorTypeMap::const_iterator iter = subDetectorTypeMap.begin(), iterEnd = subDetectorTypeMap.end(); iter != iterEnd; ++iter)
-            PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Geometry::SubDetector::Create(*m_pPandora, iter->second));
+            PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Geometry::SubDetector::Create(m_pPandora, iter->second));
 
         for (SubDetectorNameMap::const_iterator iter = subDetectorNameMap.begin(), iterEnd = subDetectorNameMap.end(); iter != iterEnd; ++iter){
             streamlog_out(DEBUG) << "Creating geometry for additional subdetector " << iter->first<< std::endl;
 
-            PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Geometry::SubDetector::Create(*m_pPandora, iter->second));
+            PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Geometry::SubDetector::Create(m_pPandora, iter->second));
         }
     }
     catch (std::exception &exception)
@@ -253,7 +253,7 @@ void DDGeometryCreator::SetDefaultSubDetectorParameters(const DD4hep::DDRec::Lay
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-pandora::StatusCode DDGeometryCreator::SetILDSpecificGeometry(SubDetectorTypeMap &subDetectorTypeMap, SubDetectorNameMap &subDetectorNameMap) const
+pandora::StatusCode DDGeometryCreator::SetILDSpecificGeometry(SubDetectorTypeMap &/*subDetectorTypeMap*/, SubDetectorNameMap &/*subDetectorNameMap*/) const
 {
     streamlog_out(DEBUG0) << " Building gaps in detector active material"<<std::endl;
     // Gaps in detector active material
@@ -359,7 +359,7 @@ pandora::StatusCode DDGeometryCreator::CreateHCalBarrelConcentricGaps() const
     gapParameters.m_outerPhiCoordinate = hCalBarrelParameters->outer_phi0/dd4hep::rad;
     gapParameters.m_outerSymmetryOrder = hCalBarrelParameters->outer_symmetry;
 
-    PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Geometry::ConcentricGap::Create(*m_pPandora, gapParameters));
+    PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Geometry::ConcentricGap::Create(m_pPandora, gapParameters));
 
     return pandora::STATUS_CODE_SUCCESS;
 }
@@ -391,7 +391,7 @@ pandora::StatusCode DDGeometryCreator::CreateRegularBoxGaps(unsigned int symmetr
         gapParameters.m_side3 = pandora::CartesianVector(cosPhi * basicSide3.GetX() + sinPhi * basicSide3.GetY(),
             -sinPhi * basicSide3.GetX() + cosPhi * basicSide3.GetY(), basicSide3.GetZ());
 
-        PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Geometry::BoxGap::Create(*m_pPandora, gapParameters));
+        PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Geometry::BoxGap::Create(m_pPandora, gapParameters));
     }
 
     return pandora::STATUS_CODE_SUCCESS;
