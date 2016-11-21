@@ -679,7 +679,7 @@ void DDCaloDigi::init() {
 }
 
 
-void DDCaloDigi::processRunHeader( LCRunHeader* run) {
+void DDCaloDigi::processRunHeader( LCRunHeader* /*run*/) {
 
   _nRun++ ;
   _nEvt = 0;
@@ -1187,7 +1187,7 @@ void DDCaloDigi::processEvent( LCEvent * evt ) {
 }
 
 
-void DDCaloDigi::check( LCEvent * evt ) { }
+void DDCaloDigi::check( LCEvent * /*evt*/ ) { }
 
 void DDCaloDigi::end(){
 
