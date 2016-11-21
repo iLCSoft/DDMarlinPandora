@@ -31,7 +31,11 @@
 DDTrackCreatorBase::DDTrackCreatorBase(const Settings &settings, const pandora::Pandora *const pPandora) :
     m_settings(settings),
     m_pandora(*pPandora),
-    m_trackVector(0)
+    m_trackVector(0),
+    m_v0TrackList( TrackList() ),
+    m_parentTrackList( TrackList() ),
+    m_daughterTrackList( TrackList() ),
+    m_trackToPidMap( TrackToPidMap() )
 {
   
 }
@@ -441,6 +445,12 @@ void DDTrackCreatorBase::CopyTrackState(const TrackState *const pTrackState, pan
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 DDTrackCreatorBase::Settings::Settings() :
+    m_trackCollections( StringVector() ),
+    m_kinkVertexCollections( StringVector() ),
+    m_prongVertexCollections( StringVector() ),
+    m_splitVertexCollections( StringVector() ),
+    m_v0VertexCollections( StringVector() ),
+    m_prongSplitVertexCollections(StringVector()),
     m_shouldFormTrackRelationships(1),
     m_minTrackHits(5),
     m_minFtdTrackHits(0),
@@ -466,6 +476,11 @@ DDTrackCreatorBase::Settings::Settings() :
     m_minMomentumForTrackHitChecks(1.f),
     m_maxBarrelTrackerInnerRDistance(50.f),
     m_minBarrelTrackerHitFractionOfExpected(0.2f),
-    m_minFtdHitsForBarrelTrackerHitFraction(2)
+    m_minFtdHitsForBarrelTrackerHitFraction(2),
+    m_bField(0.f),
+    m_eCalBarrelInnerSymmetry(0),
+    m_eCalBarrelInnerPhi0(0.f),
+    m_eCalBarrelInnerR(0.f),
+    m_eCalEndCapInnerZ(0.f)
 {
 }

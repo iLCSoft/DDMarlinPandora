@@ -6,6 +6,8 @@
  *  $Log: $
  */
 
+#include "DDTrackCreatorCLIC.h"
+
 #include "marlin/Global.h"
 #include "marlin/Processor.h"
 
@@ -15,12 +17,7 @@
 #include "UTIL/ILDConf.h"
 #include "UTIL/Operators.h"
 
-#include "DDTrackCreatorCLIC.h"
 #include "Pandora/PdgTable.h"
-
-#include <algorithm>
-#include <cmath>
-#include <limits>
 
 #include "DD4hep/LCDD.h"
 #include "DD4hep/DD4hepUnits.h"
@@ -28,12 +25,26 @@
 #include "DD4hep/DetType.h"
 #include "DD4hep/DetectorSelector.h"
 
-
+#include <algorithm>
+#include <cmath>
+#include <limits>
 
 //forward declarations. See in DDPandoraPFANewProcessor.cc
 std::vector<double> getTrackingRegionExtent();
 
-DDTrackCreatorCLIC::DDTrackCreatorCLIC(const Settings &settings, const pandora::Pandora *const pPandora) : DDTrackCreatorBase(settings,pPandora)
+DDTrackCreatorCLIC::DDTrackCreatorCLIC(const Settings &settings, const pandora::Pandora *const pPandora)
+  : DDTrackCreatorBase(settings,pPandora),
+    m_trackerInnerR( 0.f ),
+    m_trackerOuterR( 0.f ),
+    m_trackerZmax( 0.f ),
+    m_cosTracker( 0.f ),
+    m_endcapDiskInnerRadii( DoubleVector() ),
+    m_endcapDiskOuterRadii( DoubleVector() ),
+    m_endcapDiskZPositions( DoubleVector() ),
+    m_nEndcapDiskLayers( 0 ),
+    m_barrelTrackerLayers( 0 ),
+    m_tanLambdaEndcapDisk( 0.f )
+
 {
     
     m_trackerInnerR = getTrackingRegionExtent()[0];

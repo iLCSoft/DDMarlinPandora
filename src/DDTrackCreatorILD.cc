@@ -29,7 +29,23 @@
 #include "DD4hep/DetectorSelector.h"
 
 
-DDTrackCreatorILD::DDTrackCreatorILD(const Settings &settings, const pandora::Pandora *const pPandora) : DDTrackCreatorBase(settings,pPandora)
+DDTrackCreatorILD::DDTrackCreatorILD(const Settings &settings, const pandora::Pandora *const pPandora)
+  :
+  DDTrackCreatorBase(settings,pPandora),
+  m_cosTpc( 0.f ),
+  m_tpcInnerR( 0.f ),
+  m_tpcOuterR( 0.f ),
+  m_tpcMaxRow( 0 ),
+  m_tpcZmax( 0.f ),
+  m_tpcMembraneMaxZ( 0.f ),
+  m_ftdInnerRadii( DoubleVector() ),
+  m_ftdOuterRadii( DoubleVector() ),
+  m_ftdZPositions( DoubleVector() ),
+  m_nFtdLayers( 0 ),
+  m_tanLambdaFtd( 0.f ),
+  m_minEtdZPosition( 0.f ),
+  m_minSetRadius( 0.f )
+
 {
     
     
