@@ -78,7 +78,7 @@ public:
 
 private:
     const Settings          m_settings;                         ///< The mc particle creator settings
-    const pandora::Pandora *m_pPandora;                         ///< Address of the pandora object to create the mc particles
+    const pandora::Pandora &m_pandora;                          ///< Reference to the pandora object to create the mc particles
     const float             m_bField;                           ///< The bfield
 };
 

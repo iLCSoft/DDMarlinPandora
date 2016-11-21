@@ -18,7 +18,6 @@
 
 #include "DDCaloHitCreator.h"
 #include "DDMCParticleCreator.h"
-#include "DDPandoraPFANewProcessor.h"
 #include "DDTrackCreatorBase.h"
 
 #include <cmath>
@@ -33,7 +32,7 @@ double getFieldFromLCDD();
 
 DDMCParticleCreator::DDMCParticleCreator(const Settings &settings, const pandora::Pandora *const pPandora) :
     m_settings(settings),
-    m_pPandora(pPandora),
+    m_pandora(*pPandora),
     m_bField(getFieldFromLCDD())
 {
 }
@@ -76,13 +75,13 @@ pandora::StatusCode DDMCParticleCreator::CreateMCParticles(const EVENT::LCEvent 
                     mcParticleParameters.m_endpoint = pandora::CartesianVector(pMcParticle->getEndpoint()[0], pMcParticle->getEndpoint()[1],
                         pMcParticle->getEndpoint()[2]);
 
-                    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::MCParticle::Create(*m_pPandora, mcParticleParameters));
+                    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::MCParticle::Create(m_pandora, mcParticleParameters));
 
                     // Create parent-daughter relationships
                     for(MCParticleVec::const_iterator itDaughter = pMcParticle->getDaughters().begin(),
                         itDaughterEnd = pMcParticle->getDaughters().end(); itDaughter != itDaughterEnd; ++itDaughter)
                     {
-                        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetMCParentDaughterRelationship(*m_pPandora,
+                        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetMCParentDaughterRelationship(m_pandora,
                             pMcParticle, *itDaughter));
                     }
                 }
@@ -156,7 +155,7 @@ pandora::StatusCode DDMCParticleCreator::CreateTrackToMCParticleRelationships(co
                     if (NULL == pBestMCParticle)
                         continue;
 
-                    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetTrackToMCParticleRelationship(*m_pPandora, pTrack,
+                    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetTrackToMCParticleRelationship(m_pandora, pTrack,
                         pBestMCParticle));
                 }
                 catch (pandora::StatusCodeException &statusCodeException)
@@ -217,7 +216,7 @@ pandora::StatusCode DDMCParticleCreator::CreateCaloHitToMCParticleRelationships(
                     for (MCParticleToEnergyWeightMap::const_iterator mcParticleIter = mcParticleToEnergyWeightMap.begin(),
                         mcParticleIterEnd = mcParticleToEnergyWeightMap.end(); mcParticleIter != mcParticleIterEnd; ++mcParticleIter)
                     {
-                        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetCaloHitToMCParticleRelationship(*m_pPandora,
+                        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetCaloHitToMCParticleRelationship(m_pandora,
                             *caloHitIter, mcParticleIter->first, mcParticleIter->second));
                     }
                 }
@@ -243,6 +242,10 @@ pandora::StatusCode DDMCParticleCreator::CreateCaloHitToMCParticleRelationships(
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-DDMCParticleCreator::Settings::Settings()
+DDMCParticleCreator::Settings::Settings():
+  m_mcParticleCollections( StringVector() ),
+  m_lcCaloHitRelationCollections( StringVector() ),
+  m_lcTrackRelationCollections( StringVector() )
+
 {
 }
