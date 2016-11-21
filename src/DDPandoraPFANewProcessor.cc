@@ -767,6 +767,23 @@ void DDPandoraPFANewProcessor::ProcessSteeringFile()
                                "The name of the DDTrackCreator implementation",
                                m_settings.m_trackCreatorName,
                                std::string("DDTrackCreatorCLIC")); 
+
+    registerProcessorParameter("ECalBarrelNormalVector",
+                               "Normal vector for the ECal barrel sensitive layers in local coordinates",
+                               m_caloHitCreatorSettings.m_eCalBarrelNormalVector,
+                               std::vector<float>({0.0, 0.0, 1.0}));
+
+    registerProcessorParameter("HCalBarrelNormalVector",
+                               "Normal vector for the HCal barrel sensitive layers in local coordinates",
+                               m_caloHitCreatorSettings.m_hCalBarrelNormalVector,
+                               std::vector<float>({0.0, 0.0, 1.0}));
+
+    registerProcessorParameter("YokeBarrelNormalVector",
+                               "Normal vector for the muon barrel sensitive layers in local coordinates",
+                               m_caloHitCreatorSettings.m_muonBarrelNormalVector,
+                               std::vector<float>({0.0, 0.0, 1.0}));
+
+
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

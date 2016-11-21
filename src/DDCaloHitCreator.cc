@@ -6,21 +6,22 @@
  *  $Log: $
  */
 
+#include "DDCaloHitCreator.h"
+
 #include "marlin/Global.h"
 #include "marlin/Processor.h"
 
 #include "UTIL/CellIDDecoder.h"
 
-#include "DDCaloHitCreator.h"
-#include "DDPandoraPFANewProcessor.h"
+
+#include <DD4hep/DD4hepUnits.h>
+#include <DD4hep/DetType.h>
+#include <DD4hep/DetectorSelector.h>
+#include <DD4hep/Detector.h>
 
 #include <algorithm>
 #include <cmath>
 #include <limits>
-
-#include "DD4hep/LCDD.h"
-#include "DD4hep/DD4hepUnits.h"
-#include "DDRec/DetectorData.h"
 
 //forward declarations. See in DDPandoraPFANewProcessor.cc
 
@@ -45,6 +46,11 @@ DDCaloHitCreator::DDCaloHitCreator(const Settings &settings, const pandora::Pand
 
     if ((m_hCalEndCapLayerThickness < std::numeric_limits<float>::epsilon()) || (m_hCalBarrelLayerThickness < std::numeric_limits<float>::epsilon()))
         throw pandora::StatusCodeException(pandora::STATUS_CODE_INVALID_PARAMETER);
+
+   DD4hep::Geometry::LCDD& lcdd = DD4hep::Geometry::LCDD::getInstance();
+   lcdd.apply("DD4hepVolumeManager",0,0);
+   m_volumeManager = lcdd.volumeManager();
+
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -144,8 +150,7 @@ pandora::StatusCode DDCaloHitCreator::CreateECalCaloHits(const EVENT::LCEvent *c
 
                     if (std::fabs(pCaloHit->getPosition()[2]) < m_settings.m_eCalBarrelOuterZ)
                     {
-                      this->GetBarrelCaloHitProperties(pCaloHit, barrelLayers, m_settings.m_eCalBarrelInnerSymmetry, m_settings.m_eCalBarrelInnerPhi0,
-                            cellIdDecoder(pCaloHit)["stave"], caloHitParameters, absorberCorrection);
+                      this->GetBarrelCaloHitProperties(pCaloHit, barrelLayers, m_settings.m_eCalBarrelInnerSymmetry, caloHitParameters, m_settings.m_eCalBarrelNormalVector, absorberCorrection);
 
                         caloHitParameters.m_hadronicEnergy = eCalToHadGeVBarrel * pCaloHit->getEnergy();
                     }
@@ -237,8 +242,8 @@ pandora::StatusCode DDCaloHitCreator::CreateHCalCaloHits(const EVENT::LCEvent *c
 
                     if (std::fabs(pCaloHit->getPosition()[2]) < m_settings.m_hCalBarrelOuterZ)
                     {
-                        this->GetBarrelCaloHitProperties(pCaloHit, barrelLayers, m_settings.m_hCalBarrelInnerSymmetry, m_settings.m_hCalBarrelInnerPhi0,
-                            m_settings.m_hCalBarrelInnerSymmetry - int(cellIdDecoder(pCaloHit)["stave"] / 2), caloHitParameters, absorberCorrection);
+
+                      this->GetBarrelCaloHitProperties(pCaloHit, barrelLayers, m_settings.m_hCalBarrelInnerSymmetry, caloHitParameters, m_settings.m_hCalBarrelNormalVector, absorberCorrection);
                     }
                     else
                     {
@@ -328,8 +333,8 @@ pandora::StatusCode DDCaloHitCreator::CreateMuonCaloHits(const EVENT::LCEvent *c
                     }
                     else if (isInBarrelRegion)
                     {
-                        this->GetBarrelCaloHitProperties(pCaloHit, barrelLayers, m_settings.m_muonBarrelInnerSymmetry, m_settings.m_muonBarrelInnerPhi0,
-                            cellIdDecoder(pCaloHit)["stave"], caloHitParameters, absorberCorrection);
+
+                      this->GetBarrelCaloHitProperties(pCaloHit, barrelLayers, m_settings.m_muonBarrelInnerSymmetry, caloHitParameters, m_settings.m_muonBarrelNormalVector, absorberCorrection);
                     }
                     else
                     {
@@ -598,9 +603,12 @@ void DDCaloHitCreator::GetEndCapCaloHitProperties(const EVENT::CalorimeterHit *c
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void DDCaloHitCreator::GetBarrelCaloHitProperties(const EVENT::CalorimeterHit *const pCaloHit, const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer> &layers,
-    unsigned int barrelSymmetryOrder, float barrelPhi0, unsigned int staveNumber, PandoraApi::CaloHit::Parameters &caloHitParameters,
-    float &absorberCorrection) const
+void DDCaloHitCreator::GetBarrelCaloHitProperties( const EVENT::CalorimeterHit *const pCaloHit,
+                                                   const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer> &layers,
+                                                   unsigned int barrelSymmetryOrder,
+                                                   PandoraApi::CaloHit::Parameters &caloHitParameters,
+                                                   FloatVector const& normalVector,
+                                                   float &absorberCorrection ) const
 {
     caloHitParameters.m_hitRegion = pandora::BARREL;
 
@@ -652,23 +660,34 @@ void DDCaloHitCreator::GetBarrelCaloHitProperties(const EVENT::CalorimeterHit *c
 
     if (barrelSymmetryOrder > 2)
     {
-        const float phi = barrelPhi0 + (2. * M_PI * static_cast<float>(staveNumber) / static_cast<float>(barrelSymmetryOrder));
-        caloHitParameters.m_cellNormalVector = pandora::CartesianVector(-std::sin(phi), std::cos(phi), 0);
+
+        auto staveDetElement = m_volumeManager.lookupDetElement( pCaloHit->getCellID0() );
+        DD4hep::Geometry::Position local1(0.0, 0.0, 0.0);
+        DD4hep::Geometry::Position local2(normalVector[0],normalVector[1],normalVector[2]);
+        DD4hep::Geometry::Position global1(0.0, 0.0, 0.0);
+        DD4hep::Geometry::Position global2(0.0, 0.0, 0.0);
+        staveDetElement.localToWorld( local1, global1 );
+        staveDetElement.localToWorld( local2, global2 );
+        DD4hep::Geometry::Position normal( global2-global1 );
+
+        streamlog_out(DEBUG6) << "   detector?: " << staveDetElement.parent().parent().name()
+                              << "   stave?: " << staveDetElement.parent().name()
+                              << "   PhiLoc:"  << atan2( global1.y(), global1.x() )*180/M_PI
+                              << "   PhiNor:"  << atan2( normal.y(), normal.x() )*180/M_PI
+                              << " normal vector "
+                              << std::setw(15) << normal.x()
+                              << std::setw(15) << normal.y()
+                              << std::setw(15) << normal.z()
+                              << std::endl;
+
+        caloHitParameters.m_cellNormalVector = pandora::CartesianVector( normal.x(), normal.y(), normal.z() );
+
     }
     else
     {
-        const float *pCaloHitPosition(pCaloHit->getPosition());
-
-        if (pCaloHitPosition[1] != 0)
-        {
-            const float phi = barrelPhi0 + std::atan(pCaloHitPosition[0] / pCaloHitPosition[1]);
-            caloHitParameters.m_cellNormalVector = pandora::CartesianVector(std::sin(phi), std::cos(phi), 0);
-        }
-        else
-        {
-            caloHitParameters.m_cellNormalVector = (pCaloHitPosition[0] > 0) ? pandora::CartesianVector(1, 0, 0) :
-                pandora::CartesianVector(-1, 0, 0);
-        }
+        const float *pCaloHitPosition( pCaloHit->getPosition() );
+        const float phi = std::atan2( pCaloHitPosition[1], pCaloHitPosition[0] );
+        caloHitParameters.m_cellNormalVector = pandora::CartesianVector(std::cos(phi), std::sin(phi), 0);
     }
     
 //     streamlog_out(DEBUG)<<" GetBarrelCaloHitProperties: physLayer: "<<physicalLayer <<" layer: "<<caloHitParameters.m_layer.Get()<<" nX0: "<<    caloHitParameters.m_nCellRadiationLengths.Get() <<" nLambdaI: "<<    caloHitParameters.m_nCellInteractionLengths.Get()<<" thickness: "<<caloHitParameters.m_cellThickness.Get()<<std::endl;

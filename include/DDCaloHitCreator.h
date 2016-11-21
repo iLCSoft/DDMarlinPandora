@@ -10,13 +10,19 @@
 #define DDCALO_HIT_CREATOR_H 1
 
 #include "EVENT/CalorimeterHit.h"
+#include "EVENT/LCEvent.h"
 
-#include "gear/LayerLayout.h"
+#include <IMPL/CalorimeterHitImpl.h>
 
 #include "Api/PandoraApi.h"
-#include "DDRec/DetectorData.h"
 
-typedef std::vector<CalorimeterHit *> CalorimeterHitVector;
+#include <DDRec/DetectorData.h>
+#include <DD4hep/LCDD.h>
+#include <DD4hep/Detector.h>
+
+
+
+typedef std::vector<EVENT::CalorimeterHit *> CalorimeterHitVector;
 
 /**
  *  @brief  DDCaloHitCreator class
@@ -25,6 +31,7 @@ class DDCaloHitCreator
 {
 public:
     typedef std::vector<std::string> StringVector;
+    typedef std::vector<float> FloatVector;
 
     /**
      *  @brief  Settings class
@@ -103,6 +110,13 @@ public:
         float                         m_hCalBarrelOuterR;                 ///< HCal barrel outer r coordinate
         float                         m_hCalBarrelOuterPhi0;              ///< HCal barrel outer phi0 coordinate
         unsigned int                  m_hCalBarrelOuterSymmetry;          ///< HCal barrel outer symmetry order
+
+    public:
+      FloatVector m_eCalBarrelNormalVector;
+      FloatVector m_hCalBarrelNormalVector;
+      FloatVector m_muonBarrelNormalVector;
+
+
     };
 
     /**
@@ -123,7 +137,7 @@ public:
      * 
      *  @param  pLCEvent the lcio event
      */    
-    pandora::StatusCode CreateCaloHits(const LCEvent *const pLCEvent);
+    pandora::StatusCode CreateCaloHits(const EVENT::LCEvent *const pLCEvent);
 
     /**
      *  @brief  Get the calorimeter hit vector
@@ -198,14 +212,16 @@ private:
      *  @param  pCaloHit the lcio calorimeter hit
      *  @param  layers the vector of layers from DDRec extensions
      *  @param  barrelSymmetryOrder the barrel order of symmetry
-     *  @param  barrelPhi0 the barrel orientation
-     *  @param  staveNumber the stave number
      *  @param  caloHitParameters the calo hit parameters to populate
+     *  @param  normalVector is the normalVector to the sensitive layers in local coordinates
      *  @param  absorberCorrection to receive the absorber thickness correction for the mip equivalent energy
      */
-    void GetBarrelCaloHitProperties(const EVENT::CalorimeterHit *const pCaloHit,  const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer> &layers,
-        unsigned int barrelSymmetryOrder, float barrelPhi0, unsigned int staveNumber, PandoraApi::CaloHit::Parameters &caloHitParameters,
-        float &absorberCorrection) const;
+    void GetBarrelCaloHitProperties( const EVENT::CalorimeterHit *const pCaloHit,
+				     const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer> &layers,
+				     unsigned int barrelSymmetryOrder,
+				     PandoraApi::CaloHit::Parameters &caloHitParameters,
+				     FloatVector const& normalVector,
+				     float &absorberCorrection ) const;
 
     /**
      *  @brief  Get number of active layers from position of a calo hit to the edge of the detector
@@ -233,6 +249,9 @@ private:
     float                               m_hCalEndCapLayerThickness;         ///< HCal endcap layer thickness
 
     CalorimeterHitVector                m_calorimeterHitVector;             ///< The calorimeter hit vector
+
+    DD4hep::Geometry::VolumeManager m_volumeManager; ///< DD4hep volume manager
+
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
