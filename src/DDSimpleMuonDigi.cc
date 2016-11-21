@@ -160,7 +160,7 @@ void DDSimpleMuonDigi::init() {
 }
 
 
-void DDSimpleMuonDigi::processRunHeader( LCRunHeader* run) { 
+void DDSimpleMuonDigi::processRunHeader( LCRunHeader* /*run*/) {
   _nRun++ ;
   _nEvt = 0;
 } 
@@ -239,7 +239,7 @@ void DDSimpleMuonDigi::processEvent( LCEvent * evt ) {
 }
 
 
-void DDSimpleMuonDigi::check( LCEvent * evt ) { }
+void DDSimpleMuonDigi::check( LCEvent * /*evt*/ ) { }
   
 void DDSimpleMuonDigi::end(){ } 
 
