@@ -243,7 +243,7 @@ private:
 
     const Settings                      m_settings;                         ///< The calo hit creator settings
 
-    const pandora::Pandora             *m_pPandora;                         ///< Address of the pandora object to create calo hits
+    const pandora::Pandora &            m_pandora;                          ///< Reference to the pandora object to create calo hits
 
     float                               m_hCalBarrelLayerThickness;         ///< HCal barrel layer thickness
     float                               m_hCalEndCapLayerThickness;         ///< HCal endcap layer thickness

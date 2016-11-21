@@ -33,7 +33,11 @@ DD4hep::DDRec::LayeredCalorimeterData * getExtension(unsigned int includeFlag, u
 ///FIXME: HANDLE PROBLEM WHEN EXTENSION IS MISSING
 DDCaloHitCreator::DDCaloHitCreator(const Settings &settings, const pandora::Pandora *const pPandora) :
     m_settings(settings),
-    m_pPandora(pPandora)
+    m_pandora(*pPandora),
+    m_hCalBarrelLayerThickness(0.f),
+    m_hCalEndCapLayerThickness(0.f),
+    m_calorimeterHitVector(0),
+    m_volumeManager()
 {
     
     const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& barrelLayers= getExtension(( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::BARREL), ( DD4hep::DetType::AUXILIARY  |  DD4hep::DetType::FORWARD ))->layers;
@@ -175,7 +179,7 @@ pandora::StatusCode DDCaloHitCreator::CreateECalCaloHits(const EVENT::LCEvent *c
                         caloHitParameters.m_cellSize1 = splitCellSize;
                     }
 
-                    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(*m_pPandora, caloHitParameters));
+                    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters));
                     m_calorimeterHitVector.push_back(pCaloHit);
 
                 }
@@ -258,7 +262,7 @@ pandora::StatusCode DDCaloHitCreator::CreateHCalCaloHits(const EVENT::LCEvent *c
                     caloHitParameters.m_hadronicEnergy = std::min(m_settings.m_hCalToHadGeV * pCaloHit->getEnergy(), m_settings.m_maxHCalHitHadronicEnergy);
                     caloHitParameters.m_electromagneticEnergy = m_settings.m_hCalToEMGeV * pCaloHit->getEnergy();
 
-                    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(*m_pPandora, caloHitParameters));
+                    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters));
                     m_calorimeterHitVector.push_back(pCaloHit);
                 }
                 catch (pandora::StatusCodeException &statusCodeException)
@@ -298,7 +302,7 @@ pandora::StatusCode DDCaloHitCreator::CreateMuonCaloHits(const EVENT::LCEvent *c
             const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& barrelLayers= getExtension(( DD4hep::DetType::CALORIMETER | DD4hep::DetType::MUON| DD4hep::DetType::BARREL), ( DD4hep::DetType::AUXILIARY  |  DD4hep::DetType::FORWARD  ))->layers;
             const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension(( DD4hep::DetType::CALORIMETER | DD4hep::DetType::MUON| DD4hep::DetType::ENDCAP), ( DD4hep::DetType::AUXILIARY  |  DD4hep::DetType::FORWARD  ))->layers;
             ///FIXME: WHAT ABOUT MORE MUON SYSTEMS?
-            const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& plugLayers= getExtension(( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::AUXILIARY ))->layers;
+            // const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& plugLayers= getExtension(( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::AUXILIARY ))->layers;
             UTIL::CellIDDecoder<CalorimeterHit> cellIdDecoder(pCaloHitCollection);
             const std::string layerCodingString(pCaloHitCollection->getParameters().getStringVal(LCIO::CellIDEncoding));
             const std::string layerCoding("layer");
@@ -358,7 +362,7 @@ pandora::StatusCode DDCaloHitCreator::CreateMuonCaloHits(const EVENT::LCEvent *c
                         caloHitParameters.m_mipEquivalentEnergy = pCaloHit->getEnergy() * m_settings.m_muonToMip;
                     }
 
-                    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(*m_pPandora, caloHitParameters));
+                    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters));
                     m_calorimeterHitVector.push_back(pCaloHit);
                 }
                 catch (pandora::StatusCodeException &statusCodeException)
@@ -430,7 +434,7 @@ pandora::StatusCode DDCaloHitCreator::CreateLCalCaloHits(const EVENT::LCEvent *c
                     caloHitParameters.m_electromagneticEnergy = m_settings.m_eCalToEMGeV * pCaloHit->getEnergy();
                     caloHitParameters.m_hadronicEnergy = m_settings.m_eCalToHadGeVEndCap * pCaloHit->getEnergy();
 
-                    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(*m_pPandora, caloHitParameters));
+                    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters));
                     m_calorimeterHitVector.push_back(pCaloHit);
                 }
                 catch (pandora::StatusCodeException &statusCodeException)
@@ -502,7 +506,7 @@ pandora::StatusCode DDCaloHitCreator::CreateLHCalCaloHits(const EVENT::LCEvent *
                     caloHitParameters.m_hadronicEnergy = std::min(m_settings.m_hCalToHadGeV * pCaloHit->getEnergy(), m_settings.m_maxHCalHitHadronicEnergy);
                     caloHitParameters.m_electromagneticEnergy = m_settings.m_hCalToEMGeV * pCaloHit->getEnergy();
 
-                    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(*m_pPandora, caloHitParameters));
+                    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters));
                     m_calorimeterHitVector.push_back(pCaloHit);
                 }
                 catch (pandora::StatusCodeException &statusCodeException)
@@ -762,7 +766,12 @@ float DDCaloHitCreator::GetMaximumRadius(const EVENT::CalorimeterHit *const pCal
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-DDCaloHitCreator::Settings::Settings() :
+DDCaloHitCreator::Settings::Settings()
+  : m_eCalCaloHitCollections( StringVector() ),
+    m_hCalCaloHitCollections( StringVector() ),
+    m_lCalCaloHitCollections( StringVector() ),
+    m_lHCalCaloHitCollections( StringVector() ),
+    m_muonCaloHitCollections( StringVector() ),
     m_eCalToMip(1.f),
     m_hCalToMip(1.f),
     m_muonToMip(1.f),
@@ -792,6 +801,24 @@ DDCaloHitCreator::Settings::Settings() :
     m_eCalSiToHadGeVBarrel(1.f),
     m_eCalScToHadGeVBarrel(1.f),
     m_eCalSiToHadGeVEndCap(1.f),
-    m_eCalScToHadGeVEndCap(1.f)
+    m_eCalScToHadGeVEndCap(1.f),
+    m_eCalBarrelOuterZ(0.f),
+    m_hCalBarrelOuterZ(0.f),
+    m_muonBarrelOuterZ(0.f),
+    m_coilOuterR(0.f),
+    m_eCalBarrelInnerPhi0(0.f),
+    m_eCalBarrelInnerSymmetry(0.f),
+    m_hCalBarrelInnerPhi0(0.f),
+    m_hCalBarrelInnerSymmetry(0.f),
+    m_muonBarrelInnerPhi0(0.f),
+    m_muonBarrelInnerSymmetry(0.f),
+    m_hCalEndCapOuterR(0.f),
+    m_hCalEndCapOuterZ(0.f),
+    m_hCalBarrelOuterR(0.f),
+    m_hCalBarrelOuterPhi0(0.f),
+    m_hCalBarrelOuterSymmetry(0.f),
+    m_eCalBarrelNormalVector({0.0, 0.0, 1.0}),
+    m_hCalBarrelNormalVector({0.0, 0.0, 1.0}),
+    m_muonBarrelNormalVector({0.0, 0.0, 1.0})
 {
 }
