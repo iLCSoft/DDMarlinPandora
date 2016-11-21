@@ -201,7 +201,7 @@ void DDPandoraPFANewProcessor::init()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void DDPandoraPFANewProcessor::processRunHeader(LCRunHeader *pLCRunHeader)
+void DDPandoraPFANewProcessor::processRunHeader(LCRunHeader */*pLCRunHeader*/)
 {
 }
 
@@ -232,14 +232,14 @@ void DDPandoraPFANewProcessor::processEvent(LCEvent *pLCEvent)
         streamlog_out(ERROR) << "Marlin pandora failed to process event: " << statusCodeException.ToString() << std::endl;
         throw statusCodeException;
     }
-    catch (std::exception &exception)
-    {
-        streamlog_out(ERROR) << "Marlin pandora failed to process event: std exception " << exception.what() << std::endl;
-        throw exception;
-    }
     catch (EVENT::Exception &exception)
     {
         streamlog_out(ERROR) << "Marlin pandora failed to process event: lcio exception " << exception.what() << std::endl;
+        throw exception;
+    }
+    catch (std::exception &exception)
+    {
+        streamlog_out(ERROR) << "Marlin pandora failed to process event: std exception " << exception.what() << std::endl;
         throw exception;
     }
     catch (...)
@@ -873,6 +873,10 @@ void DDPandoraPFANewProcessor::Reset()
 DDPandoraPFANewProcessor::Settings::Settings() :
     m_innerBField(3.5f),
     m_muonBarrelBField(-1.5f),
-    m_muonEndCapBField(0.01f)
+    m_muonEndCapBField(0.01f),
+    m_inputEnergyCorrectionPoints(0),
+    m_outputEnergyCorrectionPoints(0),
+    m_trackCreatorName("")
+
 {
 }

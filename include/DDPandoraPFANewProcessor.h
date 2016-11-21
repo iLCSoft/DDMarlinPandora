@@ -9,17 +9,17 @@
 #ifndef DDPANDORAPFANEWPROCESSOR_H
 #define DDPANDORAPFANEWPROCESSOR_H 1
 
-#include "marlin/Processor.h"
-
-
+#include "DDCaloHitCreator.h"
+#include "DDGeometryCreator.h"
 #include "DDMCParticleCreator.h"
 #include "DDPfoCreator.h"
 #include "DDTrackCreatorBase.h"
 
-#include "DDGeometryCreator.h"
-#include "DDCaloHitCreator.h"
+#include "marlin/Processor.h"
+
 #include "DD4hep/DetType.h"
 #include "DD4hep/DetectorSelector.h"
+
 
 namespace pandora {class Pandora;}
 
@@ -140,14 +140,14 @@ private:
      */
     void Reset();
 
-    pandora::Pandora                   *m_pPandora;                         ///< Address of the pandora instance
+    pandora::Pandora                     *m_pPandora;                         ///< Address of the pandora instance
     DDCaloHitCreator                     *m_pCaloHitCreator;                  ///< The calo hit creator
     DDGeometryCreator                    *m_pGeometryCreator;                 ///< The geometry creator
     DDTrackCreatorBase                   *m_pTrackCreator;                    ///< The track creator
     DDMCParticleCreator                  *m_pDDMCParticleCreator;               ///< The mc particle creator
     DDPfoCreator                         *m_pDDPfoCreator;                      ///< The pfo creator
 
-    Settings                            m_settings;                         ///< The settings for the pandora pfa new processor
+    Settings                              m_settings;                         ///< The settings for the pandora pfa new processor
     DDCaloHitCreator::Settings            m_caloHitCreatorSettings;           ///< The calo hit creator settings
     DDGeometryCreator::Settings           m_geometryCreatorSettings;          ///< The geometry creator settings
     DDMCParticleCreator::Settings         m_mcParticleCreatorSettings;        ///< The mc particle creator settings
