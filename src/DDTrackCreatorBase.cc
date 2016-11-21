@@ -15,24 +15,23 @@
 #include "UTIL/ILDConf.h"
 #include "UTIL/Operators.h"
 
-#include "DDPandoraPFANewProcessor.h"
 #include "DDTrackCreatorBase.h"
 #include "Pandora/PdgTable.h"
-
-#include <algorithm>
-#include <cmath>
-#include <limits>
 
 #include "DD4hep/LCDD.h"
 #include "DD4hep/DD4hepUnits.h"
 #include "DDRec/DetectorData.h"
 
+#include <algorithm>
+#include <cmath>
+#include <limits>
 
 
 
 DDTrackCreatorBase::DDTrackCreatorBase(const Settings &settings, const pandora::Pandora *const pPandora) :
     m_settings(settings),
-    m_pPandora(pPandora)
+    m_pandora(*pPandora),
+    m_trackVector(0)
 {
   
 }
@@ -131,7 +130,7 @@ pandora::StatusCode DDTrackCreatorBase::ExtractKinks(const EVENT::LCEvent *const
                         {
                             for (unsigned int jTrack = iTrack + 1; jTrack < nTracks; ++jTrack)
                             {
-                                PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetTrackParentDaughterRelationship(*m_pPandora,
+                                PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetTrackParentDaughterRelationship(m_pandora,
                                     pTrack, trackVec[jTrack]));
                             }
                         }
@@ -141,7 +140,7 @@ pandora::StatusCode DDTrackCreatorBase::ExtractKinks(const EVENT::LCEvent *const
                         {
                             for (unsigned int jTrack = iTrack + 1; jTrack < nTracks; ++jTrack)
                             {
-                                PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetTrackSiblingRelationship(*m_pPandora,
+                                PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetTrackSiblingRelationship(m_pandora,
                                     pTrack, trackVec[jTrack]));
                             }
                         }
@@ -203,7 +202,7 @@ pandora::StatusCode DDTrackCreatorBase::ExtractProngsAndSplits(const EVENT::LCEv
                         {
                             for (unsigned int jTrack = iTrack + 1; jTrack < nTracks; ++jTrack)
                             {
-                                PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetTrackParentDaughterRelationship(*m_pPandora,
+                                PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetTrackParentDaughterRelationship(m_pandora,
                                     pTrack, trackVec[jTrack]));
                             }
                         }
@@ -213,7 +212,7 @@ pandora::StatusCode DDTrackCreatorBase::ExtractProngsAndSplits(const EVENT::LCEv
                         {
                             for (unsigned int jTrack = iTrack + 1; jTrack < nTracks; ++jTrack)
                             {
-                                PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetTrackSiblingRelationship(*m_pPandora,
+                                PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetTrackSiblingRelationship(m_pandora,
                                     pTrack, trackVec[jTrack]));
                             }
                         }
@@ -298,7 +297,7 @@ pandora::StatusCode DDTrackCreatorBase::ExtractV0s(const EVENT::LCEvent *const p
                         // Make track sibling relationships
                         for (unsigned int jTrack = iTrack + 1; jTrack < nTracks; ++jTrack)
                         {
-                            PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetTrackSiblingRelationship(*m_pPandora,
+                            PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetTrackSiblingRelationship(m_pandora,
                                 pTrack, trackVec[jTrack]));
                         }
                     }

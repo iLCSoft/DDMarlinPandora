@@ -15,7 +15,6 @@
 #include "UTIL/ILDConf.h"
 #include "UTIL/Operators.h"
 
-#include "DDPandoraPFANewProcessor.h"
 #include "DDTrackCreatorCLIC.h"
 #include "Pandora/PdgTable.h"
 
@@ -224,7 +223,7 @@ pandora::StatusCode DDTrackCreatorCLIC::CreateTracks(EVENT::LCEvent *pLCEvent)
 			this->TrackReachesECAL(pTrack, trackParameters);
 			this->DefineTrackPfoUsage(pTrack, trackParameters);
 
-			PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Track::Create(*m_pPandora, trackParameters));
+			PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Track::Create(m_pandora, trackParameters));
 			m_trackVector.push_back(pTrack);
 		      }
 		    catch (pandora::StatusCodeException &statusCodeException)

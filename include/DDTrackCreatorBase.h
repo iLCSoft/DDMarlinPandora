@@ -20,16 +20,16 @@
 #include "Api/PandoraApi.h"
 #include "Objects/Helix.h"
 
-typedef std::vector<Track *> TrackVector;
-typedef std::set<const Track *> TrackList;
-typedef std::map<Track *, int> TrackToPidMap;
+typedef std::vector<EVENT::Track *> TrackVector;
+typedef std::set<const EVENT::Track *> TrackList;
+typedef std::map<EVENT::Track *, int> TrackToPidMap;
 
-inline LCCollectionVec *newTrkCol(const std::string &name, LCEvent *evt , bool isSubset)
+inline IMPL::LCCollectionVec *newTrkCol(const std::string &name, EVENT::LCEvent *evt , bool isSubset)
 {
-    LCCollectionVec* col = new LCCollectionVec( LCIO::TRACK ) ;
+    IMPL::LCCollectionVec* col = new IMPL::LCCollectionVec( EVENT::LCIO::TRACK ) ;
 
-    LCFlagImpl hitFlag(0) ;
-    hitFlag.setBit( LCIO::TRBIT_HITS ) ;
+    IMPL::LCFlagImpl hitFlag(0) ;
+    hitFlag.setBit( EVENT::LCIO::TRBIT_HITS ) ;
     col->setFlag( hitFlag.getFlag()  ) ;
     evt->addCollection( col , name ) ;
     col->setSubset( isSubset ) ;
@@ -161,7 +161,7 @@ protected:
     
 
     const Settings          m_settings;                     ///< The track creator settings
-    const pandora::Pandora *m_pPandora;                     ///< Address of the pandora object to create tracks and track relationships
+    const pandora::Pandora &m_pandora;                     ///< Reference to the pandora object to create tracks and track relationships
 
 
     TrackVector             m_trackVector;                  ///< The track vector
@@ -270,7 +270,7 @@ protected:
      *  @param  pTrackState the lcio track state instance
      *  @param  inputTrackState the pandora input track state
      */
-    void CopyTrackState(const TrackState *const pTrackState, pandora::InputTrackState &inputTrackState) const;
+    void CopyTrackState(const EVENT::TrackState *const pTrackState, pandora::InputTrackState &inputTrackState) const;
 
     /**
      *  @brief  Obtain track time when it reaches ECAL
@@ -300,21 +300,21 @@ inline void DDTrackCreatorBase::Reset()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline bool DDTrackCreatorBase::IsV0(const Track *const pTrack) const
+inline bool DDTrackCreatorBase::IsV0(const EVENT::Track *const pTrack) const
 {
     return (m_v0TrackList.end() != m_v0TrackList.find(pTrack));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline bool DDTrackCreatorBase::IsParent(const Track *const pTrack) const
+inline bool DDTrackCreatorBase::IsParent(const EVENT::Track *const pTrack) const
 {
     return (m_parentTrackList.end() != m_parentTrackList.find(pTrack));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline bool DDTrackCreatorBase::IsDaughter(const Track *const pTrack) const
+inline bool DDTrackCreatorBase::IsDaughter(const EVENT::Track *const pTrack) const
 {
     return (m_daughterTrackList.end() != m_daughterTrackList.find(pTrack));
 }

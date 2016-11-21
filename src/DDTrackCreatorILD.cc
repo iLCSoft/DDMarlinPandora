@@ -15,7 +15,6 @@
 #include "UTIL/ILDConf.h"
 #include "UTIL/Operators.h"
 
-#include "DDPandoraPFANewProcessor.h"
 #include "DDTrackCreatorILD.h"
 #include "Pandora/PdgTable.h"
 
@@ -221,13 +220,12 @@ pandora::StatusCode DDTrackCreatorILD::CreateTracks(EVENT::LCEvent *pLCEvent)
 	      trackParameters.m_mass = pandora::PdgTable::GetParticleMass(pandora::PI_PLUS);
 
 	      // Use particle id information from V0 and Kink finders
-	      TrackToPidMap::const_iterator iter = m_trackToPidMap.find(pTrack);
+	      TrackToPidMap::const_iterator trIter = m_trackToPidMap.find(pTrack);
 
-	      if(iter != m_trackToPidMap.end())
-		{
-		  trackParameters.m_particleId = (*iter).second;
-		  trackParameters.m_mass = pandora::PdgTable::GetParticleMass((*iter).second);
-		}
+	      if(trIter != m_trackToPidMap.end()) {
+		trackParameters.m_particleId = trIter->second;
+		trackParameters.m_mass = pandora::PdgTable::GetParticleMass(trIter->second);
+	      }
 
 	      if (std::numeric_limits<float>::epsilon() < std::fabs(signedCurvature))
 		trackParameters.m_charge = static_cast<int>(signedCurvature / std::fabs(signedCurvature));
@@ -238,7 +236,7 @@ pandora::StatusCode DDTrackCreatorILD::CreateTracks(EVENT::LCEvent *pLCEvent)
 		  this->TrackReachesECAL(pTrack, trackParameters);
 		  this->DefineTrackPfoUsage(pTrack, trackParameters);
 
-		  PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Track::Create(*m_pPandora, trackParameters));
+		  PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Track::Create(m_pandora, trackParameters));
 		  m_trackVector.push_back(pTrack);
 		}
 	      catch (pandora::StatusCodeException &statusCodeException)
