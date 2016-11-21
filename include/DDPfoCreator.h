@@ -190,7 +190,7 @@ private:
     bool AreAnyOtherSiblingsInList(const pandora::Track *const pPandoraTrack, const pandora::TrackList &allTrackList) const;
 
     const Settings              m_settings;                         ///< The pfo creator settings
-    const pandora::Pandora      *m_pPandora;                        ///< Address of the pandora object from which to extract the pfos
+    const pandora::Pandora      &m_pandora;                        ///< Reference to the pandora object from which to extract the pfos
 };
 
 #endif // #ifndef DDPFO_CREATOR_H

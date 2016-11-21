@@ -5,6 +5,9 @@
  * 
  *  $Log: $
  */
+
+#include "DDPfoCreator.h"
+
 #include "marlin/Global.h"
 #include "marlin/Processor.h"
 
@@ -27,15 +30,13 @@
 #include "Objects/Track.h"
 
 #include "Pandora/PdgTable.h"
-#include "DDPandoraPFANewProcessor.h"
-#include "DDPfoCreator.h"
 
 #include <algorithm>
 #include <cmath>
 
 DDPfoCreator::DDPfoCreator(const Settings &settings, const pandora::Pandora *const pPandora) :
     m_settings(settings),
-    m_pPandora(pPandora)
+    m_pandora(*pPandora)
 {
 }
 
@@ -50,7 +51,7 @@ DDPfoCreator::~DDPfoCreator()
 pandora::StatusCode DDPfoCreator::CreateParticleFlowObjects(EVENT::LCEvent *pLCEvent)
 {
     const pandora::PfoList *pPandoraPfoList = NULL;
-    PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetCurrentPfoList(*m_pPandora, pPandoraPfoList));
+    PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetCurrentPfoList(m_pandora, pPandoraPfoList));
 
     IMPL::LCCollectionVec *pClusterCollection = new IMPL::LCCollectionVec(LCIO::CLUSTER);
     IMPL::LCCollectionVec *pReconstructedParticleCollection = new IMPL::LCCollectionVec(LCIO::RECONSTRUCTEDPARTICLE);
@@ -191,7 +192,7 @@ void DDPfoCreator::SetClusterEnergyAndError(const pandora::ParticleFlowObject *c
     IMPL::ClusterImpl *const pLcioCluster, float &clusterCorrectEnergy) const
 {
     const bool isEmShower((pandora::PHOTON == pPandoraPfo->GetParticleId()) || (pandora::E_MINUS == std::abs(pPandoraPfo->GetParticleId())));
-    clusterCorrectEnergy = (isEmShower ? pPandoraCluster->GetCorrectedElectromagneticEnergy(*m_pPandora) : pPandoraCluster->GetCorrectedHadronicEnergy(*m_pPandora));
+    clusterCorrectEnergy = (isEmShower ? pPandoraCluster->GetCorrectedElectromagneticEnergy(m_pandora) : pPandoraCluster->GetCorrectedHadronicEnergy(m_pandora));
 
     if (clusterCorrectEnergy < std::numeric_limits<float>::epsilon())
         throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
@@ -417,6 +418,10 @@ void DDPfoCreator::SetRecoParticlePropertiesFromPFO(const pandora::ParticleFlowO
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 DDPfoCreator::Settings::Settings():
+    m_clusterCollectionName(""),
+    m_pfoCollectionName(""),
+    m_startVertexCollectionName(""),
+    m_startVertexAlgName(""),
     m_emStochasticTerm(0.17f),
     m_hadStochasticTerm(0.6f),
     m_emConstantTerm(0.01f),
