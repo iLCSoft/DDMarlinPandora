@@ -1,6 +1,40 @@
 
 DDMarlinPandora: Development package to integrate with DD4hep
 
+
+  --------
+ | v00-05 |
+  --------
+
+ A.Sailer
+
+   * DDMarlinPandora::CaloHitCreator:
+   Get normal vector from DD4hep::DetElement instead of using assumptions
+   about calorimeter construction to calculate phi, which are no longer true
+   
+   Add options to set local NormalVector for ecal, hcal, and muon barrels
+   in case they are not build with layers increasing along the z-axis
+   ECalBarrelNormalVector
+   HCalBarrelNormalVector
+   YokeBarrelNormalVector
+   
+   All three are three vectors
+   
+   Correct and simplify calculation of NormalVector for cylindrical barrel
+   calorimeters
+   
+   * Fix many compiler warnings
+
+
+
+  --------
+ | v00-04 |
+  --------
+
+ ...
+
+
+
   --------
  | v00-03 |
   --------
