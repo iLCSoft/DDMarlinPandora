@@ -52,8 +52,11 @@ DDCaloHitCreator::DDCaloHitCreator(const Settings &settings, const pandora::Pand
         throw pandora::StatusCodeException(pandora::STATUS_CODE_INVALID_PARAMETER);
 
    DD4hep::Geometry::LCDD& lcdd = DD4hep::Geometry::LCDD::getInstance();
-   lcdd.apply("DD4hepVolumeManager",0,0);
    m_volumeManager = lcdd.volumeManager();
+   if( not m_volumeManager.isValid() ){
+     lcdd.apply("DD4hepVolumeManager",0,0);
+     m_volumeManager = lcdd.volumeManager();
+   }
 
 }
 
