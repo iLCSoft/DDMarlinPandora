@@ -31,18 +31,6 @@ INSTALL_DIRECTORY( ./include DESTINATION . FILES_MATCHING PATTERN "*.h" )
 
 AUX_SOURCE_DIRECTORY( ./src/ DDMarlinPandora_SRCS )
 
-if (NOT CMAKE_CXX_FLAGS)
-    set(CMAKE_CXX_FLAGS "-std=c++11")
-endif()
-
-include(CheckCXXCompilerFlag)
-unset(COMPILER_SUPPORTS_CXX_FLAGS CACHE)
-CHECK_CXX_COMPILER_FLAG(${CMAKE_CXX_FLAGS} COMPILER_SUPPORTS_CXX_FLAGS)
-
-if(NOT COMPILER_SUPPORTS_CXX_FLAGS)
-    message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} does not support cxx flags ${CMAKE_CXX_FLAGS}")
-endif()
-
 ### DEPENDENCIES ############################################################
 
 FIND_PACKAGE( Marlin 1.0 REQUIRED )
