@@ -43,15 +43,6 @@ if(NOT COMPILER_SUPPORTS_CXX_FLAGS)
     message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} does not support cxx flags ${CMAKE_CXX_FLAGS}")
 endif()
 
-if( APPLE )
-    SET( CMAKE_CXX_FLAGS "-Wall -pedantic -Wno-long-long -Wno-sign-compare -fno-strict-aliasing ${CMAKE_CXX_FLAGS}" )
-else()
-    SET( CMAKE_CXX_FLAGS "-Wall -pedantic -Wno-long-long -Wno-sign-compare -fno-strict-aliasing ${CMAKE_CXX_FLAGS}" )
-endif()
-
-MESSAGE( STATUS "DDMarlinPandora CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS} " )
-
-
 ### DEPENDENCIES ############################################################
 
 FIND_PACKAGE( Marlin 1.0 REQUIRED )
