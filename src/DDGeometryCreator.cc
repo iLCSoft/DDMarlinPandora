@@ -227,7 +227,7 @@ void DDGeometryCreator::SetDefaultSubDetectorParameters(const DD4hep::DDRec::Lay
     parameters.m_isMirroredInZ = true;
     parameters.m_nLayers = layers.size();
 
-    for (int i = 0; i< layers.size(); i++)
+    for (size_t i = 0; i< layers.size(); i++)
     {
         const DD4hep::DDRec::LayeredCalorimeterStruct::Layer & theLayer = layers.at(i);
         
