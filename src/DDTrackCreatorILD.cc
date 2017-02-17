@@ -344,8 +344,8 @@ bool DDTrackCreatorILD::PassesQualityCuts(const EVENT::Track *const pTrack, cons
       if (std::fabs(pZ) / momentumAtDca.GetMagnitude() < m_tpcMembraneMaxZ / m_tpcInnerR)
 	nExpectedTpcHits = 0;
 
-        const int nTpcHits(this->GetNTpcHits(pTrack));
-        const int nFtdHits(this->GetNFtdHits(pTrack));
+      const int nTpcHits(this->GetNTpcHits(pTrack));
+      const int nFtdHits(this->GetNFtdHits(pTrack));
 
       const int minTpcHits = static_cast<int>(nExpectedTpcHits * m_settings.m_minBarrelTrackerHitFractionOfExpected);
 
