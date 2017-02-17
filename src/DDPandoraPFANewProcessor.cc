@@ -139,13 +139,7 @@ DDPandoraPFANewProcessor::PandoraToLCEventMap DDPandoraPFANewProcessor::m_pandor
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 DDPandoraPFANewProcessor::DDPandoraPFANewProcessor() :
-    Processor("DDPandoraPFANewProcessor"),
-    m_pPandora(NULL),
-    m_pCaloHitCreator(NULL),
-    m_pGeometryCreator(NULL),
-    m_pTrackCreator(NULL),
-    m_pDDMCParticleCreator(NULL),
-    m_pDDPfoCreator(NULL)
+    Processor("DDPandoraPFANewProcessor")
 {
     _description = "Pandora reconstructs clusters and particle flow objects";
     this->ProcessSteeringFile();

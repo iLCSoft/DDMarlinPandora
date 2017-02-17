@@ -45,18 +45,18 @@ public:
          */
         Settings();
 
-        std::string     m_pandoraSettingsXmlFile;           ///< The pandora settings xml file
+        std::string     m_pandoraSettingsXmlFile = "";      ///< The pandora settings xml file
 
-        float           m_innerBField;                      ///< The bfield in the main tracker, ecal and hcal, units Tesla
-        float           m_muonBarrelBField;                 ///< The bfield in the muon barrel, units Tesla
-        float           m_muonEndCapBField;                 ///< The bfield in the muon endcap, units Tesla
+        float           m_innerBField = 0.0;                ///< The bfield in the main tracker, ecal and hcal, units Tesla
+        float           m_muonBarrelBField = 0.0;           ///< The bfield in the muon barrel, units Tesla
+        float           m_muonEndCapBField = 0.0;           ///< The bfield in the muon endcap, units Tesla
 
-        FloatVector     m_inputEnergyCorrectionPoints;      ///< The input energy points for non-linearity energy correction
-        FloatVector     m_outputEnergyCorrectionPoints;     ///< The output energy points for non-linearity energy correction
+        FloatVector     m_inputEnergyCorrectionPoints{};    ///< The input energy points for non-linearity energy correction
+        FloatVector     m_outputEnergyCorrectionPoints{};   ///< The output energy points for non-linearity energy correction
         
         ///ADDED BY NIKIFOROS
         //Detector names not needed anymore, accessed by det type flags
-        std::string     m_trackCreatorName;                 ///< The name of the DDTrackCreator implementation to use
+        std::string     m_trackCreatorName = "";            ///< The name of the DDTrackCreator implementation to use
 
         
     };
@@ -65,6 +65,8 @@ public:
      *  @brief  Default constructor
      */
     DDPandoraPFANewProcessor();
+    DDPandoraPFANewProcessor(const DDPandoraPFANewProcessor&) = delete;
+    DDPandoraPFANewProcessor& operator=(const DDPandoraPFANewProcessor&) = delete;
 
     /**
      *  @brief  Create new processor
@@ -140,19 +142,19 @@ private:
      */
     void Reset();
 
-    pandora::Pandora                     *m_pPandora;                         ///< Address of the pandora instance
-    DDCaloHitCreator                     *m_pCaloHitCreator;                  ///< The calo hit creator
-    DDGeometryCreator                    *m_pGeometryCreator;                 ///< The geometry creator
-    DDTrackCreatorBase                   *m_pTrackCreator;                    ///< The track creator
-    DDMCParticleCreator                  *m_pDDMCParticleCreator;               ///< The mc particle creator
-    DDPfoCreator                         *m_pDDPfoCreator;                      ///< The pfo creator
+    pandora::Pandora                     *m_pPandora = NULL;                  ///< Address of the pandora instance
+    DDCaloHitCreator                     *m_pCaloHitCreator = NULL;           ///< The calo hit creator
+    DDGeometryCreator                    *m_pGeometryCreator = NULL;          ///< The geometry creator
+    DDTrackCreatorBase                   *m_pTrackCreator = NULL;             ///< The track creator
+    DDMCParticleCreator                  *m_pDDMCParticleCreator = NULL;      ///< The mc particle creator
+    DDPfoCreator                         *m_pDDPfoCreator = NULL;             ///< The pfo creator
 
-    Settings                              m_settings;                         ///< The settings for the pandora pfa new processor
-    DDCaloHitCreator::Settings            m_caloHitCreatorSettings;           ///< The calo hit creator settings
-    DDGeometryCreator::Settings           m_geometryCreatorSettings;          ///< The geometry creator settings
-    DDMCParticleCreator::Settings         m_mcParticleCreatorSettings;        ///< The mc particle creator settings
-    DDTrackCreatorBase::Settings              m_trackCreatorSettings;             ///< The track creator settings
-    DDPfoCreator::Settings                m_pfoCreatorSettings;               ///< The pfo creator settings
+    Settings                              m_settings{};                       ///< The settings for the pandora pfa new processor
+    DDCaloHitCreator::Settings            m_caloHitCreatorSettings{};         ///< The calo hit creator settings
+    DDGeometryCreator::Settings           m_geometryCreatorSettings{};        ///< The geometry creator settings
+    DDMCParticleCreator::Settings         m_mcParticleCreatorSettings{};      ///< The mc particle creator settings
+    DDTrackCreatorBase::Settings          m_trackCreatorSettings{};           ///< The track creator settings
+    DDPfoCreator::Settings                m_pfoCreatorSettings{};             ///< The pfo creator settings
 
     typedef std::map<const pandora::Pandora *, EVENT::LCEvent *> PandoraToLCEventMap;
     static PandoraToLCEventMap          m_pandoraToLCEventMap;              ///< The pandora to lc event map
