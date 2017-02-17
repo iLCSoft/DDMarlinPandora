@@ -45,25 +45,25 @@ class DDSimpleMuonDigi : public Processor {
   
  protected:
 
-  int _nRun ;
-  int _nEvt ;
+  int _nRun = 0;
+  int _nEvt = 0;
 
-  IntVec _layersToKeepBarrelVec, _layersToKeepEndcapVec;
-  std::vector<bool>  _useLayersBarrelVec, _useLayersEndcapVec;
+  IntVec _layersToKeepBarrelVec{}, _layersToKeepEndcapVec{};
+  std::vector<bool>  _useLayersBarrelVec{}, _useLayersEndcapVec{};
 
-  std::vector<std::string> _muonCollections;
+  std::vector<std::string> _muonCollections{};
 
-  std::string _outputMuonCollection;
-  std::string _outputRelCollection;
+  std::string _outputMuonCollection = "";
+  std::string _outputRelCollection = "";
 
-  std::string _cellIDLayerString ;
+  std::string _cellIDLayerString = "layer";
 
-  float _thresholdMuon;
-  float _calibrCoeffMuon;
-  float _maxHitEnergyMuon;
+  float _thresholdMuon = 0.025;
+  float _calibrCoeffMuon = 120000;
+  float _maxHitEnergyMuon = 2.0;
 
-  std::string _detectorNameBarrel;
-  std::string _detectorNameEndcap;
+  std::string _detectorNameBarrel = "YokeBarrel";
+  std::string _detectorNameEndcap = "YokeEndcap";
   
   
 } ;

@@ -40,8 +40,8 @@ private:
 
     typedef std::map<const void *, const pandora::CaloHit *> ParentAddressToCaloHitMap;
 
-    std::string     m_externalClusterCollectionName;        ///< The collection name for the external clusters
-    bool            m_flagClustersAsPhotons;                ///< Whether to automatically flag new clusters as fixed photons
+    std::string     m_externalClusterCollectionName = "";   ///< The collection name for the external clusters
+    bool            m_flagClustersAsPhotons = true;         ///< Whether to automatically flag new clusters as fixed photons
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

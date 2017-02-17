@@ -13,14 +13,7 @@ using std::endl;
 // Daniel Jeans, Jan/Feb 2014. 
 // (split off from ILDCaloDigi Aug'14.)
 
-DDScintillatorPpdDigi::DDScintillatorPpdDigi() {
-  _pe_per_mip=-99;
-  _calib_mip=-99;
-  _npix=-99;
-  _misCalibNpix=0;
-  _pixSpread=0;
-  _elecNoise=0;
-}
+DDScintillatorPpdDigi::DDScintillatorPpdDigi() {}
 
 void DDScintillatorPpdDigi::printParameters() {
   cout << "--------------------------------" << endl;

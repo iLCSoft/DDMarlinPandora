@@ -35,13 +35,13 @@ class DDScintillatorPpdDigi {
 
  private:
 
-  float _pe_per_mip;
-  float _calib_mip;
-  float _npix;
-  float _misCalibNpix;
-  float _pixSpread;
-  float _elecNoise;
-  float _elecMaxDynRange_MIP;
+  float _pe_per_mip = -99;
+  float _calib_mip = -99;
+  float _npix = -99;
+  float _misCalibNpix = 0;
+  float _pixSpread = 0;
+  float _elecNoise = 0;
+  float _elecMaxDynRange_MIP = 0;
 
 };
 

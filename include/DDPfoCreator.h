@@ -26,14 +26,14 @@ public:
          */
         Settings();
 
-        std::string     m_clusterCollectionName;                ///< The name of the cluster output collection
-        std::string     m_pfoCollectionName;                    ///< The name of the pfo output collection
-        std::string     m_startVertexCollectionName;            ///< The name of the start vertex output collection
-        std::string     m_startVertexAlgName;                   ///< The name of the algorithm to fill the start vertex output collection
-        float           m_emStochasticTerm;                     ///< The stochastic term for EM shower energy resolution
-        float           m_hadStochasticTerm;                    ///< The stochastic term for Hadronic shower energy resolution
-        float           m_emConstantTerm;                       ///< The constant term for EM shower energy resolution
-        float           m_hadConstantTerm;                      ///< The constant term for Hadronic shower energy resolution
+        std::string     m_clusterCollectionName = "";            ///< The name of the cluster output collection
+        std::string     m_pfoCollectionName = "";                ///< The name of the pfo output collection
+        std::string     m_startVertexCollectionName = "";        ///< The name of the start vertex output collection
+        std::string     m_startVertexAlgName = "";               ///< The name of the algorithm to fill the start vertex output collection
+        float           m_emStochasticTerm = 0;                  ///< The stochastic term for EM shower energy resolution
+        float           m_hadStochasticTerm = 0;                 ///< The stochastic term for Hadronic shower energy resolution
+        float           m_emConstantTerm = 0;                    ///< The constant term for EM shower energy resolution
+        float           m_hadConstantTerm = 0;                   ///< The constant term for Hadronic shower energy resolution
     };
 
     /**
