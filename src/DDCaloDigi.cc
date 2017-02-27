@@ -583,13 +583,13 @@ void DDCaloDigi::init() {
       }
     }
 
-    for(int i=0;i<ecalBarrelLayers.size();++i){
+    for(unsigned int i=0;i<ecalBarrelLayers.size();++i){
       _barrelPixelSizeT[i] = ecalBarrelLayers[i].cellSize0;
       _barrelPixelSizeZ[i] = ecalBarrelLayers[i].cellSize1;
       streamlog_out ( DEBUG ) << "barrel pixel size " << i << " " << _barrelPixelSizeT[i] << " " << _barrelPixelSizeZ[i] << endl;
     }
 
-    for(int i=0;i<ecalEndcapLayers.size();++i){
+    for(unsigned int i=0;i<ecalEndcapLayers.size();++i){
       _endcapPixelSizeX[i] = ecalEndcapLayers[i].cellSize0;
       _endcapPixelSizeY[i] = ecalEndcapLayers[i].cellSize1;
       streamlog_out ( DEBUG ) << "endcap pixel size " << i << " " << _endcapPixelSizeX[i] << " " << _endcapPixelSizeY[i] << endl;
@@ -811,9 +811,9 @@ void DDCaloDigi::processEvent( LCEvent * evt ) {
             float eCellInTime = 0.;
             float eCellOutput = 0.;
 
-            for(unsigned int i =0; i<n;i++){
-              float timei   = hit->getTimeCont(i);
-              float energyi = hit->getEnergyCont(i);
+            for(unsigned int i_t =0; i_t<n;i_t++){
+              float timei   = hit->getTimeCont(i_t);
+              float energyi = hit->getEnergyCont(i_t);
       	      float energySum = 0;
 
               float deltat = 0;
@@ -823,27 +823,27 @@ void DDCaloDigi::processEvent( LCEvent * evt ) {
                 eCellInTime+=ecor;
               }
 
-              if(!used[i]){
+              if(!used[i_t]){
                 // merge with other hits?
-                used[i] = true;
-                for(unsigned int j =i+1; j<n;j++){
-                  if(!used[j]){
-                    float timej   = hit->getTimeCont(j);
-                    float energyj = hit->getEnergyCont(j);
-                    float deltat = fabs(timei-timej);
+                used[i_t] = true;
+                for(unsigned int j_t =i_t+1; j_t<n;j_t++){
+                  if(!used[j_t]){
+                    float timej   = hit->getTimeCont(j_t);
+                    float energyj = hit->getEnergyCont(j_t);
+                    float deltat_ij = fabs(timei-timej);
 		    if (_ecalSimpleTimingCut){
-			    float deltat = _ecalCorrectTimesForPropagation?dt:0;
-			    if (timej-deltat>_ecalTimeWindowMin && timej-deltat<ecalTimeWindowMax){
+			    deltat_ij = _ecalCorrectTimesForPropagation?dt:0;
+			    if (timej-deltat_ij>_ecalTimeWindowMin && timej-deltat_ij<ecalTimeWindowMax){
 				    energySum += energyj;
 				    if (timej < timei){
 					    timei = timej;
 				    }
 			    }
 		    } else {
-			if(deltat<_ecalDeltaTimeHitResolution){
+			if(deltat_ij<_ecalDeltaTimeHitResolution){
 			if(energyj>energyi)timei=timej;
 			energyi+=energyj;
-			used[j] = true;
+			used[j_t] = true;
 			}
 		    }
                   }
@@ -1045,9 +1045,9 @@ void DDCaloDigi::processEvent( LCEvent * evt ) {
 
             int count = 0;
          
-            for(unsigned int i =0; i<n;i++){ // loop over all subhits
-              float timei   = hit->getTimeCont(i); //absolute hit timing of current subhit
-              float energyi = hit->getEnergyCont(i); //energy of current subhit
+            for(unsigned int i_t =0; i_t<n;i_t++){ // loop over all subhits
+              float timei   = hit->getTimeCont(i_t); //absolute hit timing of current subhit
+              float energyi = hit->getEnergyCont(i_t); //energy of current subhit
 	      float energySum = 0;
               float deltat = 0;
               if(_hcalCorrectTimesForPropagation)deltat=dt;  //deltat now carries hit timing correction.
@@ -1063,31 +1063,31 @@ void DDCaloDigi::processEvent( LCEvent * evt ) {
               //sum up hit energies within timeWindowMin and timeWindowMax, use earliest subhit in this window as hit time for resulting calohit.
               //only one calorimeterhit will be generated from this.
               
-              if(!used[i]){ //if current subhit has not been merged with previous hits already, take current hit as starting point to merge hits
+              if(!used[i_t]){ //if current subhit has not been merged with previous hits already, take current hit as starting point to merge hits
                 // merge with other hits?
-                used[i] = true;
-                for(unsigned int j =i; j<n;j++){//loop through all hits after current hit
+                used[i_t] = true;
+                for(unsigned int j_t =i_t; j_t<n;j_t++){//loop through all hits after current hit
 		  //std::cout << "inner:" << i << " " << j << " " << n << std::endl;
-                  if(!used[j]){
-                    float timej   = hit->getTimeCont(j);
-                    float energyj = hit->getEnergyCont(j);
-                    float deltat = fabs(timei-timej);
-                    //              std::cout << " HCAL  deltat : " << deltat << std::endl;
+                  if(!used[j_t]){
+                    float timej   = hit->getTimeCont(j_t);
+                    float energyj = hit->getEnergyCont(j_t);
+                    float deltat_ij = fabs(timei-timej);
+                    //              std::cout << " HCAL  deltat_ij : " << deltat_ij << std::endl;
 		    if (_hcalSimpleTimingCut){
-			    float deltat = _hcalCorrectTimesForPropagation?dt:0;
-			    if (timej-deltat>_hcalTimeWindowMin && timej-deltat<hcalTimeWindowMax){
+			    deltat_ij = _hcalCorrectTimesForPropagation?dt:0;
+			    if (timej-deltat_ij>_hcalTimeWindowMin && timej-deltat_ij<hcalTimeWindowMax){
 				    energySum += energyj;
 				    if (timej<timei){
 					    timei = timej; //use earliest hit time for simpletimingcut
 				    }
 			    }
 		    } else {
-			if(deltat<_hcalDeltaTimeHitResolution){ //if this subhit is close to current subhit, add this hit's energy to timecluster
+			if(deltat_ij<_hcalDeltaTimeHitResolution){ //if this subhit is close to current subhit, add this hit's energy to timecluster
 			if(energyj>energyi)timei=timej; //this is probably not what was intended. i guess this should find the largest hit of one timecluster and use its hittime for the cluster, but instead it compares the current hit energy to the sum of already found hit energies
 			//std::cout << timei << " - " << timej << std::endl;
 			//std::cout << energyi << " - " << energyj << std::endl;
 			energyi+=energyj;
-			used[j] = true;
+			used[j_t] = true;
 			//std::cout << timei << " " << energyi << std::endl;
 			}
 		    }
