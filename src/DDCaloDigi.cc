@@ -1049,8 +1049,9 @@ void DDCaloDigi::processEvent( LCEvent * evt ) {
               float timei   = hit->getTimeCont(i_t); //absolute hit timing of current subhit
               float energyi = hit->getEnergyCont(i_t); //energy of current subhit
 	      float energySum = 0;
-              float deltat = 0;
-              if(_hcalCorrectTimesForPropagation)deltat=dt;  //deltat now carries hit timing correction.
+              //float deltat = 0;
+              //if(_hcalCorrectTimesForPropagation)deltat=dt;  
+	      //deltat now carries hit timing correction.
 	      //std::cout <<"outer:" << i << " " << n << std::endl;
 
               //idea of the following section: 
@@ -1082,14 +1083,14 @@ void DDCaloDigi::processEvent( LCEvent * evt ) {
 				    }
 			    }
 		    } else {
-			if(deltat_ij<_hcalDeltaTimeHitResolution){ //if this subhit is close to current subhit, add this hit's energy to timecluster
+		      if(deltat_ij<_hcalDeltaTimeHitResolution){ //if this subhit is close to current subhit, add this hit's energy to timecluster
 			if(energyj>energyi)timei=timej; //this is probably not what was intended. i guess this should find the largest hit of one timecluster and use its hittime for the cluster, but instead it compares the current hit energy to the sum of already found hit energies
 			//std::cout << timei << " - " << timej << std::endl;
 			//std::cout << energyi << " - " << energyj << std::endl;
 			energyi+=energyj;
 			used[j_t] = true;
 			//std::cout << timei << " " << energyi << std::endl;
-			}
+		      }
 		    }
                   }
                 }
