@@ -830,21 +830,21 @@ void DDCaloDigi::processEvent( LCEvent * evt ) {
                   if(!used[j_t]){
                     float timej   = hit->getTimeCont(j_t);
                     float energyj = hit->getEnergyCont(j_t);
-                    float deltat_ij = fabs(timei-timej);
 		    if (_ecalSimpleTimingCut){
-			    deltat_ij = _ecalCorrectTimesForPropagation?dt:0;
-			    if (timej-deltat_ij>_ecalTimeWindowMin && timej-deltat_ij<ecalTimeWindowMax){
-				    energySum += energyj;
-				    if (timej < timei){
-					    timei = timej;
-				    }
-			    }
+		      float deltat_ij = _ecalCorrectTimesForPropagation?dt:0;
+		      if (timej-deltat_ij>_ecalTimeWindowMin && timej-deltat_ij<ecalTimeWindowMax){
+			energySum += energyj;
+			if (timej < timei){
+			  timei = timej;
+			}
+		      }
 		    } else {
-			if(deltat_ij<_ecalDeltaTimeHitResolution){
+		      float deltat_ij = fabs(timei-timej);
+		      if(deltat_ij<_ecalDeltaTimeHitResolution){
 			if(energyj>energyi)timei=timej;
 			energyi+=energyj;
 			used[j_t] = true;
-			}
+		      }
 		    }
                   }
                 }
@@ -1072,17 +1072,17 @@ void DDCaloDigi::processEvent( LCEvent * evt ) {
                   if(!used[j_t]){
                     float timej   = hit->getTimeCont(j_t);
                     float energyj = hit->getEnergyCont(j_t);
-                    float deltat_ij = fabs(timei-timej);
                     //              std::cout << " HCAL  deltat_ij : " << deltat_ij << std::endl;
 		    if (_hcalSimpleTimingCut){
-			    deltat_ij = _hcalCorrectTimesForPropagation?dt:0;
-			    if (timej-deltat_ij>_hcalTimeWindowMin && timej-deltat_ij<hcalTimeWindowMax){
-				    energySum += energyj;
-				    if (timej<timei){
-					    timei = timej; //use earliest hit time for simpletimingcut
-				    }
-			    }
+		      float deltat_ij = _hcalCorrectTimesForPropagation?dt:0;
+		      if (timej-deltat_ij>_hcalTimeWindowMin && timej-deltat_ij<hcalTimeWindowMax){
+			energySum += energyj;
+			if (timej<timei){
+			  timei = timej; //use earliest hit time for simpletimingcut
+			}
+		      }
 		    } else {
+		      float deltat_ij = fabs(timei-timej);
 		      if(deltat_ij<_hcalDeltaTimeHitResolution){ //if this subhit is close to current subhit, add this hit's energy to timecluster
 			if(energyj>energyi)timei=timej; //this is probably not what was intended. i guess this should find the largest hit of one timecluster and use its hittime for the cluster, but instead it compares the current hit energy to the sum of already found hit energies
 			//std::cout << timei << " - " << timej << std::endl;
