@@ -348,7 +348,7 @@ bool DDTrackCreatorCLIC::PassesQualityCuts(const EVENT::Track *const pTrack, con
         }
         
         int nEndcapTrackerHits = 0;
-        const std::vector< DD4hep::Geometry::DetElement>& endcapDets = DD4hep::Geometry::DetectorSelector(lcdd).detectors(  ( DD4hep::DetType::TRACKER | DD4hep::DetType::BARREL )) ;
+        const std::vector< DD4hep::Geometry::DetElement>& endcapDets = DD4hep::Geometry::DetectorSelector(lcdd).detectors(  ( DD4hep::DetType::TRACKER | DD4hep::DetType::ENDCAP )) ;
         for (std::vector< DD4hep::Geometry::DetElement>::const_iterator iter = endcapDets.begin(), iterEnd = endcapDets.end();iter != iterEnd; ++iter){
             const DD4hep::Geometry::DetElement& theDetector = *iter;
             int detId = theDetector.id();
