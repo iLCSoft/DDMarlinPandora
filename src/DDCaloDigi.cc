@@ -41,7 +41,6 @@ using namespace lcio ;
 using namespace marlin ;
 using namespace DD4hep ;
 using namespace DD4hep::Geometry;
-using namespace dd4hep ;
 
 // protect against rounding errors
 // will not find caps smaller than this
@@ -577,7 +576,7 @@ void DDCaloDigi::init() {
       float nFoldSymmetry = static_cast<float>(symmetry);
       float phi0 = ecalBarrelData->phi0/dd4hep::rad ;
       for(int i=0;i<symmetry;++i){
-        float phi  = phi0 + i*twopi/nFoldSymmetry;  
+        float phi  = phi0 + i*dd4hep::twopi/nFoldSymmetry;  
         _barrelStaveDir[i][0] = cos(phi);
         _barrelStaveDir[i][1] = sin(phi);
       }
