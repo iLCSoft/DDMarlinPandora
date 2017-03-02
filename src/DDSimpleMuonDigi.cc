@@ -104,8 +104,9 @@ void DDSimpleMuonDigi::init() {
   _nRun = -1;
   _nEvt = 0;
 
-  //fg: need to set default encoding in for reading old files...
-  CellIDDecoder<SimCalorimeterHit>::setDefaultEncoding("system:5,side:2,layer:9,module:8,stave:4,submodule:4,x:32:-16,y:-16") ;
+  //fg: there cannot be any reasonable default for this string - so we set it to sth. that will cause an exception in case 
+  //    the cellID encoding string is not in the collection: 
+  UTIL::CellIDDecoder<CalorimeterHit>::setDefaultEncoding("undefined_cellID_encoding:100");
 
 
   //Get the number of Layers in the Endcap

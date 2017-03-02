@@ -70,9 +70,11 @@ DDCaloHitCreator::~DDCaloHitCreator()
 
 pandora::StatusCode DDCaloHitCreator::CreateCaloHits(const EVENT::LCEvent *const pLCEvent)
 {
-  ///FIXME: WHAT SHOULD IT BE?
-  UTIL::CellIDDecoder<CalorimeterHit>::setDefaultEncoding("system:5,side:2,module:8,stave:4,layer:9,submodule:4,x:32:-16,y:-16");
 
+  //fg: there cannot be any reasonable default for this string - so we set it to sth. that will cause an exception in case 
+  //    the cellID encoding string is not in the collection: 
+  UTIL::CellIDDecoder<CalorimeterHit>::setDefaultEncoding("undefined_cellID_encoding:100");
+  
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, this->CreateECalCaloHits(pLCEvent));
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, this->CreateHCalCaloHits(pLCEvent));
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, this->CreateMuonCaloHits(pLCEvent));
