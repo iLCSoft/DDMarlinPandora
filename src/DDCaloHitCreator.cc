@@ -701,8 +701,8 @@ void DDCaloHitCreator::GetBarrelCaloHitProperties( const EVENT::CalorimeterHit *
         DD4hep::Geometry::Position local2(normalVector[0],normalVector[1],normalVector[2]);
         DD4hep::Geometry::Position global1(0.0, 0.0, 0.0);
         DD4hep::Geometry::Position global2(0.0, 0.0, 0.0);
-        staveDetElement.localToWorld( local1, global1 );
-        staveDetElement.localToWorld( local2, global2 );
+        staveDetElement.nominal().localToWorld( local1, global1 );
+        staveDetElement.nominal().localToWorld( local2, global2 );
         DD4hep::Geometry::Position normal( global2-global1 );
 
         streamlog_out(DEBUG6) << "   detelement: " << staveDetElement.name()
