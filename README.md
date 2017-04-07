@@ -1,5 +1,6 @@
 # DDMarlinPandora
 [![Build Status](https://travis-ci.org/iLCSoft/DDMarlinPandora.svg?branch=master)](https://travis-ci.org/iLCSoft/DDMarlinPandora)
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/11933/badge.svg)](https://scan.coverity.com/projects/ilcsoft-ddmarlinpandora)
 
 Interface between [Marlin](https://github.com/iLCSoft/Marlin) and [PandoraPFA](https://github.com/PandoraPFA)
 
