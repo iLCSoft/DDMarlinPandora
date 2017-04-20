@@ -179,6 +179,7 @@ void DDSimpleMuonDigi::processEvent( LCEvent * evt ) {
   LCFlagImpl flag;
 
   flag.setBit(LCIO::CHBIT_LONG);
+  flag.setBit(LCIO::CHBIT_ID1);
 
   muoncol->setFlag(flag.getFlag());
 
