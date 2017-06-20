@@ -84,7 +84,7 @@ private:
      *  @param  subDetectorType the sub detector type
      *  @param  parameters the sub detector parameters
      */
-    void SetDefaultSubDetectorParameters(const DD4hep::DDRec::LayeredCalorimeterData &inputParameters, const std::string &subDetectorName,
+    void SetDefaultSubDetectorParameters(const dd4hep::rec::LayeredCalorimeterData &inputParameters, const std::string &subDetectorName,
         const pandora::SubDetectorType subDetectorType, PandoraApi::Geometry::SubDetector::Parameters &parameters) const;
 
     /**

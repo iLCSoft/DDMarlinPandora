@@ -18,7 +18,7 @@
 #include "DDTrackCreatorBase.h"
 #include "Pandora/PdgTable.h"
 
-#include "DD4hep/LCDD.h"
+#include "DD4hep/Detector.h"
 #include "DD4hep/DD4hepUnits.h"
 #include "DDRec/DetectorData.h"
 

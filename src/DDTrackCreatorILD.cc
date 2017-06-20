@@ -22,7 +22,7 @@
 #include <cmath>
 #include <limits>
 
-#include "DD4hep/LCDD.h"
+#include "DD4hep/Detector.h"
 #include "DD4hep/DD4hepUnits.h"
 #include "DDRec/DetectorData.h"
 #include "DD4hep/DetType.h"
@@ -55,15 +55,15 @@ DDTrackCreatorILD::DDTrackCreatorILD(const Settings &settings, const pandora::Pa
     
   //Instead of gear, loop over a provided list of forward (read: endcap) tracking detectors. For ILD this would be FTD
   ///FIXME: Should we use surfaces instead?
-  DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
-  const std::vector< DD4hep::Geometry::DetElement>& endcapDets = DD4hep::Geometry::DetectorSelector(lcdd).detectors(  ( DD4hep::DetType::TRACKER | DD4hep::DetType::ENDCAP )) ;
-  for (std::vector< DD4hep::Geometry::DetElement>::const_iterator iter = endcapDets.begin(), iterEnd = endcapDets.end();iter != iterEnd; ++iter){
+  dd4hep::Detector & mainDetector = dd4hep::Detector::getInstance();
+  const std::vector< dd4hep::DetElement>& endcapDets = dd4hep::DetectorSelector(mainDetector).detectors(  ( dd4hep::DetType::TRACKER | dd4hep::DetType::ENDCAP )) ;
+  for (std::vector< dd4hep::DetElement>::const_iterator iter = endcapDets.begin(), iterEnd = endcapDets.end();iter != iterEnd; ++iter){
     try
       {
-	DD4hep::DDRec::ZDiskPetalsData * theExtension = 0;
+	dd4hep::rec::ZDiskPetalsData * theExtension = 0;
   
-        const DD4hep::Geometry::DetElement& theDetector = *iter;
-	theExtension = theDetector.extension<DD4hep::DDRec::ZDiskPetalsData>();
+        const dd4hep::DetElement& theDetector = *iter;
+	theExtension = theDetector.extension<dd4hep::rec::ZDiskPetalsData>();
             
 	unsigned int N = theExtension->layers.size();
             
@@ -72,7 +72,7 @@ DDTrackCreatorILD::DDTrackCreatorILD(const Settings &settings, const pandora::Pa
 	for(unsigned int i = 0; i < N; ++i)
 	  {
                 
-	    DD4hep::DDRec::ZDiskPetalsData::LayerLayout thisLayer  = theExtension->layers[i];
+	    dd4hep::rec::ZDiskPetalsData::LayerLayout thisLayer  = theExtension->layers[i];
 
 	    // Create a disk to represent even number petals front side
 	    //FIXME! VERIFY THAT TIS MAKES SENSE!
@@ -90,18 +90,18 @@ DDTrackCreatorILD::DDTrackCreatorILD(const Settings &settings, const pandora::Pa
        
       } catch (std::runtime_error &exception){
             
-      streamlog_out(WARNING) << "DDTrackCreatorILD exception during Forward Tracking Disk parameter construction for detector "<<const_cast<DD4hep::Geometry::DetElement&>(*iter).name()<<" : " << exception.what() << std::endl;
+      streamlog_out(WARNING) << "DDTrackCreatorILD exception during Forward Tracking Disk parameter construction for detector "<<const_cast<dd4hep::DetElement&>(*iter).name()<<" : " << exception.what() << std::endl;
     }
   }
     
   try
     {
-      DD4hep::DDRec::FixedPadSizeTPCData * theExtension = 0;
+      dd4hep::rec::FixedPadSizeTPCData * theExtension = 0;
       //Get the TPC, make sure not to get the vertex
-      const std::vector< DD4hep::Geometry::DetElement>& tpcDets= DD4hep::Geometry::DetectorSelector(lcdd).detectors(  ( DD4hep::DetType::TRACKER |  DD4hep::DetType::BARREL  | DD4hep::DetType::GASEOUS ), DD4hep::DetType::VERTEX) ;
+      const std::vector< dd4hep::DetElement>& tpcDets= dd4hep::DetectorSelector(mainDetector).detectors(  ( dd4hep::DetType::TRACKER |  dd4hep::DetType::BARREL  | dd4hep::DetType::GASEOUS ), dd4hep::DetType::VERTEX) ;
 
       //There should only be one TPC
-      theExtension = tpcDets[0].extension<DD4hep::DDRec::FixedPadSizeTPCData>();
+      theExtension = tpcDets[0].extension<dd4hep::rec::FixedPadSizeTPCData>();
 
       m_tpcInnerR = theExtension->rMin/dd4hep::mm ;
       m_tpcOuterR = theExtension->rMax/dd4hep::mm ;

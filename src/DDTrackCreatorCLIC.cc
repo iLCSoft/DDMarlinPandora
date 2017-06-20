@@ -19,7 +19,7 @@
 
 #include "Pandora/PdgTable.h"
 
-#include "DD4hep/LCDD.h"
+#include "DD4hep/Detector.h"
 #include "DD4hep/DD4hepUnits.h"
 #include "DDRec/DetectorData.h"
 #include "DD4hep/DetType.h"
@@ -56,19 +56,19 @@ DDTrackCreatorCLIC::DDTrackCreatorCLIC(const Settings &settings, const pandora::
     m_cosTracker = m_trackerZmax / std::sqrt(m_trackerZmax * m_trackerZmax + m_trackerInnerR * m_trackerInnerR);
 
     
-    DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
+    dd4hep::Detector & mainDetector = dd4hep::Detector::getInstance();
     
     //Maybe we need to veto the vertex? That was done in the ILD case
-    const std::vector< DD4hep::Geometry::DetElement>& barrelDets = DD4hep::Geometry::DetectorSelector(lcdd).detectors(  ( DD4hep::DetType::TRACKER | DD4hep::DetType::BARREL )) ;
+    const std::vector< dd4hep::DetElement>& barrelDets = dd4hep::DetectorSelector(mainDetector).detectors(  ( dd4hep::DetType::TRACKER | dd4hep::DetType::BARREL )) ;
 
     m_barrelTrackerLayers = 0;
-    for (std::vector< DD4hep::Geometry::DetElement>::const_iterator iter = barrelDets.begin(), iterEnd = barrelDets.end();iter != iterEnd; ++iter){
+    for (std::vector< dd4hep::DetElement>::const_iterator iter = barrelDets.begin(), iterEnd = barrelDets.end();iter != iterEnd; ++iter){
         try
         {
-            DD4hep::DDRec::ZPlanarData * theExtension = 0;
+            dd4hep::rec::ZPlanarData * theExtension = 0;
   
-            const DD4hep::Geometry::DetElement& theDetector = *iter;
-            theExtension = theDetector.extension<DD4hep::DDRec::ZPlanarData>();
+            const dd4hep::DetElement& theDetector = *iter;
+            theExtension = theDetector.extension<dd4hep::rec::ZPlanarData>();
             
             unsigned int N = theExtension->layers.size();
             m_barrelTrackerLayers=m_barrelTrackerLayers+N;
@@ -76,7 +76,7 @@ DDTrackCreatorCLIC::DDTrackCreatorCLIC(const Settings &settings, const pandora::
             streamlog_out( DEBUG2 ) << " Adding layers for barrel tracker from DD4hep for "<< theDetector.name()<< "- n layers: " << N<< " sum up to now: "<<m_barrelTrackerLayers<<std::endl;
         } catch (std::runtime_error &exception){
             
-            streamlog_out(WARNING) << "DDTrackCreatorCLIC exception during Barrel Tracker layer sum for "<<const_cast<DD4hep::Geometry::DetElement&>(*iter).name()<<" : " << exception.what() << std::endl;
+            streamlog_out(WARNING) << "DDTrackCreatorCLIC exception during Barrel Tracker layer sum for "<<const_cast<dd4hep::DetElement&>(*iter).name()<<" : " << exception.what() << std::endl;
         }
     }
     
@@ -86,15 +86,15 @@ DDTrackCreatorCLIC::DDTrackCreatorCLIC(const Settings &settings, const pandora::
     
     //Instead of gear, loop over a provided list of forward (read: endcap) tracking detectors. For ILD this would be FTD
     
-     const std::vector< DD4hep::Geometry::DetElement>& endcapDets = DD4hep::Geometry::DetectorSelector(lcdd).detectors(  ( DD4hep::DetType::TRACKER | DD4hep::DetType::ENDCAP )) ;
+     const std::vector< dd4hep::DetElement>& endcapDets = dd4hep::DetectorSelector(mainDetector).detectors(  ( dd4hep::DetType::TRACKER | dd4hep::DetType::ENDCAP )) ;
 
-     for (std::vector< DD4hep::Geometry::DetElement>::const_iterator iter = endcapDets.begin(), iterEnd = endcapDets.end();iter != iterEnd; ++iter){
+     for (std::vector< dd4hep::DetElement>::const_iterator iter = endcapDets.begin(), iterEnd = endcapDets.end();iter != iterEnd; ++iter){
         try
         {
-            DD4hep::DDRec::ZDiskPetalsData * theExtension = 0;
+            dd4hep::rec::ZDiskPetalsData * theExtension = 0;
   
-            const DD4hep::Geometry::DetElement& theDetector = *iter;
-            theExtension = theDetector.extension<DD4hep::DDRec::ZDiskPetalsData>();
+            const dd4hep::DetElement& theDetector = *iter;
+            theExtension = theDetector.extension<dd4hep::rec::ZDiskPetalsData>();
             
             unsigned int N = theExtension->layers.size();
             
@@ -103,7 +103,7 @@ DDTrackCreatorCLIC::DDTrackCreatorCLIC(const Settings &settings, const pandora::
             for(unsigned int i = 0; i < N; ++i)
             {
                 
-                DD4hep::DDRec::ZDiskPetalsData::LayerLayout thisLayer  = theExtension->layers[i];
+                dd4hep::rec::ZDiskPetalsData::LayerLayout thisLayer  = theExtension->layers[i];
 
                 // Create a disk to represent even number petals front side
                 //FIXME! VERIFY THAT TIS MAKES SENSE!
@@ -121,7 +121,7 @@ DDTrackCreatorCLIC::DDTrackCreatorCLIC(const Settings &settings, const pandora::
        
         } catch (std::runtime_error &exception){
             
-            streamlog_out(WARNING) << "DDTrackCreatorCLIC exception during Forward Tracking Disk parameter construction for detector "<<const_cast<DD4hep::Geometry::DetElement&>(*iter).name()<<" : " << exception.what() << std::endl;
+            streamlog_out(WARNING) << "DDTrackCreatorCLIC exception during Forward Tracking Disk parameter construction for detector "<<const_cast<dd4hep::DetElement&>(*iter).name()<<" : " << exception.what() << std::endl;
         }
     }
     
@@ -339,18 +339,18 @@ bool DDTrackCreatorCLIC::PassesQualityCuts(const EVENT::Track *const pTrack, con
         
         //Initialize hits to 0
         int nBarrelTrackerHits = 0;
-        DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
-        const std::vector< DD4hep::Geometry::DetElement>& barrelDets = DD4hep::Geometry::DetectorSelector(lcdd).detectors(  ( DD4hep::DetType::TRACKER | DD4hep::DetType::BARREL )) ;
-        for (std::vector< DD4hep::Geometry::DetElement>::const_iterator iter = barrelDets.begin(), iterEnd = barrelDets.end();iter != iterEnd; ++iter){
-            const DD4hep::Geometry::DetElement & theDetector = *iter;
+        dd4hep::Detector & mainDetector = dd4hep::Detector::getInstance();
+        const std::vector< dd4hep::DetElement>& barrelDets = dd4hep::DetectorSelector(mainDetector).detectors(  ( dd4hep::DetType::TRACKER | dd4hep::DetType::BARREL )) ;
+        for (std::vector< dd4hep::DetElement>::const_iterator iter = barrelDets.begin(), iterEnd = barrelDets.end();iter != iterEnd; ++iter){
+            const dd4hep::DetElement & theDetector = *iter;
             int detId = theDetector.id();
             nBarrelTrackerHits+=hitsBySubdetector[2*detId-2]; //Offset is 2 for hits in fit
         }
         
         int nEndcapTrackerHits = 0;
-        const std::vector< DD4hep::Geometry::DetElement>& endcapDets = DD4hep::Geometry::DetectorSelector(lcdd).detectors(  ( DD4hep::DetType::TRACKER | DD4hep::DetType::ENDCAP )) ;
-        for (std::vector< DD4hep::Geometry::DetElement>::const_iterator iter = endcapDets.begin(), iterEnd = endcapDets.end();iter != iterEnd; ++iter){
-            const DD4hep::Geometry::DetElement& theDetector = *iter;
+        const std::vector< dd4hep::DetElement>& endcapDets = dd4hep::DetectorSelector(mainDetector).detectors(  ( dd4hep::DetType::TRACKER | dd4hep::DetType::ENDCAP )) ;
+        for (std::vector< dd4hep::DetElement>::const_iterator iter = endcapDets.begin(), iterEnd = endcapDets.end();iter != iterEnd; ++iter){
+            const dd4hep::DetElement& theDetector = *iter;
             int detId = theDetector.id();
             nEndcapTrackerHits +=hitsBySubdetector[2*detId-2]; //Offset is 2 for hits in fit
         }
