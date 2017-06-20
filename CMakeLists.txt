@@ -41,7 +41,7 @@ FIND_PACKAGE( DD4hep REQUIRED )
 FIND_PACKAGE( ROOT REQUIRED )
 
 
-FOREACH( pkg Marlin MarlinUtil PandoraSDK LCContent DD4hep ROOT)
+FOREACH( pkg PandoraSDK Marlin MarlinUtil  LCContent DD4hep ROOT)
     IF( ${pkg}_FOUND )
         INCLUDE_DIRECTORIES( SYSTEM ${${pkg}_INCLUDE_DIRS} )
         LINK_LIBRARIES( ${${pkg}_LIBRARIES} )
