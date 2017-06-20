@@ -25,7 +25,6 @@
 #include "CLHEP/Random/RandGauss.h"
 #include "CLHEP/Random/RandFlat.h"
 
-#include "DD4hep/LCDD.h"
 #include "DD4hep/Factories.h"
 #include "DD4hep/DD4hepUnits.h" 
 #include "DDRec/DetectorData.h"
@@ -39,8 +38,6 @@
 using namespace std;
 using namespace lcio ;
 using namespace marlin ;
-using namespace DD4hep ;
-using namespace DD4hep::Geometry;
 
 // protect against rounding errors
 // will not find caps smaller than this
@@ -50,7 +47,7 @@ const float slop = 0.25; // (mm)
 
 
 //forward declarations. See in DDPandoraPFANewProcessor.cc
-DD4hep::DDRec::LayeredCalorimeterData * getExtension(unsigned int includeFlag, unsigned int excludeFlag=0);
+dd4hep::rec::LayeredCalorimeterData * getExtension(unsigned int includeFlag, unsigned int excludeFlag=0);
 
 DDCaloDigi aDDCaloDigi ;
 	
@@ -558,12 +555,12 @@ void DDCaloDigi::init() {
 
   try {
     
-    DDRec::LayeredCalorimeterData* ecalBarrelData =  getExtension(( DD4hep::DetType::CALORIMETER | DD4hep::DetType::ELECTROMAGNETIC | DD4hep::DetType::BARREL), ( DD4hep::DetType::AUXILIARY  |  DD4hep::DetType::FORWARD ));
+    dd4hep::rec::LayeredCalorimeterData* ecalBarrelData =  getExtension(( dd4hep::DetType::CALORIMETER | dd4hep::DetType::ELECTROMAGNETIC | dd4hep::DetType::BARREL), ( dd4hep::DetType::AUXILIARY  |  dd4hep::DetType::FORWARD ));
     
-    DDRec::LayeredCalorimeterData* ecalEndcapData = getExtension(( DD4hep::DetType::CALORIMETER | DD4hep::DetType::ELECTROMAGNETIC | DD4hep::DetType::ENDCAP), ( DD4hep::DetType::AUXILIARY  |  DD4hep::DetType::FORWARD ));
+    dd4hep::rec::LayeredCalorimeterData* ecalEndcapData = getExtension(( dd4hep::DetType::CALORIMETER | dd4hep::DetType::ELECTROMAGNETIC | dd4hep::DetType::ENDCAP), ( dd4hep::DetType::AUXILIARY  |  dd4hep::DetType::FORWARD ));
     
-    const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& ecalBarrelLayers = ecalBarrelData->layers;
-    const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer>& ecalEndcapLayers = ecalEndcapData->layers;
+    const std::vector<dd4hep::rec::LayeredCalorimeterStruct::Layer>& ecalBarrelLayers = ecalBarrelData->layers;
+    const std::vector<dd4hep::rec::LayeredCalorimeterStruct::Layer>& ecalEndcapLayers = ecalEndcapData->layers;
     
     // determine geometry of ECAL
     int symmetry = ecalBarrelData->inner_symmetry;

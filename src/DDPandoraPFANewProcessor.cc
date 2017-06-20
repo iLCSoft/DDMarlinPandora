@@ -17,7 +17,7 @@
 #include "DDExternalClusteringAlgorithm.h"
 #include "DDPandoraPFANewProcessor.h"
 
-#include "DD4hep/LCDD.h"
+#include "DD4hep/Detector.h"
 #include "DD4hep/DD4hepUnits.h"
 #include "DD4hep/DetType.h"
 #include "DDRec/DetectorData.h"
@@ -31,12 +31,12 @@
 
 DDPandoraPFANewProcessor aDDPandoraPFANewProcessor;
 
-double getFieldFromLCDD(){
+double getFieldFromCompact(){
   
-  DD4hep::Geometry::LCDD& lcdd = DD4hep::Geometry::LCDD::getInstance();
+  dd4hep::Detector& mainDetector = dd4hep::Detector::getInstance();
   const double position[3]={0,0,0}; // position to calculate magnetic field at (the origin in this case)
   double magneticFieldVector[3]={0,0,0}; // initialise object to hold magnetic field
-  lcdd.field().magneticField(position,magneticFieldVector); // get the magnetic field vector from DD4hep
+  mainDetector.field().magneticField(position,magneticFieldVector); // get the magnetic field vector from DD4hep
   
   return magneticFieldVector[2]/dd4hep::tesla; // z component at (0,0,0)
   
@@ -46,10 +46,10 @@ double getFieldFromLCDD(){
 // double getCoilOuterR(){
 //     
 //   try{
-//     DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
-//     const std::vector< DD4hep::Geometry::DetElement>& theDetectors = DD4hep::Geometry::DetectorSelector(lcdd).detectors(  DD4hep::DetType::COIL ) ;
+//     dd4hep::Detector & mainDetector = dd4hep::Detector::getInstance();
+//     const std::vector< dd4hep::DetElement>& theDetectors = dd4hep::DetectorSelector(mainDetector).detectors(  dd4hep::DetType::COIL ) ;
 //     //access the detelement and create a shape from the envelope since only minimal info needed
-//     DD4hep::Geometry::Tube coilTube = DD4hep::Geometry::Tube( theDetectors.at(0).volume().solid() )  ;
+//     dd4hep::Tube coilTube = dd4hep::Tube( theDetectors.at(0).volume().solid() )  ;
 //     return coilTube->GetRmax()/ dd4hep::mm;
 //   } catch ( std::exception & e ) {
 //       
@@ -68,8 +68,8 @@ double getFieldFromLCDD(){
 //   DD4hep::DDRec::LayeredCalorimeterData * theExtension = 0;
 //   
 //   try {
-//     DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
-//     const DD4hep::Geometry::DetElement & theDetector = lcdd.detector(detectorName);
+//     dd4hep::Detector & mainDetector = dd4hep::Detector::getInstance();
+//     const dd4hep::DetElement & theDetector = mainDetector.detector(detectorName);
 //     theExtension = theDetector.extension<DD4hep::DDRec::LayeredCalorimeterData>();
 //     //     std::cout<< "DEBUG: in getExtension(\""<<detectorName<<"\"): size of layers: "<<theExtension->layers.size()<<" positions not shown. "<<std::endl;
 //     
@@ -86,22 +86,22 @@ double getFieldFromLCDD(){
 // }
 
 
-DD4hep::DDRec::LayeredCalorimeterData * getExtension(unsigned int includeFlag, unsigned int excludeFlag=0) {
+dd4hep::rec::LayeredCalorimeterData * getExtension(unsigned int includeFlag, unsigned int excludeFlag=0) {
   
   
-  DD4hep::DDRec::LayeredCalorimeterData * theExtension = 0;
+  dd4hep::rec::LayeredCalorimeterData * theExtension = 0;
   
-  DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
-  const std::vector< DD4hep::Geometry::DetElement>& theDetectors = DD4hep::Geometry::DetectorSelector(lcdd).detectors(  includeFlag, excludeFlag ) ;
+  dd4hep::Detector & mainDetector = dd4hep::Detector::getInstance();
+  const std::vector< dd4hep::DetElement>& theDetectors = dd4hep::DetectorSelector(mainDetector).detectors(  includeFlag, excludeFlag );
   
   
-  streamlog_out( DEBUG2 ) << " getExtension :  includeFlag: " << DD4hep::DetType( includeFlag ) << " excludeFlag: " << DD4hep::DetType( excludeFlag ) 
-			  << "  found : " << theDetectors.size() << "  - first det: " << theDetectors.at(0).name() << std::endl ;
+  streamlog_out( DEBUG2 ) << " getExtension :  includeFlag: " << dd4hep::DetType( includeFlag ) << " excludeFlag: " << dd4hep::DetType( excludeFlag )
+                          << "  found : " << theDetectors.size() << "  - first det: " << theDetectors.at(0).name() << std::endl ;
   
   if( theDetectors.size()  != 1 ){
     
     std::stringstream es ;
-    es << " getExtension: selection is not unique (or empty)  includeFlag: " << DD4hep::DetType( includeFlag ) << " excludeFlag: " << DD4hep::DetType( excludeFlag ) 
+    es << " getExtension: selection is not unique (or empty)  includeFlag: " << dd4hep::DetType( includeFlag ) << " excludeFlag: " << dd4hep::DetType( excludeFlag )
        << " --- found detectors : " ;
     for( unsigned i=0, N= theDetectors.size(); i<N ; ++i ){
       es << theDetectors.at(i).name() << ", " ; 
@@ -109,7 +109,7 @@ DD4hep::DDRec::LayeredCalorimeterData * getExtension(unsigned int includeFlag, u
     throw std::runtime_error( es.str() ) ;
   }
   
-  theExtension = theDetectors.at(0).extension<DD4hep::DDRec::LayeredCalorimeterData>();
+  theExtension = theDetectors.at(0).extension<dd4hep::rec::LayeredCalorimeterData>();
   
   return theExtension;
 }
@@ -121,13 +121,13 @@ std::vector<double> getTrackingRegionExtent(){
   
   extent.reserve(3);
   
-  DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
+  dd4hep::Detector & mainDetector = dd4hep::Detector::getInstance();
   
   
   
   extent[0]=0.1; ///FIXME! CLIC-specific: Inner radius was set to 0 for SiD-type detectors
-  extent[1]=lcdd.constantAsDouble("tracker_region_rmax")/dd4hep::mm;
-  extent[2]=lcdd.constantAsDouble("tracker_region_zmax")/dd4hep::mm;
+  extent[1]=mainDetector.constantAsDouble("tracker_region_rmax")/dd4hep::mm;
+  extent[2]=mainDetector.constantAsDouble("tracker_region_zmax")/dd4hep::mm;
 
   return extent;
   
@@ -789,29 +789,29 @@ void DDPandoraPFANewProcessor::FinaliseSteeringParameters()
     m_trackCreatorSettings.m_prongSplitVertexCollections = m_trackCreatorSettings.m_prongVertexCollections;
     m_trackCreatorSettings.m_prongSplitVertexCollections.insert(m_trackCreatorSettings.m_prongSplitVertexCollections.end(),m_trackCreatorSettings.m_splitVertexCollections.begin(),m_trackCreatorSettings.m_splitVertexCollections.end());
     
-    m_trackCreatorSettings.m_bField=getFieldFromLCDD();
+    m_trackCreatorSettings.m_bField=getFieldFromCompact();
     
     //Get ECal Barrel extension by type, ignore plugs and rings 
-    const DD4hep::DDRec::LayeredCalorimeterData * eCalBarrelExtension= getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::ELECTROMAGNETIC | DD4hep::DetType::BARREL), 
-										     ( DD4hep::DetType::AUXILIARY  |  DD4hep::DetType::FORWARD ) );
+    const dd4hep::rec::LayeredCalorimeterData * eCalBarrelExtension= getExtension( ( dd4hep::DetType::CALORIMETER | dd4hep::DetType::ELECTROMAGNETIC | dd4hep::DetType::BARREL),
+										     ( dd4hep::DetType::AUXILIARY  |  dd4hep::DetType::FORWARD ) );
     //Get ECal Endcap extension by type, ignore plugs and rings 
-    const DD4hep::DDRec::LayeredCalorimeterData * eCalEndcapExtension= getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::ELECTROMAGNETIC | DD4hep::DetType::ENDCAP), 
-										     ( DD4hep::DetType::AUXILIARY |  DD4hep::DetType::FORWARD  ) );
+    const dd4hep::rec::LayeredCalorimeterData * eCalEndcapExtension= getExtension( ( dd4hep::DetType::CALORIMETER | dd4hep::DetType::ELECTROMAGNETIC | dd4hep::DetType::ENDCAP),
+										     ( dd4hep::DetType::AUXILIARY |  dd4hep::DetType::FORWARD  ) );
     //Get HCal Barrel extension by type, ignore plugs and rings 
-    const DD4hep::DDRec::LayeredCalorimeterData * hCalBarrelExtension= getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::BARREL), 
-										     ( DD4hep::DetType::AUXILIARY |  DD4hep::DetType::FORWARD ) );
+    const dd4hep::rec::LayeredCalorimeterData * hCalBarrelExtension= getExtension( ( dd4hep::DetType::CALORIMETER | dd4hep::DetType::HADRONIC | dd4hep::DetType::BARREL),
+										     ( dd4hep::DetType::AUXILIARY |  dd4hep::DetType::FORWARD ) );
       //Get HCal Endcap extension by type, ignore plugs and rings 
-    const DD4hep::DDRec::LayeredCalorimeterData * hCalEndcapExtension= getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::HADRONIC | DD4hep::DetType::ENDCAP), 
-										     ( DD4hep::DetType::AUXILIARY |  DD4hep::DetType::FORWARD ) );
+    const dd4hep::rec::LayeredCalorimeterData * hCalEndcapExtension= getExtension( ( dd4hep::DetType::CALORIMETER | dd4hep::DetType::HADRONIC | dd4hep::DetType::ENDCAP),
+										     ( dd4hep::DetType::AUXILIARY |  dd4hep::DetType::FORWARD ) );
     //Get Muon Barrel extension by type, ignore plugs and rings 
-    const DD4hep::DDRec::LayeredCalorimeterData * muonBarrelExtension= getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::MUON | DD4hep::DetType::BARREL), 
-										     ( DD4hep::DetType::AUXILIARY |  DD4hep::DetType::FORWARD ) );
+    const dd4hep::rec::LayeredCalorimeterData * muonBarrelExtension= getExtension( ( dd4hep::DetType::CALORIMETER | dd4hep::DetType::MUON | dd4hep::DetType::BARREL),
+										     ( dd4hep::DetType::AUXILIARY |  dd4hep::DetType::FORWARD ) );
     //fg: muon endcap is not used :
     // //Get Muon Endcap extension by type, ignore plugs and rings 
-    // const DD4hep::DDRec::LayeredCalorimeterData * muonEndcapExtension= getExtension( ( DD4hep::DetType::CALORIMETER | DD4hep::DetType::MUON | DD4hep::DetType::ENDCAP), ( DD4hep::DetType::AUXILIARY ) );   
+    // const dd4hep::rec::LayeredCalorimeterData * muonEndcapExtension= getExtension( ( dd4hep::DetType::CALORIMETER | dd4hep::DetType::MUON | dd4hep::DetType::ENDCAP), ( dd4hep::DetType::AUXILIARY ) );
     
     //Get COIL extension
-    const DD4hep::DDRec::LayeredCalorimeterData * coilExtension= getExtension( ( DD4hep::DetType::COIL ) );   
+    const dd4hep::rec::LayeredCalorimeterData * coilExtension= getExtension( ( dd4hep::DetType::COIL ) );
   
     
     m_trackCreatorSettings.m_eCalBarrelInnerSymmetry        =   eCalBarrelExtension->inner_symmetry;
@@ -838,10 +838,10 @@ void DDPandoraPFANewProcessor::FinaliseSteeringParameters()
     m_caloHitCreatorSettings.m_hCalEndCapInnerPhiCoordinate =   hCalEndcapExtension->inner_phi0/dd4hep::rad;;
     
     // Get the magnetic field
-    DD4hep::Geometry::LCDD& lcdd = DD4hep::Geometry::LCDD::getInstance();
+    dd4hep::Detector& mainDetector = dd4hep::Detector::getInstance();
     const double position[3]={0,0,0}; // position to calculate magnetic field at (the origin in this case)
     double magneticFieldVector[3]={0,0,0}; // initialise object to hold magnetic field
-    lcdd.field().magneticField(position,magneticFieldVector); // get the magnetic field vector from DD4hep
+    mainDetector.field().magneticField(position,magneticFieldVector); // get the magnetic field vector from DD4hep
     
     m_settings.m_innerBField = magneticFieldVector[2]/dd4hep::tesla; // z component at (0,0,0)
 }

@@ -17,8 +17,8 @@
 #include "Api/PandoraApi.h"
 
 #include <DDRec/DetectorData.h>
-#include <DD4hep/LCDD.h>
 #include <DD4hep/Detector.h>
+#include <DD4hep/DetElement.h>
 
 
 
@@ -203,7 +203,7 @@ private:
      *  @param  caloHitParameters the calo hit parameters to populate
      *  @param  absorberCorrection to receive the absorber thickness correction for the mip equivalent energy
      */
-    void GetEndCapCaloHitProperties(const EVENT::CalorimeterHit *const pCaloHit,  const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer> &layers,
+    void GetEndCapCaloHitProperties(const EVENT::CalorimeterHit *const pCaloHit,  const std::vector<dd4hep::rec::LayeredCalorimeterStruct::Layer> &layers,
         PandoraApi::CaloHit::Parameters &caloHitParameters, float &absorberCorrection) const;
 
     /**
@@ -217,7 +217,7 @@ private:
      *  @param  absorberCorrection to receive the absorber thickness correction for the mip equivalent energy
      */
     void GetBarrelCaloHitProperties( const EVENT::CalorimeterHit *const pCaloHit,
-				     const std::vector<DD4hep::DDRec::LayeredCalorimeterStruct::Layer> &layers,
+				     const std::vector<dd4hep::rec::LayeredCalorimeterStruct::Layer> &layers,
 				     unsigned int barrelSymmetryOrder,
 				     PandoraApi::CaloHit::Parameters &caloHitParameters,
 				     FloatVector const& normalVector,
@@ -250,7 +250,7 @@ private:
 
     CalorimeterHitVector                m_calorimeterHitVector;             ///< The calorimeter hit vector
 
-    DD4hep::Geometry::VolumeManager m_volumeManager; ///< DD4hep volume manager
+    dd4hep::VolumeManager m_volumeManager; ///< DD4hep volume manager
 
 };
 

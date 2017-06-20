@@ -23,17 +23,17 @@
 #include <cmath>
 #include <limits>
 
-#include "DD4hep/LCDD.h"
+#include "DD4hep/Detector.h"
 #include "DD4hep/DD4hepUnits.h"
 
 //forward declarations. See in DDPandoraPFANewProcessor.cc
-double getFieldFromLCDD(); 
+double getFieldFromCompact();
 
 
 DDMCParticleCreator::DDMCParticleCreator(const Settings &settings, const pandora::Pandora *const pPandora) :
     m_settings(settings),
     m_pandora(*pPandora),
-    m_bField(getFieldFromLCDD())
+    m_bField(getFieldFromCompact())
 {
 }
 

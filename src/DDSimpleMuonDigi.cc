@@ -13,7 +13,7 @@
 #include <cctype> 
 #include <cstdlib>  // abs
 
-#include "DD4hep/LCDD.h"
+#include "DD4hep/Detector.h"
 #include "DD4hep/DD4hepUnits.h"
 #include "DDRec/DetectorData.h"
 
@@ -114,18 +114,18 @@ void DDSimpleMuonDigi::init() {
 
   try{
     
-    DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
-    DD4hep::Geometry::DetElement theDetector = lcdd.detector(_detectorNameBarrel);
-    const DD4hep::DDRec::LayeredCalorimeterData *yokeBarrelParameters  = theDetector.extension<DD4hep::DDRec::LayeredCalorimeterData>();
+    dd4hep::Detector & mainDetector = dd4hep::Detector::getInstance();
+    dd4hep::DetElement theDetector = mainDetector.detector(_detectorNameBarrel);
+    const dd4hep::rec::LayeredCalorimeterData *yokeBarrelParameters  = theDetector.extension<dd4hep::rec::LayeredCalorimeterData>();
     layersBarrel =  yokeBarrelParameters->layers.size();
   }catch( std::exception& e ){
     streamlog_out(WARNING) << "  oops - no Yoke Barrel available: "<<e.what() << std::endl ;
   }
   try{
     
-    DD4hep::Geometry::LCDD & lcdd = DD4hep::Geometry::LCDD::getInstance();
-    DD4hep::Geometry::DetElement theDetector = lcdd.detector(_detectorNameEndcap);
-    const DD4hep::DDRec::LayeredCalorimeterData *yokeEndcapParameters  = theDetector.extension<DD4hep::DDRec::LayeredCalorimeterData>();
+    dd4hep::Detector & mainDetector = dd4hep::Detector::getInstance();
+    dd4hep::DetElement theDetector = mainDetector.detector(_detectorNameEndcap);
+    const dd4hep::rec::LayeredCalorimeterData *yokeEndcapParameters  = theDetector.extension<dd4hep::rec::LayeredCalorimeterData>();
     layersEndcap =  yokeEndcapParameters->layers.size();
   }catch(std::exception& e ){
     streamlog_out(WARNING) << "  oops - no Yoke Endcap available: "<<e.what() << std::endl ;
