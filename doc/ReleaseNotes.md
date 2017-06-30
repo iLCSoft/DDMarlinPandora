@@ -1,3 +1,18 @@
+# v00-07
+
+* 2017-04-21 Andre Sailer ([PR#6](https://github.com/iLCSoft/DDMarlinPandora/pull/6))
+  - DDSimpleMuonDigi: set ID1 bit to store cellID1 for digitized hits
+
+* 2017-06-20 Frank Gaede ([PR#9](https://github.com/iLCSoft/DDMarlinPandora/pull/9))
+  - fix order of includes to get correct tinyxml.h from PandoraPFA 
+         - needed on Mac to avoid confusion with tinyxml.h from DD4hep
+
+* 2017-06-20 Andre Sailer ([PR#8](https://github.com/iLCSoft/DDMarlinPandora/pull/8))
+  - Adapt to changes in namespaces and LCDD -->  Detector
+
+* 2017-05-10 Andre Sailer ([PR#7](https://github.com/iLCSoft/DDMarlinPandora/pull/7))
+  - Add Werror to CI configuration, no more warnings allowed in DDMarlinPandora
+
 # v00-06
 
 
