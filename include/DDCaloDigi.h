@@ -190,8 +190,8 @@ class DDCaloDigi : public Processor {
   float _hcalTimeResolution = 10.0;
   bool  _hcalSimpleTimingCut = true;
   
-  DDScintillatorPpdDigi* _scEcalDigi = NULL;
-  DDScintillatorPpdDigi* _scHcalDigi = NULL;
+  std::unique_ptr<DDScintillatorPpdDigi> _scEcalDigi{};
+  std::unique_ptr<DDScintillatorPpdDigi> _scHcalDigi{};
 
 
   // parameters for extra ECAL digitization effects
