@@ -17,6 +17,10 @@
 
 #include "DDTrackCreatorBase.h"
 #include "Pandora/PdgTable.h"
+#include <LCObjects/LCTrack.h>
+
+#include <MarlinTrk/Factory.h>
+#include <MarlinTrk/IMarlinTrack.h>
 
 #include "DD4hep/Detector.h"
 #include "DD4hep/DD4hepUnits.h"
@@ -26,7 +30,8 @@
 #include <cmath>
 #include <limits>
 
-
+//forward declaration
+std::vector<double> getTrackingRegionExtent();
 
 DDTrackCreatorBase::DDTrackCreatorBase(const Settings &settings, const pandora::Pandora *const pPandora) :
     m_settings(settings),
@@ -35,9 +40,21 @@ DDTrackCreatorBase::DDTrackCreatorBase(const Settings &settings, const pandora::
     m_v0TrackList( TrackList() ),
     m_parentTrackList( TrackList() ),
     m_daughterTrackList( TrackList() ),
-    m_trackToPidMap( TrackToPidMap() )
+    m_trackToPidMap( TrackToPidMap() ),
+    m_minimalTrackStateRadiusSquared( 0.f )
 {
-  
+
+    const float ecalInnerR = settings.m_eCalBarrelInnerR;
+    const float tsTolerance = settings.m_trackStateTolerance;
+    m_minimalTrackStateRadiusSquared = (ecalInnerR-tsTolerance)*(ecalInnerR-tsTolerance);
+    //wrap in shared_ptr with a dummy destructor
+    m_trackingSystem =
+      std::shared_ptr<MarlinTrk::IMarlinTrkSystem>( MarlinTrk::Factory::createMarlinTrkSystem(settings.m_trackingSystemName,
+                                                                                              nullptr, ""),
+                                                    [](MarlinTrk::IMarlinTrkSystem*){} );
+    m_trackingSystem->init();
+    m_encoder = std::make_shared<UTIL::BitField64>( lcio::LCTrackerCellID::encoding_string() );
+
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -369,6 +386,91 @@ void DDTrackCreatorBase::GetTrackStates(const EVENT::Track *const pTrack, Pandor
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void DDTrackCreatorBase::GetTrackStatesAtCalo( EVENT::Track *track,
+                                               lc_content::LCTrackParameters& trackParameters ){
+
+  if( not trackParameters.m_reachesCalorimeter.Get() ) {
+      streamlog_out(DEBUG4) << "Track does not reach the ECal" <<std::endl;
+    return;
+  }
+
+  const TrackState *trackAtCalo = track->getTrackState(TrackState::AtCalorimeter);
+  if( not trackAtCalo ) {
+      streamlog_out(DEBUG4) << "Track does not have a trackState at calorimeter" <<std::endl;
+      streamlog_out(DEBUG3) << toString(track) << std::endl;
+      return;
+  }
+
+  streamlog_out(DEBUG3) << "Original" << toString(trackAtCalo) << std::endl;
+
+  const auto* tsPosition = trackAtCalo->getReferencePoint();
+
+  if( tsPosition[2] <  getTrackingRegionExtent()[2] ) {
+      streamlog_out(DEBUG4) << "Original trackState is at Barrel" << std::endl;
+      pandora::InputTrackState pandoraTrackState;
+      this->CopyTrackState( trackAtCalo, pandoraTrackState );
+      trackParameters.m_trackStates.push_back( pandoraTrackState );
+  } else { // if track state is in endcap we do not repeat track state calculation, because the barrel cannot be hit
+      streamlog_out(DEBUG4) << "Original track state is at Endcap" << std::endl;
+      pandora::InputTrackState pandoraTrackState;
+      this->CopyTrackState( trackAtCalo, pandoraTrackState );
+      trackParameters.m_trackStates.push_back( pandoraTrackState );
+      return;
+  }
+
+  auto marlintrk = std::unique_ptr<MarlinTrk::IMarlinTrack>(m_trackingSystem->createTrack());
+  const EVENT::TrackerHitVec& trkHits = track->getTrackerHits();
+  const int nHitsTrack = trkHits.size();
+  for (int iHit = 0; iHit < nHitsTrack; ++iHit) {
+      marlintrk->addHit(trkHits[iHit]);
+  }
+
+  bool tanL_is_positive = trackAtCalo->getTanLambda()>0;
+
+  auto trackState = TrackStateImpl(*trackAtCalo);
+  marlintrk->initialise(trackState, m_settings.m_bField, MarlinTrk::IMarlinTrack::modeForward);
+
+  int return_error = 0;
+  double chi2 = -DBL_MAX;
+  int ndf = 0;
+
+  TrackStateImpl trackStateAtCaloEndcap;
+
+  unsigned ecal_endcap_face_ID = lcio::ILDDetID::ECAL_ENDCAP;
+  int detElementID = 0;
+  m_encoder->reset();  // reset to 0
+  (*m_encoder)[lcio::LCTrackerCellID::subdet()] = ecal_endcap_face_ID;
+  (*m_encoder)[lcio::LCTrackerCellID::side()] = tanL_is_positive ? lcio::ILDDetID::fwd : lcio::ILDDetID::bwd;
+  (*m_encoder)[lcio::LCTrackerCellID::layer()]  = 0;
+
+  return_error = marlintrk->propagateToLayer(m_encoder->lowWord(), trackStateAtCaloEndcap, chi2, ndf,
+                                             detElementID, MarlinTrk::IMarlinTrack::modeForward );
+  streamlog_out(DEBUG4) << "Found trackState at endcap? Error code: " << return_error  << std::endl;
+
+  if (return_error == MarlinTrk::IMarlinTrack::success ) {
+      streamlog_out(DEBUG3) << "Endcap" << toString(&trackStateAtCaloEndcap) << std::endl;
+      const auto* tsEP = trackStateAtCaloEndcap.getReferencePoint();
+      const double radSquared = ( tsEP[0]*tsEP[0] + tsEP[1]*tsEP[1] );
+      if( radSquared < m_minimalTrackStateRadiusSquared ) {
+          streamlog_out(DEBUG4) << "new track state is below tolerance radius" << std::endl;
+          return;
+      }
+      //for curling tracks the propagated track has the wrong z0 whereas it should be 0. really
+      if( std::abs( trackStateAtCaloEndcap.getZ0() ) >
+          std::abs( 2.*M_PI/trackStateAtCaloEndcap.getOmega() * trackStateAtCaloEndcap.getTanLambda() ) ){
+          trackStateAtCaloEndcap.setZ0( 0. );
+      }
+      streamlog_out(DEBUG4) << "new track state at endcap accepted" << std::endl;
+      pandora::InputTrackState pandoraAtEndcap;
+      this->CopyTrackState( &trackStateAtCaloEndcap, pandoraAtEndcap );
+      trackParameters.m_trackStates.push_back( pandoraAtEndcap );
+  }
+
+  return;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 float DDTrackCreatorBase::CalculateTrackTimeAtCalorimeter(const EVENT::Track *const pTrack) const
 {
     const pandora::Helix helix(pTrack->getPhi(), pTrack->getD0(), pTrack->getZ0(), pTrack->getOmega(), pTrack->getTanLambda(), m_settings.m_bField);
@@ -477,6 +579,8 @@ DDTrackCreatorBase::Settings::Settings() :
     m_maxBarrelTrackerInnerRDistance(50.f),
     m_minBarrelTrackerHitFractionOfExpected(0.2f),
     m_minFtdHitsForBarrelTrackerHitFraction(2),
+    m_trackStateTolerance(0.f),
+    m_trackingSystemName("DDKalTest"),
     m_bField(0.f),
     m_eCalBarrelInnerSymmetry(0),
     m_eCalBarrelInnerPhi0(0.f),

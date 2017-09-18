@@ -665,7 +665,16 @@ void DDPandoraPFANewProcessor::ProcessSteeringFile()
                             m_trackCreatorSettings.m_maxBarrelTrackerInnerRDistance,
                             float(50.));
 
-   
+    registerProcessorParameter( "TrackStateTolerance",
+                                "Distance of possible second track state in the ECal Endcap to the ECal barrel inner radius",
+                                m_trackCreatorSettings.m_trackStateTolerance,
+                                m_trackCreatorSettings.m_trackStateTolerance );
+
+    registerProcessorParameter( "TrackSystemName",
+                                "Name of the track fitting system to be used (KalTest, DDKalTest, aidaTT, ... )",
+                                m_trackCreatorSettings.m_trackingSystemName,
+                                m_trackCreatorSettings.m_trackingSystemName );
+
     // For Strip Splitting method and also for hybrid ECAL
     registerProcessorParameter("StripSplittingOn",
                             "To use strip splitting algorithm, this should be true",

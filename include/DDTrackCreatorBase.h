@@ -20,9 +20,20 @@
 #include "Api/PandoraApi.h"
 #include "Objects/Helix.h"
 
+#include <UTIL/ILDConf.h>
+
+#include <memory>
+
 typedef std::vector<EVENT::Track *> TrackVector;
 typedef std::set<const EVENT::Track *> TrackList;
 typedef std::map<EVENT::Track *, int> TrackToPidMap;
+
+namespace lc_content{
+  class LCTrackParameters;
+}
+namespace MarlinTrk{
+  class IMarlinTrkSystem;
+}
 
 inline IMPL::LCCollectionVec *newTrkCol(const std::string &name, EVENT::LCEvent *evt , bool isSubset)
 {
@@ -99,7 +110,10 @@ public:
         float           m_maxBarrelTrackerInnerRDistance;                 ///< Track cut on distance from barrel tracker inner r to id whether track can form pfo
         float           m_minBarrelTrackerHitFractionOfExpected;          ///< Minimum fraction of TPC hits compared to expected
         int             m_minFtdHitsForBarrelTrackerHitFraction;          ///< Minimum number of FTD hits to ignore TPC hit fraction
-        
+        float           m_trackStateTolerance; ///< distance below tracker ecal radius the second trackstate in the ecal endcap is still passed to pandora
+        std::string     m_trackingSystemName;  ///< name of the tracking system used for getting new track states
+
+
         ///Nikiforos: Moved from main class
         
         float             m_bField;                       ///< The bfield
@@ -147,6 +161,16 @@ public:
      */
     const TrackVector &GetTrackVector() const;
 
+
+    /**
+     *  @brief  Calculate possible second track state at the ECal Endcap
+     *
+     *  @param track lcio track
+     *  @param trackParameters pandora LCTrackParameters
+     */
+    virtual void GetTrackStatesAtCalo( EVENT::Track *track, lc_content::LCTrackParameters& trackParameters);
+
+
     /**
      *  @brief  Reset the track creator
      */
@@ -169,6 +193,9 @@ protected:
     TrackList               m_parentTrackList;              ///< The list of parent tracks
     TrackList               m_daughterTrackList;            ///< The list of daughter tracks
     TrackToPidMap           m_trackToPidMap;                ///< The map from track addresses to particle ids, where set by kinks/V0s
+    float                   m_minimalTrackStateRadiusSquared;         ///< minimal track state radius, derived value
+    std::shared_ptr<MarlinTrk::IMarlinTrkSystem> m_trackingSystem={}; ///< Tracking system used for track states
+    std::shared_ptr<UTIL::BitField64> m_encoder={};                   ///< cell ID encoder
     
     
     ///Nikiforos: Need to implement following abstract functions according to detector model
