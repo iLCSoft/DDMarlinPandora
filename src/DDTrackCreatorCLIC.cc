@@ -18,6 +18,7 @@
 #include "UTIL/Operators.h"
 
 #include "Pandora/PdgTable.h"
+#include "LCObjects/LCTrack.h"
 
 #include "DD4hep/Detector.h"
 #include "DD4hep/DD4hepUnits.h"
@@ -149,6 +150,9 @@ DDTrackCreatorCLIC::~DDTrackCreatorCLIC()
 
 pandora::StatusCode DDTrackCreatorCLIC::CreateTracks(EVENT::LCEvent *pLCEvent)
 {
+
+    lc_content::LCTrackFactory lcTrackFactory;
+
     for (StringVector::const_iterator iter = m_settings.m_trackCollections.begin(), iterEnd = m_settings.m_trackCollections.end();
         iter != iterEnd; ++iter)
     {
@@ -198,7 +202,7 @@ pandora::StatusCode DDTrackCreatorCLIC::CreateTracks(EVENT::LCEvent *pLCEvent)
 //                     }
 
                     // Proceed to create the pandora track
-                    PandoraApi::Track::Parameters trackParameters;
+                    lc_content::LCTrackParameters trackParameters;
                     trackParameters.m_d0 = pTrack->getD0();
                     trackParameters.m_z0 = pTrack->getZ0();
                     trackParameters.m_pParentAddress = pTrack;
@@ -232,9 +236,10 @@ pandora::StatusCode DDTrackCreatorCLIC::CreateTracks(EVENT::LCEvent *pLCEvent)
 
 			this->GetTrackStates(pTrack, trackParameters);
 			this->TrackReachesECAL(pTrack, trackParameters);
+			this->GetTrackStatesAtCalo(pTrack, trackParameters);
 			this->DefineTrackPfoUsage(pTrack, trackParameters);
 
-			PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Track::Create(m_pandora, trackParameters));
+			PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Track::Create(m_pandora, trackParameters, lcTrackFactory));
 			m_trackVector.push_back(pTrack);
 		      }
 		    catch (pandora::StatusCodeException &statusCodeException)
