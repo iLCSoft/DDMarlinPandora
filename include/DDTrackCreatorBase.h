@@ -30,6 +30,7 @@ typedef std::map<EVENT::Track *, int> TrackToPidMap;
 
 namespace lc_content{
   class LCTrackParameters;
+  class LCTrackFactory;
 }
 namespace MarlinTrk{
   class IMarlinTrkSystem;
@@ -196,7 +197,8 @@ protected:
     float                   m_minimalTrackStateRadiusSquared;         ///< minimal track state radius, derived value
     std::shared_ptr<MarlinTrk::IMarlinTrkSystem> m_trackingSystem={}; ///< Tracking system used for track states
     std::shared_ptr<UTIL::BitField64> m_encoder={};                   ///< cell ID encoder
-    
+    std::shared_ptr<lc_content::LCTrackFactory> m_lcTrackFactory={};  ///< LCTrackFactor for creating LCTracks
+
     
     ///Nikiforos: Need to implement following abstract functions according to detector model
     

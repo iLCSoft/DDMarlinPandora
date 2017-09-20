@@ -151,8 +151,6 @@ DDTrackCreatorCLIC::~DDTrackCreatorCLIC()
 pandora::StatusCode DDTrackCreatorCLIC::CreateTracks(EVENT::LCEvent *pLCEvent)
 {
 
-    lc_content::LCTrackFactory lcTrackFactory;
-
     for (StringVector::const_iterator iter = m_settings.m_trackCollections.begin(), iterEnd = m_settings.m_trackCollections.end();
         iter != iterEnd; ++iter)
     {
@@ -239,7 +237,7 @@ pandora::StatusCode DDTrackCreatorCLIC::CreateTracks(EVENT::LCEvent *pLCEvent)
 			this->GetTrackStatesAtCalo(pTrack, trackParameters);
 			this->DefineTrackPfoUsage(pTrack, trackParameters);
 
-			PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Track::Create(m_pandora, trackParameters, lcTrackFactory));
+			PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Track::Create(m_pandora, trackParameters, *m_lcTrackFactory));
 			m_trackVector.push_back(pTrack);
 		      }
 		    catch (pandora::StatusCodeException &statusCodeException)

@@ -54,7 +54,7 @@ DDTrackCreatorBase::DDTrackCreatorBase(const Settings &settings, const pandora::
                                                     [](MarlinTrk::IMarlinTrkSystem*){} );
     m_trackingSystem->init();
     m_encoder = std::make_shared<UTIL::BitField64>( lcio::LCTrackerCellID::encoding_string() );
-
+    m_lcTrackFactory = std::make_shared<lc_content::LCTrackFactory>();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
