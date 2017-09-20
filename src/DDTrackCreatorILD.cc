@@ -17,6 +17,7 @@
 
 #include "DDTrackCreatorILD.h"
 #include "Pandora/PdgTable.h"
+#include "LCObjects/LCTrack.h"
 
 #include <algorithm>
 #include <cmath>
@@ -225,7 +226,7 @@ pandora::StatusCode DDTrackCreatorILD::CreateTracks(EVENT::LCEvent *pLCEvent)
 		continue;
 
 	      // Proceed to create the pandora track
-	      PandoraApi::Track::Parameters trackParameters;
+	      lc_content::LCTrackParameters trackParameters;
 	      trackParameters.m_d0 = pTrack->getD0();
 	      trackParameters.m_z0 = pTrack->getZ0();
 	      trackParameters.m_pParentAddress = pTrack;
@@ -250,9 +251,10 @@ pandora::StatusCode DDTrackCreatorILD::CreateTracks(EVENT::LCEvent *pLCEvent)
 		{
 		  this->GetTrackStates(pTrack, trackParameters);
 		  this->TrackReachesECAL(pTrack, trackParameters);
+		  this->GetTrackStatesAtCalo(pTrack, trackParameters);
 		  this->DefineTrackPfoUsage(pTrack, trackParameters);
 
-		  PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Track::Create(m_pandora, trackParameters));
+		  PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Track::Create(m_pandora, trackParameters, *m_lcTrackFactory));
 		  m_trackVector.push_back(pTrack);
 		}
 	      catch (pandora::StatusCodeException &statusCodeException)
