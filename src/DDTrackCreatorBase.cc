@@ -390,13 +390,13 @@ void DDTrackCreatorBase::GetTrackStatesAtCalo( EVENT::Track *track,
                                                lc_content::LCTrackParameters& trackParameters ){
 
   if( not trackParameters.m_reachesCalorimeter.Get() ) {
-      streamlog_out(DEBUG4) << "Track does not reach the ECal" <<std::endl;
+      streamlog_out(DEBUG5) << "Track does not reach the ECal" <<std::endl;
     return;
   }
 
   const TrackState *trackAtCalo = track->getTrackState(TrackState::AtCalorimeter);
   if( not trackAtCalo ) {
-      streamlog_out(DEBUG4) << "Track does not have a trackState at calorimeter" <<std::endl;
+      streamlog_out(DEBUG5) << "Track does not have a trackState at calorimeter" <<std::endl;
       streamlog_out(DEBUG3) << toString(track) << std::endl;
       return;
   }
@@ -406,12 +406,12 @@ void DDTrackCreatorBase::GetTrackStatesAtCalo( EVENT::Track *track,
   const auto* tsPosition = trackAtCalo->getReferencePoint();
 
   if( tsPosition[2] <  getTrackingRegionExtent()[2] ) {
-      streamlog_out(DEBUG4) << "Original trackState is at Barrel" << std::endl;
+      streamlog_out(DEBUG5) << "Original trackState is at Barrel" << std::endl;
       pandora::InputTrackState pandoraTrackState;
       this->CopyTrackState( trackAtCalo, pandoraTrackState );
       trackParameters.m_trackStates.push_back( pandoraTrackState );
   } else { // if track state is in endcap we do not repeat track state calculation, because the barrel cannot be hit
-      streamlog_out(DEBUG4) << "Original track state is at Endcap" << std::endl;
+      streamlog_out(DEBUG5) << "Original track state is at Endcap" << std::endl;
       pandora::InputTrackState pandoraTrackState;
       this->CopyTrackState( trackAtCalo, pandoraTrackState );
       trackParameters.m_trackStates.push_back( pandoraTrackState );
@@ -445,14 +445,14 @@ void DDTrackCreatorBase::GetTrackStatesAtCalo( EVENT::Track *track,
 
   return_error = marlintrk->propagateToLayer(m_encoder->lowWord(), trackStateAtCaloEndcap, chi2, ndf,
                                              detElementID, MarlinTrk::IMarlinTrack::modeForward );
-  streamlog_out(DEBUG4) << "Found trackState at endcap? Error code: " << return_error  << std::endl;
+  streamlog_out(DEBUG5) << "Found trackState at endcap? Error code: " << return_error  << std::endl;
 
   if (return_error == MarlinTrk::IMarlinTrack::success ) {
       streamlog_out(DEBUG3) << "Endcap" << toString(&trackStateAtCaloEndcap) << std::endl;
       const auto* tsEP = trackStateAtCaloEndcap.getReferencePoint();
       const double radSquared = ( tsEP[0]*tsEP[0] + tsEP[1]*tsEP[1] );
       if( radSquared < m_minimalTrackStateRadiusSquared ) {
-          streamlog_out(DEBUG4) << "new track state is below tolerance radius" << std::endl;
+          streamlog_out(DEBUG5) << "new track state is below tolerance radius" << std::endl;
           return;
       }
       //for curling tracks the propagated track has the wrong z0 whereas it should be 0. really
@@ -460,7 +460,7 @@ void DDTrackCreatorBase::GetTrackStatesAtCalo( EVENT::Track *track,
           std::abs( 2.*M_PI/trackStateAtCaloEndcap.getOmega() * trackStateAtCaloEndcap.getTanLambda() ) ){
           trackStateAtCaloEndcap.setZ0( 0. );
       }
-      streamlog_out(DEBUG4) << "new track state at endcap accepted" << std::endl;
+      streamlog_out(DEBUG5) << "new track state at endcap accepted" << std::endl;
       pandora::InputTrackState pandoraAtEndcap;
       this->CopyTrackState( &trackStateAtCaloEndcap, pandoraAtEndcap );
       trackParameters.m_trackStates.push_back( pandoraAtEndcap );
