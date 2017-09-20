@@ -246,7 +246,7 @@ pandora::StatusCode DDTrackCreatorCLIC::CreateTracks(EVENT::LCEvent *pLCEvent)
 		      {
 			streamlog_out(ERROR) << "Failed to extract a track: " << statusCodeException.ToString() << std::endl;
 			
-			streamlog_out( DEBUG5 ) << " failed track : " << *pTrack << std::endl ;
+			streamlog_out( DEBUG3 ) << " failed track : " << *pTrack << std::endl ;
 		      }
 		    catch (EVENT::Exception &exception)
 		      {
@@ -274,7 +274,7 @@ bool DDTrackCreatorCLIC::PassesQualityCuts(const EVENT::Track *const pTrack, con
     // First simple sanity checks
     if (trackParameters.m_trackStateAtCalorimeter.Get().GetPosition().GetMagnitude() < m_settings.m_minTrackECalDistanceFromIp){
         streamlog_out(WARNING) << " Dropping track! Distance at ECAL: " << trackParameters.m_trackStateAtCalorimeter.Get().GetPosition().GetMagnitude()<<std::endl;
-	streamlog_out(DEBUG5)  << " track : " << *pTrack
+	streamlog_out(DEBUG3)  << " track : " << *pTrack
 			       << std::endl;
         return false;
     }
@@ -295,12 +295,12 @@ bool DDTrackCreatorCLIC::PassesQualityCuts(const EVENT::Track *const pTrack, con
                                << " chi2 = " <<  pTrack->getChi2() << " " << pTrack->getNdf()
                                << " from " << pTrack->getTrackerHits().size()  << std::endl ;
 
-	streamlog_out(DEBUG5)  << " track : " << *pTrack
+	streamlog_out(DEBUG3)  << " track : " << *pTrack
 			       << std::endl;
         return false;
     }
 
-    streamlog_out( DEBUG5 ) << " TEMPORARILY ACCEPT TRACK WITHOUT CUTS (should change!)" << *pTrack << std::endl ;
+    streamlog_out( DEBUG3 ) << " TEMPORARILY ACCEPT TRACK WITHOUT CUTS (should change!)" << *pTrack << std::endl ;
     return true;
     
     // Require reasonable number of Tracker hits 
@@ -367,7 +367,7 @@ bool DDTrackCreatorCLIC::PassesQualityCuts(const EVENT::Track *const pTrack, con
             streamlog_out(WARNING) << " Dropping track : " << momentumAtDca.GetMagnitude() << " Number of Tracker hits = " << nBarrelTrackerHits
                                    << " < " << minTrackerHits << " nendcapDisk = " << nEndcapTrackerHits << std::endl;
 
-	    streamlog_out(DEBUG5)  << " track : " << *pTrack
+	    streamlog_out(DEBUG3)  << " track : " << *pTrack
 				   << std::endl;
             return false;
         }
