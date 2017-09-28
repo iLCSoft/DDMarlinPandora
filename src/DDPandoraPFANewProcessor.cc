@@ -13,6 +13,7 @@
 #include "Api/PandoraApi.h"
 
 #include "LCContent.h"
+#include "LCPlugins/LCSoftwareCompensation.h"
 
 #include "DDExternalClusteringAlgorithm.h"
 #include "DDPandoraPFANewProcessor.h"
@@ -301,6 +302,14 @@ pandora::StatusCode DDPandoraPFANewProcessor::RegisterUserComponents() const
 
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::RegisterAlgorithmFactory(*m_pPandora,
         "ExternalClustering", new DDExternalClusteringAlgorithm::Factory));
+    
+    lc_content::LCSoftwareCompensationParameters softwareCompensationParameters;
+    softwareCompensationParameters.m_softCompWeights = m_settings.m_softCompWeights;
+    softwareCompensationParameters.m_softCompEnergyDensityBins = m_settings.m_softCompEnergyDensityBins;
+    softwareCompensationParameters.m_energyDensityFinalBin = m_settings.m_energyDensityFinalBin;
+        
+    PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LCContent::RegisterSoftwareCompensationEnergyCorrection(*m_pPandora,
+        "SoftwareCompensation", softwareCompensationParameters));
 
     return pandora::STATUS_CODE_SUCCESS;
 }
@@ -786,7 +795,23 @@ void DDPandoraPFANewProcessor::ProcessSteeringFile()
                                m_caloHitCreatorSettings.m_muonBarrelNormalVector,
                                std::vector<float>({0.0, 0.0, 1.0}));
 
+    // Re-use LCSoftwareCompensationParameters default values
+    lc_content::LCSoftwareCompensationParameters softwareCompensationParameters;
+    
+    registerProcessorParameter("SoftwareCompensationWeights",
+                               "The 8 software compensation weights for Pandora energy correction",
+                               m_settings.m_softCompWeights,
+                               softwareCompensationParameters.m_softCompWeights);
 
+    registerProcessorParameter("SoftwareCompensationEnergyDensityBins",
+                               "The 10 software compensation density bins for Pandora energy correction",
+                               m_settings.m_softCompEnergyDensityBins,
+                               softwareCompensationParameters.m_softCompEnergyDensityBins);
+
+    registerProcessorParameter("FinalEnergyDensityBin",
+                               "The software compensation final energy density bins for Pandora energy correction",
+                               m_settings.m_energyDensityFinalBin,
+                               softwareCompensationParameters.m_energyDensityFinalBin);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
