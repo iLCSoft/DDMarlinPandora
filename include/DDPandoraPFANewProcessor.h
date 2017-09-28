@@ -54,6 +54,11 @@ public:
         FloatVector     m_inputEnergyCorrectionPoints{};    ///< The input energy points for non-linearity energy correction
         FloatVector     m_outputEnergyCorrectionPoints{};   ///< The output energy points for non-linearity energy correction
         
+        // Software compensation parameters
+        FloatVector     m_softCompWeights{};
+        FloatVector     m_softCompEnergyDensityBins{};
+        float           m_energyDensityFinalBin = 0.0;
+        
         ///ADDED BY NIKIFOROS
         //Detector names not needed anymore, accessed by det type flags
         std::string     m_trackCreatorName = "";            ///< The name of the DDTrackCreator implementation to use
