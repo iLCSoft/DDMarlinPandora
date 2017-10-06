@@ -33,7 +33,6 @@
 #include "DDRec/DetectorData.h"
 #include "DDRec/DDGear.h"
 #include "DDRec/MaterialManager.h"
-#include "DDRec/API/Calorimeter.h"
 
 using namespace std;
 using namespace lcio ;
