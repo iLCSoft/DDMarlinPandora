@@ -58,6 +58,11 @@ public:
         FloatVector     m_softCompWeights{};
         FloatVector     m_softCompEnergyDensityBins{};
         float           m_energyDensityFinalBin = 0.0;
+        float           m_maxClusterEnergyToApplySoftComp = 100.0;
+        float           m_minCleanHitEnergy = 0.5;
+        float           m_minCleanHitEnergyFraction = 0.01;
+        float           m_minCleanCorrectedHitEnergy = 0.1;
+        
         
         ///ADDED BY NIKIFOROS
         //Detector names not needed anymore, accessed by det type flags
