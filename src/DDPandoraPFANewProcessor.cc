@@ -307,6 +307,10 @@ pandora::StatusCode DDPandoraPFANewProcessor::RegisterUserComponents() const
     softwareCompensationParameters.m_softCompWeights = m_settings.m_softCompWeights;
     softwareCompensationParameters.m_softCompEnergyDensityBins = m_settings.m_softCompEnergyDensityBins;
     softwareCompensationParameters.m_energyDensityFinalBin = m_settings.m_energyDensityFinalBin;
+    softwareCompensationParameters.m_maxClusterEnergyToApplySoftComp = m_settings.m_maxClusterEnergyToApplySoftComp;
+    softwareCompensationParameters.m_minCleanHitEnergy = m_settings.m_minCleanHitEnergy;
+    softwareCompensationParameters.m_minCleanHitEnergyFraction = m_settings.m_minCleanHitEnergyFraction;
+    softwareCompensationParameters.m_minCleanCorrectedHitEnergy = m_settings.m_minCleanCorrectedHitEnergy;
         
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LCContent::RegisterSoftwareCompensationEnergyCorrection(*m_pPandora,
         "SoftwareCompensation", softwareCompensationParameters));
@@ -812,6 +816,26 @@ void DDPandoraPFANewProcessor::ProcessSteeringFile()
                                "The software compensation final energy density bins for Pandora energy correction",
                                m_settings.m_energyDensityFinalBin,
                                softwareCompensationParameters.m_energyDensityFinalBin);
+
+    registerProcessorParameter("MaxClusterEnergyToApplySoftComp",
+                               "The maximum hadronic energy to apply software compensation in Pandora energy correction",
+                               m_settings.m_maxClusterEnergyToApplySoftComp,
+                               softwareCompensationParameters.m_maxClusterEnergyToApplySoftComp);
+                               
+    registerProcessorParameter("MinCleanHitEnergy",
+                               "The minimum hit energy to apply ecal correction in Pandora energy correction",
+                               m_settings.m_minCleanHitEnergy,
+                               softwareCompensationParameters.m_minCleanHitEnergy);
+                               
+    registerProcessorParameter("MinCleanHitEnergyFraction",
+                               "The minimum hit energy fraction to apply ecal correction in Pandora energy correction",
+                               m_settings.m_minCleanHitEnergyFraction,
+                               softwareCompensationParameters.m_minCleanHitEnergyFraction);
+                               
+    registerProcessorParameter("MinCleanCorrectedHitEnergy",
+                               "The minimum correction to on ecal hit in Pandora energy correction",
+                               m_settings.m_minCleanCorrectedHitEnergy,
+                               softwareCompensationParameters.m_minCleanCorrectedHitEnergy);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
