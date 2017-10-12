@@ -1,3 +1,21 @@
+# v00-08
+
+* 2017-07-07 Andre Sailer ([PR#11](https://github.com/iLCSoft/DDMarlinPandora/pull/11))
+  - DDCaloDigi: add cleanup of PpdDigi objects, fixes small memory leak
+
+* 2017-09-26 Andre Sailer ([PR#12](https://github.com/iLCSoft/DDMarlinPandora/pull/12))
+  - DDTrackCreator: implement passing of multiple track states to Pandora, needs PandoraPFA/LCContent#16
+  - Implemented DDTrackCreatorBase::GetTrackStatesAtCalo to obtain second trackstate in the endcap
+  - Added GetTrackStatesAtCalo and related code in DDTrackCreatorCLIC and DDTrackCreatorILD
+  
+  - DDPandoraPFANewProcessor: 
+    * added *TrackStateTolerance* variable to tweak the radius until trackStates in the ECal endcap are accepted, by default only trackStates with a radius larger than EcalBarrel Inner radius are accepted
+    * added *TrackSystemName* parameter to chose trackSystem (DDKalTest) to use for trackState calculation
+
+* 2017-10-06 Frank Gaede ([PR#14](https://github.com/iLCSoft/DDMarlinPandora/pull/14))
+  - rm unused and deprecated DDRec/API/Calorimeter.h 
+       - (see https://github.com/AIDASoft/DD4hep/pull/241)
+
 # v00-07
 
 * 2017-04-21 Andre Sailer ([PR#6](https://github.com/iLCSoft/DDMarlinPandora/pull/6))
