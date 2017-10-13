@@ -304,7 +304,7 @@ pandora::StatusCode DDPandoraPFANewProcessor::RegisterUserComponents() const
         "ExternalClustering", new DDExternalClusteringAlgorithm::Factory));
     
     lc_content::LCSoftwareCompensationParameters softwareCompensationParameters;
-    softwareCompensationParameters.m_softCompWeights = m_settings.m_softCompWeights;
+    softwareCompensationParameters.m_softCompParameters = m_settings.m_softCompParameters;
     softwareCompensationParameters.m_softCompEnergyDensityBins = m_settings.m_softCompEnergyDensityBins;
     softwareCompensationParameters.m_energyDensityFinalBin = m_settings.m_energyDensityFinalBin;
     softwareCompensationParameters.m_maxClusterEnergyToApplySoftComp = m_settings.m_maxClusterEnergyToApplySoftComp;
@@ -803,9 +803,9 @@ void DDPandoraPFANewProcessor::ProcessSteeringFile()
     lc_content::LCSoftwareCompensationParameters softwareCompensationParameters;
     
     registerProcessorParameter("SoftwareCompensationWeights",
-                               "The 8 software compensation weights for Pandora energy correction",
-                               m_settings.m_softCompWeights,
-                               softwareCompensationParameters.m_softCompWeights);
+                               "The 9 software compensation weights for Pandora energy correction",
+                               m_settings.m_softCompParameters,
+                               softwareCompensationParameters.m_softCompParameters);
 
     registerProcessorParameter("SoftwareCompensationEnergyDensityBins",
                                "The 10 software compensation density bins for Pandora energy correction",
