@@ -55,7 +55,7 @@ public:
         FloatVector     m_outputEnergyCorrectionPoints{};   ///< The output energy points for non-linearity energy correction
         
         // Software compensation parameters
-        FloatVector     m_softCompWeights{};
+        FloatVector     m_softCompParameters{};
         FloatVector     m_softCompEnergyDensityBins{};
         float           m_energyDensityFinalBin = 0.0;
         float           m_maxClusterEnergyToApplySoftComp = 100.0;
