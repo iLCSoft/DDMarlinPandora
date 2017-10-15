@@ -1,3 +1,12 @@
+# v00-09
+
+* 2017-10-14 Ete Remi ([PR#13](https://github.com/ilcsoft/DDMarlinPandora/pull/13))
+  - Added separate registration function for software compensation energy correction
+  - Software compensation parameters added in processor parameters 
+    - SoftwareCompensationWeights : the sc weights
+    - SoftwareCompensationEnergyDensityBins : the energy density bins
+    - FinalEnergyDensityBin : the final energy density value
+
 # v00-08
 
 * 2017-07-07 Andre Sailer ([PR#11](https://github.com/iLCSoft/DDMarlinPandora/pull/11))
