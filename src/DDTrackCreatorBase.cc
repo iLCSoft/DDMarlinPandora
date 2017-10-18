@@ -426,9 +426,9 @@ void DDTrackCreatorBase::GetTrackStatesAtCalo( EVENT::Track *track,
     EVENT::TrackerHit* trkHit = trkHits[iHit] ;
     if( UTIL::BitSet32( trkHit->getType() )[ UTIL::ILDTrkHitTypeBit::COMPOSITE_SPACEPOINT ]   ){ //it is a composite spacepoint
       //Split it up and add both hits to the MarlinTrk
-      const EVENT::LCObjectVec rawObjects = trkHit->getRawHits();
+      const EVENT::LCObjectVec& rawObjects = trkHit->getRawHits();
       for( unsigned k=0; k< rawObjects.size(); k++ ){
-	EVENT::TrackerHit* rawHit = dynamic_cast< EVENT::TrackerHit* >( rawObjects[k] );
+	EVENT::TrackerHit* rawHit = static_cast< EVENT::TrackerHit* >( rawObjects[k] );
 	if( marlintrk->addHit( rawHit ) != MarlinTrk::IMarlinTrack::success ){
 	  streamlog_out(DEBUG4) << "DDTrackCreatorBase::GetTrackStatesAtCalo failed to add strip hit " << *rawHit << std::endl;
 	}
