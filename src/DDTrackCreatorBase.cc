@@ -405,7 +405,7 @@ void DDTrackCreatorBase::GetTrackStatesAtCalo( EVENT::Track *track,
 
   const auto* tsPosition = trackAtCalo->getReferencePoint();
 
-  if( tsPosition[2] <  getTrackingRegionExtent()[2] ) {
+  if( std::fabs(tsPosition[2]) <  getTrackingRegionExtent()[2] ) {
       streamlog_out(DEBUG5) << "Original trackState is at Barrel" << std::endl;
       pandora::InputTrackState pandoraTrackState;
       this->CopyTrackState( trackAtCalo, pandoraTrackState );
@@ -421,16 +421,34 @@ void DDTrackCreatorBase::GetTrackStatesAtCalo( EVENT::Track *track,
   auto marlintrk = std::unique_ptr<MarlinTrk::IMarlinTrack>(m_trackingSystem->createTrack());
   const EVENT::TrackerHitVec& trkHits = track->getTrackerHits();
   const int nHitsTrack = trkHits.size();
+
   for (int iHit = 0; iHit < nHitsTrack; ++iHit) {
-      marlintrk->addHit(trkHits[iHit]);
+    EVENT::TrackerHit* trkHit = trkHits[iHit] ;
+    if( UTIL::BitSet32( trkHit->getType() )[ UTIL::ILDTrkHitTypeBit::COMPOSITE_SPACEPOINT ]   ){ //it is a composite spacepoint
+      //Split it up and add both hits to the MarlinTrk
+      const EVENT::LCObjectVec rawObjects = trkHit->getRawHits();
+      for( unsigned k=0; k< rawObjects.size(); k++ ){
+	EVENT::TrackerHit* rawHit = dynamic_cast< EVENT::TrackerHit* >( rawObjects[k] );
+	if( marlintrk->addHit( rawHit ) != MarlinTrk::IMarlinTrack::success ){
+	  streamlog_out(DEBUG4) << "DDTrackCreatorBase::GetTrackStatesAtCalo failed to add strip hit " << *rawHit << std::endl;
+	}
+      }
+    } else {
+      if( marlintrk->addHit(trkHits[iHit])  != MarlinTrk::IMarlinTrack::success  )
+	streamlog_out(DEBUG4) << "DDTrackCreatorBase::GetTrackStatesAtCalo failed to add tracker hit " << *trkHit<< std::endl;
+    }
   }
 
   bool tanL_is_positive = trackAtCalo->getTanLambda()>0;
 
   auto trackState = TrackStateImpl(*trackAtCalo);
-  marlintrk->initialise(trackState, m_settings.m_bField, MarlinTrk::IMarlinTrack::modeForward);
 
-  int return_error = 0;
+  int return_error  = marlintrk->initialise(trackState, m_settings.m_bField, MarlinTrk::IMarlinTrack::modeForward);
+  if (return_error != MarlinTrk::IMarlinTrack::success ) {
+    streamlog_out(DEBUG4) << "DDTrackCreatorBase::GetTrackStatesAtCalo failed to initialize track for endcap track : " << std::endl ;
+    return ;
+  }
+
   double chi2 = -DBL_MAX;
   int ndf = 0;
 
