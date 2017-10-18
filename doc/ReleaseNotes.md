@@ -1,3 +1,12 @@
+# v00-09-01
+
+* 2017-10-18 Frank Gaede ([PR#16](https://github.com/ilcsoft/DDMarlinPandora/pull/16))
+  - fix DDTrackCreatorBase::GetTrackStatesAtCalo
+      - treat correctly composite spacepoints (from strip stereo layers)
+      - protect against initialization error
+      - fix logic for backward tracks hitting endcap
+   - fixes https://github.com/iLCSoft/DDMarlinPandora/issues/15
+
 # v00-09
 
 * 2017-10-14 Ete Remi ([PR#13](https://github.com/ilcsoft/DDMarlinPandora/pull/13))
