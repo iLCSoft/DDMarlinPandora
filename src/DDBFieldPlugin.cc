@@ -1,5 +1,5 @@
 /**
- *  @file   DDMarlinPandora/src/DDGeometryCreator.cc
+ *  @file   DDMarlinPandora/src/DDBFieldPlugin.cc
  * 
  *  @brief  Implementation of the geometry creator class.
  * 
