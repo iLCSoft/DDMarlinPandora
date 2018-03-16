@@ -27,6 +27,8 @@
 #include "DDTrackCreatorILD.h"
 #include "DDTrackCreatorCLIC.h"
 
+#include "DDBFieldPlugin.h"
+
 
 #include <cstdlib>
 
@@ -294,8 +296,19 @@ pandora::StatusCode DDPandoraPFANewProcessor::RegisterUserComponents() const
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LCContent::RegisterAlgorithms(*m_pPandora));
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LCContent::RegisterBasicPlugins(*m_pPandora));
 
-    PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LCContent::RegisterBFieldPlugin(*m_pPandora,
-        m_settings.m_innerBField, m_settings.m_muonBarrelBField, m_settings.m_muonEndCapBField));
+    if(m_settings.m_useDD4hepField)
+    {
+      dd4hep::Detector& mainDetector = dd4hep::Detector::getInstance();
+      
+      PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetBFieldPlugin(*m_pPandora,
+          new DDBFieldPlugin(mainDetector)));  
+    }
+    else
+    {
+      PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LCContent::RegisterBFieldPlugin(*m_pPandora,
+          m_settings.m_innerBField, m_settings.m_muonBarrelBField, m_settings.m_muonEndCapBField));  
+    }
+
 
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LCContent::RegisterNonLinearityEnergyCorrection(*m_pPandora,
         "NonLinearity", pandora::HADRONIC, m_settings.m_inputEnergyCorrectionPoints, m_settings.m_outputEnergyCorrectionPoints));
@@ -542,6 +555,11 @@ void DDPandoraPFANewProcessor::ProcessSteeringFile()
                             "The bfield in the muon endcap, units Tesla",
                             m_settings.m_muonEndCapBField,
                             float(0.01f));
+                            
+    registerProcessorParameter("UseDD4hepField",
+                            "Whether to use the BField map from DD4hep",
+                            m_settings.m_useDD4hepField,
+                            false);
 
     // Track relationship parameters
     registerProcessorParameter("ShouldFormTrackRelationships",
