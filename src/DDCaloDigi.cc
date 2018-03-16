@@ -1991,9 +1991,9 @@ std::vector < std::pair <int, int> > & DDCaloDigi::getLayerConfig() {
 
       // convert each element of string to integer
       // int type = std::atoi( &ccdd ); // this is not well done (must be null-terminated)
-      int type = _ecalLayout[i] - '0'; // this is less obvious, but works...
+      int etype = _ecalLayout[i] - '0'; // this is less obvious, but works...
       
-      switch ( type ) { // these originally defined in Mokka driver SEcalSD04
+      switch ( etype ) { // these originally defined in Mokka driver SEcalSD04
       case 0:
 	_layerTypes.push_back(std::pair < int, int > (SIECAL, SQUARE) );
 	_layerTypes.push_back(std::pair < int, int > (SIECAL, SQUARE) );
@@ -2031,7 +2031,7 @@ std::vector < std::pair <int, int> > & DDCaloDigi::getLayerConfig() {
 	_layerTypes.push_back(std::pair < int, int > (SIECAL, SQUARE) );
 	break;
       default:
-	streamlog_out (ERROR) << "ERROR, unknown layer type " << type << endl;
+	streamlog_out (ERROR) << "ERROR, unknown layer type " << etype << endl;
       }
     }
   }
