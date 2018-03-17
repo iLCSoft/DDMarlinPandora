@@ -23,7 +23,7 @@ float DDBFieldPlugin::GetBField(const pandora::CartesianVector &positionVector) 
 {
     double bfield[3] = {0.};
     m_field.magneticField({positionVector.GetX(), positionVector.GetY(), positionVector.GetZ()}, bfield);
-    return std::sqrt(bfield[0]*bfield[0] + bfield[1]*bfield[1] + bfield[2]*bfield[2]);
+    return bfield[2];
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
