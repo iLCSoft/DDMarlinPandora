@@ -10,6 +10,7 @@
 
 #include "Helpers/XmlHelper.h"
 
+#include "DD4hep/DD4hepUnits.h"
 
 DDBFieldPlugin::DDBFieldPlugin(const dd4hep::Detector &detector) :
     m_field(detector.field())
@@ -22,8 +23,8 @@ DDBFieldPlugin::DDBFieldPlugin(const dd4hep::Detector &detector) :
 float DDBFieldPlugin::GetBField(const pandora::CartesianVector &positionVector) const
 {
     double bfield[3] = {0.};
-    m_field.magneticField({positionVector.GetX(), positionVector.GetY(), positionVector.GetZ()}, bfield);
-    return bfield[2];
+    m_field.magneticField({positionVector.GetX()*dd4hep::mm, positionVector.GetY()*dd4hep::mm, positionVector.GetZ()*dd4hep::mm}, bfield);
+    return bfield[2]/dd4hep::tesla;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
