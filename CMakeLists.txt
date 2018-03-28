@@ -11,8 +11,8 @@ PROJECT( DDMarlinPandora )
 
 # project version# continuing from MarlinPandora version 2.0.0 revision 1934
 SET( DDMarlinPandora_VERSION_MAJOR 0 )
-SET( DDMarlinPandora_VERSION_MINOR 9 )
-SET( DDMarlinPandora_VERSION_PATCH 1 )
+SET( DDMarlinPandora_VERSION_MINOR 10 )
+SET( DDMarlinPandora_VERSION_PATCH 0 )
 
 
 ### CMAKE ###################################################################
