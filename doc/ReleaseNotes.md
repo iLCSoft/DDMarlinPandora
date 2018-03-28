@@ -1,3 +1,13 @@
+# v00-10
+
+* 2018-03-23 Ete Remi ([PR#17](https://github.com/iLCSoft/DDMarlinPandora/pull/17))
+  - New class DDBFieldPlugin:
+     - Returns the B field magnitude from DD4hep detector field to Pandora
+  - DDPandoraPFANewProcessor:
+     - Added optional registration of DDBFieldPlugin under processor parameter condition "UseDD4hepField" (default false)
+  - DDCaloDigi:
+     - Fixed warning
+
 # v00-09-01
 
 * 2017-10-18 Frank Gaede ([PR#16](https://github.com/ilcsoft/DDMarlinPandora/pull/16))
