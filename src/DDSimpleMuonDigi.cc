@@ -220,6 +220,7 @@ void DDSimpleMuonDigi::processEvent( LCEvent * evt ) {
 	  calhit->setEnergy(hitEnergy);
 	  calhit->setPosition(hit->getPosition());
 	  calhit->setType( CHT( CHT::muon, CHT::yoke, caloLayout ,  idDecoder(hit)[ _cellIDLayerString ] ) );
+	  calhit->setTime( computeHitTime(hit) );
 	  calhit->setRawHit(hit);
 	  muoncol->addElement(calhit);
 	  LCRelationImpl *rel = new LCRelationImpl(calhit,hit,1.);
@@ -258,3 +259,33 @@ bool DDSimpleMuonDigi::useLayer(CHT::Layout caloLayout,  unsigned int layer) {
     return true;
   }
 }//useLayer
+
+
+float DDSimpleMuonDigi::computeHitTime( const EVENT::SimCalorimeterHit *h ) const {
+  if( nullptr == h ) {
+    return 0.f ;
+  }
+  // Sort sim hit MC contribution by time.
+  // Accumulate the energy from earliest time till the energy
+  // threshold is reached. The hit time is then estimated at this position in the array 
+  std::vector<std::pair<float, float>> timeToEnergyMapping {} ;
+  using entry_type = std::pair<float, float> ;
+  const unsigned int nContribs = h->getNMCContributions() ;
+  timeToEnergyMapping.reserve( nContribs ) ;
+
+  for( unsigned int c=0 ; c<nContribs ; ++c ) {
+    timeToEnergyMapping.push_back( { h->getTimeCont(c), h->getEnergyCont(c) } ) ;
+  }
+  std::sort(timeToEnergyMapping.begin(), timeToEnergyMapping.end(), [this](entry_type &lhs, entry_type &rhs){
+      return lhs.first < rhs.first ;
+  }) ;
+  float energySum = 0.f ;
+  for(auto &entry : timeToEnergyMapping ) {
+    energySum += entry.second * _calibrCoeffMuon;
+    if( energySum > _thresholdMuon ) {
+      return entry.first ;
+    }
+  }
+  // default case. That should not happen ...
+  return 0.f ;
+}

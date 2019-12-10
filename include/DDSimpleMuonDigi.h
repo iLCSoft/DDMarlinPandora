@@ -12,6 +12,10 @@
 using namespace lcio ;
 using namespace marlin ;
 
+namespace EVENT {
+  class SimCalorimeterHit ;
+}
+
 
 /** === DDSimpleMuonDigi Processor === <br>
  *  Simple calorimeter digitizer for the muon detectors.
@@ -42,6 +46,7 @@ class DDSimpleMuonDigi : public Processor {
   virtual void end() ;
 
   bool useLayer(CHT::Layout caloLayout, unsigned int layer) ;
+  float computeHitTime( const EVENT::SimCalorimeterHit *h ) const ;
   
  protected:
 
