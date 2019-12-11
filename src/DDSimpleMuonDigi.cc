@@ -59,6 +59,11 @@ DDSimpleMuonDigi::DDSimpleMuonDigi() : Processor("DDSimpleMuonDigi") {
 			     _thresholdMuon,
 			     (float)0.025);
 
+    registerProcessorParameter("MuonTimeThreshold" ,
+			     "Energy threshold for timing information for Muon Hits in GeV" ,
+			     _timeThresholdMuon,
+			     (float)0.025);
+
   registerProcessorParameter("CalibrMUON" , 
 			     "Calibration coefficients for MUON" ,
 			     _calibrCoeffMuon,
@@ -155,7 +160,6 @@ void DDSimpleMuonDigi::init() {
       }
     }
   }
-
 
 
 }
@@ -282,7 +286,7 @@ float DDSimpleMuonDigi::computeHitTime( const EVENT::SimCalorimeterHit *h ) cons
   float energySum = 0.f ;
   for(auto &entry : timeToEnergyMapping ) {
     energySum += entry.second * _calibrCoeffMuon;
-    if( energySum > _thresholdMuon ) {
+    if( energySum > _timeThresholdMuon ) {
       return entry.first ;
     }
   }
