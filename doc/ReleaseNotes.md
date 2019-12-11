@@ -1,3 +1,13 @@
+# v00-11
+
+* 2019-12-11 Ete Remi ([PR#19](https://github.com/iLCSoft/DDMarlinPandora/pull/19))
+  - DDSimpleMuonDigi processor: 
+     - added time computation
+        - Sort MC contribution by time
+        - Accumulate energy until the threshold is reached
+        - Return the corresponding MC contribution time
+     - added new parameter MuonTimeThreshold: the muon energy threshold for estimating the hit time
+
 # v00-10
 
 * 2018-03-23 Ete Remi ([PR#17](https://github.com/iLCSoft/DDMarlinPandora/pull/17))
