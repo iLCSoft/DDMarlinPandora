@@ -64,6 +64,7 @@ class DDSimpleMuonDigi : public Processor {
   std::string _cellIDLayerString = "layer";
 
   float _thresholdMuon = 0.025;
+  float _timeThresholdMuon = _thresholdMuon ;
   float _calibrCoeffMuon = 120000;
   float _maxHitEnergyMuon = 2.0;
 
