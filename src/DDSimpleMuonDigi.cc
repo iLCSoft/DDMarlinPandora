@@ -272,8 +272,9 @@ float DDSimpleMuonDigi::computeHitTime( const EVENT::SimCalorimeterHit *h ) cons
   // Sort sim hit MC contribution by time.
   // Accumulate the energy from earliest time till the energy
   // threshold is reached. The hit time is then estimated at this position in the array 
-  std::vector<std::pair<float, float>> timeToEnergyMapping {} ;
   using entry_type = std::pair<float, float> ;
+  std::vector<entry_type> timeToEnergyMapping {} ;
+
   const unsigned int nContribs = h->getNMCContributions() ;
   timeToEnergyMapping.reserve( nContribs ) ;
 
