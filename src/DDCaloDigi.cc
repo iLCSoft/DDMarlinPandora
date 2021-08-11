@@ -13,6 +13,7 @@
 #include <EVENT/LCParameters.h>
 #include <UTIL/CellIDDecoder.h>
 #include <UTIL/CellIDEncoder.h>
+#include <UTIL/LCRelationNavigator.h>
 #include <iostream>
 #include <string>
 #include <algorithm>
@@ -684,7 +685,10 @@ void DDCaloDigi::processRunHeader( LCRunHeader* /*run*/) {
 void DDCaloDigi::processEvent( LCEvent * evt ) {
 
   // create the output collections
-  LCCollectionVec *relcol  = new LCCollectionVec(LCIO::LCRELATION);
+  
+  // Relation collection CalorimeterHit, SimCalorimeterHit
+  LCCollection* chschcol = 0;
+  UTIL::LCRelationNavigator calohitNav = UTIL::LCRelationNavigator( LCIO::CALORIMETERHIT, LCIO::SIMCALORIMETERHIT );
 
   // copy the flags from the input collection
   _flag.setBit(LCIO::CHBIT_LONG);
@@ -901,8 +905,10 @@ void DDCaloDigi::processEvent( LCEvent * evt ) {
                     calhit->setType( CHT( CHT::em, CHT::ecal , caloLayout ,  layer ) );
                     calhit->setRawHit(hit);
                     ecalcol->addElement(calhit);
-                    LCRelationImpl *rel = new LCRelationImpl(calhit,hit,1.0);
-                    relcol->addElement( rel );
+
+                    // Set relation with LCRelationNavigator
+                    calohitNav.addRelation(calhit, hit, 1.0);
+
                   }else{
                     //                    if(caloLayout==CHT::barrel)std::cout << " Drop ECAL Barrel hit : " << timei << " " << calibr_coeff*energyi << std::endl;
                   }
@@ -932,8 +938,9 @@ void DDCaloDigi::processEvent( LCEvent * evt ) {
             calhit->setType( CHT( CHT::em, CHT::ecal , caloLayout ,  layer ) );
             calhit->setRawHit(hit);
             ecalcol->addElement(calhit);
-            LCRelationImpl *rel = new LCRelationImpl(calhit,hit,1.0);
-            relcol->addElement( rel );
+
+            // Set relation with LCRelationNavigator
+            calohitNav.addRelation(calhit, hit, 1.0);
           } // timing if...else
 
 
@@ -1128,8 +1135,10 @@ void DDCaloDigi::processEvent( LCEvent * evt ) {
                     calhit->setType( CHT( CHT::had, CHT::hcal , caloLayout ,  layer ) );
                     calhit->setRawHit(hit);
                     hcalcol->addElement(calhit);
-                    LCRelationImpl *rel = new LCRelationImpl(calhit,hit,1.0);
-                    relcol->addElement( rel );
+
+                    // Set relation with LCRelationNavigator
+                    calohitNav.addRelation(calhit, hit, 1.0);
+
                   }else{
                     //              std::cout << "Drop HCAL hit : " << timei << " " << calibr_coeff*energyi << std::endl;
                   }
@@ -1159,8 +1168,8 @@ void DDCaloDigi::processEvent( LCEvent * evt ) {
             calhit->setType( CHT( CHT::had, CHT::hcal , caloLayout ,  layer ) );
             calhit->setRawHit(hit);
             hcalcol->addElement(calhit);
-            LCRelationImpl *rel = new LCRelationImpl(calhit,hit,1.0);
-            relcol->addElement( rel );
+
+            calohitNav.addRelation(calhit, hit, 1.0);
           }
 
           // std::cout << hit->getTimeCont(0) << " count = " << count <<  " EHCAL = " << energyCal << " - " << eCellInTime << " - " << eCellOutput << std::endl;
@@ -1175,8 +1184,9 @@ void DDCaloDigi::processEvent( LCEvent * evt ) {
     }
   }
 
-  // add relation collection for ECAL/HCAL to event
-  evt->addCollection(relcol,_outputRelCollection.c_str());
+  // Create and add relation collection for ECAL/HCAL to event
+  chschcol = calohitNav.createLCCollection();
+  evt->addCollection(chschcol,_outputRelCollection.c_str());
 
   _nEvt++;
 
