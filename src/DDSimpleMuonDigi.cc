@@ -7,6 +7,7 @@
 #include <IMPL/LCRelationImpl.h>
 #include <EVENT/LCParameters.h>
 #include <UTIL/CellIDDecoder.h>
+#include <UTIL/LCRelationNavigator.h>
 
 // #include <algorithm>
 // #include <string>
@@ -178,7 +179,9 @@ void DDSimpleMuonDigi::processEvent( LCEvent * evt ) {
 
 
   LCCollectionVec *muoncol = new LCCollectionVec(LCIO::CALORIMETERHIT);
-  LCCollectionVec *relcol  = new LCCollectionVec(LCIO::LCRELATION);
+  // Relation collection CalorimeterHit, SimCalorimeterHit
+  LCCollection* chschcol = 0;
+  UTIL::LCRelationNavigator calohitNav = UTIL::LCRelationNavigator( LCIO::CALORIMETERHIT, LCIO::SIMCALORIMETERHIT );
 
   LCFlagImpl flag;
 
@@ -227,8 +230,7 @@ void DDSimpleMuonDigi::processEvent( LCEvent * evt ) {
 	  calhit->setTime( computeHitTime(hit) );
 	  calhit->setRawHit(hit);
 	  muoncol->addElement(calhit);
-	  LCRelationImpl *rel = new LCRelationImpl(calhit,hit,1.);
-	  relcol->addElement( rel );
+	  calohitNav.addRelation(calhit, hit, 1.0);
 	}
 
       }
@@ -238,7 +240,9 @@ void DDSimpleMuonDigi::processEvent( LCEvent * evt ) {
   }
   muoncol->parameters().setValue(LCIO::CellIDEncoding,initString);
   evt->addCollection(muoncol,_outputMuonCollection.c_str());
-  evt->addCollection(relcol,_outputRelCollection.c_str());
+  // Create and add relation collection for ECAL/HCAL to event
+  chschcol = calohitNav.createLCCollection();
+  evt->addCollection(chschcol,_outputRelCollection.c_str());
 
 
   _nEvt++;
