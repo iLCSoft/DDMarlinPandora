@@ -2,7 +2,7 @@ name: coverity
 
 on:
   schedule:
-    - cron:  '0 0 * * *'
+    - cron: '0 0 * * *'
 
 jobs:
   run-coverity:
@@ -13,7 +13,7 @@ jobs:
     - uses: cvmfs-contrib/github-action-cvmfs@v2
     - uses: aidasoft/run-lcg-view@v3
       with:
-        coverity-cmake-command: 'cmake -C $ILCSoft/ILCSoft.cmake ..'
+        coverity-cmake-command: 'cmake -C $ILCSOFT/ILCSoft.cmake ..'
         coverity-project: 'iLCSoft%2FDDMarlinPandora'
         coverity-project-token: ${{ secrets.DDMARLINPANDORA_COVERITY_TOKEN }}
         github-pat: ${{ secrets.READ_COVERITY_IMAGE }}
