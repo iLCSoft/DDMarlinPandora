@@ -1,3 +1,12 @@
+# v00-12
+
+* 2021-09-06 Placido Fernandez Declara ([PR#21](https://github.com/iLCSoft/DDMarlinPandora/pull/21))
+  - DDCaloDigi: Add setting of the fromType and toType parameters for the LCRelation collection between CaloHit and SimCaloHit
+  - DDSimpleMuonDigi: Add setting of the fromType and toType parameters for the LCRelation collection between CaloHit and SimCaloHit
+
+* 2021-08-23 Andre Sailer ([PR#22](https://github.com/iLCSoft/DDMarlinPandora/pull/22))
+  - CI: build against LCG_99python2 gcc8 and LCG_100 gcc10, clang11
+
 # v00-11
 
 * 2019-12-11 Ete Remi ([PR#19](https://github.com/iLCSoft/DDMarlinPandora/pull/19))
