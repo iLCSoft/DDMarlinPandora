@@ -24,3 +24,5 @@ jobs:
           ninja -k0
           ctest --output-on-failure
           ninja install
+name: linux
+on: [push, pull_request]
