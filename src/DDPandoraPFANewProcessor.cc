@@ -9,11 +9,18 @@
 #include "marlin/Global.h"
 #include "marlin/Exceptions.h"
 
-
 #include "Api/PandoraApi.h"
 
 #include "LCContent.h"
 #include "LCPlugins/LCSoftwareCompensation.h"
+
+#ifdef SDHCALCONTENT
+#include "SDHCALContent.h"
+#endif
+
+#ifdef APRILCONTENT
+#include "APRILContent.h"
+#endif
 
 #include "DDExternalClusteringAlgorithm.h"
 #include "DDPandoraPFANewProcessor.h"
@@ -28,7 +35,6 @@
 #include "DDTrackCreatorCLIC.h"
 
 #include "DDBFieldPlugin.h"
-
 
 #include <cstdlib>
 
@@ -295,6 +301,10 @@ pandora::StatusCode DDPandoraPFANewProcessor::RegisterUserComponents() const
 {
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LCContent::RegisterAlgorithms(*m_pPandora));
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LCContent::RegisterBasicPlugins(*m_pPandora));
+
+    #ifdef SDHCALCONTENT
+    PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, SDHCALContent::RegisterEnergyCorrections(*m_pPandora));
+    #endif
 
     if(m_settings.m_useDD4hepField)
     {
