@@ -16,3 +16,23 @@ DDMarlinPandora is free software: you can redistribute it and/or modify it under
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License long with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+## Options to add SDHCALContent or APRILContent
+
+Added the compilation options to choose to include SDHCALContent or APRILContent in DDMarlinPandora.
+
+**To compile with SDHCALContent :**
+
+mkdir build
+
+cd build
+
+cmake -C ${ILCSOFT}/ILCSoft.cmake -DPANDORA_MONITORING=ON -DUSE_SDHCALCONTENT=ON -DSDHCALContent_DIR=path/to/SDHCALContent ..
+
+**To compile with APRILContent :**
+
+mkdir build
+
+cd build
+
+cmake -C ${ILCSOFT}/ILCSoft.cmake -DPANDORA_MONITORING=ON -DUSE_APRILCONTENT=ON -DAPRILContent_DIR=path/toAPRILContent -Dmlpack_DIR=path/to/MLPACK/INSTALL ..
