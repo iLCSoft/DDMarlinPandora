@@ -1,3 +1,12 @@
+# v00-12-01
+
+* 2024-02-19 tmadlener ([PR#25](https://github.com/iLCSoft/DDMarlinPandora/pull/25))
+  - Remove calls setting default encoding strings that have no effect
+
+* 2024-02-19 tmadlener ([PR#24](https://github.com/iLCSoft/DDMarlinPandora/pull/24))
+  - Switch to latest clicdp nightlies based releases
+  - Add a `key4hep-build` based workflow to build against Key4hep stacks.
+
 # v00-12
 
 * 2021-09-06 Placido Fernandez Declara ([PR#21](https://github.com/iLCSoft/DDMarlinPandora/pull/21))
