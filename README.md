@@ -21,18 +21,27 @@ You should have received a copy of the GNU General Public License long with this
 
 Added the compilation options to choose to include SDHCALContent or APRILContent in DDMarlinPandora.
 
+Note, you should have sourced the init_ilcsoft.sh script
+
 **To compile with SDHCALContent :**
 
-mkdir build
-
-cd build
-
-cmake -C ${ILCSOFT}/ILCSoft.cmake -DPANDORA_MONITORING=ON -DUSE_SDHCALCONTENT=ON -DSDHCALContent_DIR=path/to/SDHCALContent ..
+1. mkdir build
+2. cd build
+3. cmake -C ${ILCSOFT}/ILCSoft.cmake -DPANDORA_MONITORING=ON -DUSE_SDHCALCONTENT=ON -DSDHCALContent_DIR=/absolute/path/to/SDHCALContent ..
+4. make install
 
 **To compile with APRILContent :**
 
-mkdir build
+mlpack should be installed. You should use the same mlpack installation as the one used to compile APRILContent
 
-cd build
 
-cmake -C ${ILCSOFT}/ILCSoft.cmake -DPANDORA_MONITORING=ON -DUSE_APRILCONTENT=ON -DAPRILContent_DIR=path/toAPRILContent -Dmlpack_DIR=path/to/MLPACK/INSTALL ..
+1. mkdir build
+2. cd build
+3. cmake -C ${ILCSOFT}/ILCSoft.cmake -DPANDORA_MONITORING=ON -DUSE_APRILCONTENT=ON -DAPRILContent_DIR=/absolute/path/to/APRILContent -Dmlpack_DIR=/absolute/path/to/mlpack/INSTALL ..
+4. make install
+
+**To compile with both SDHCALContent and APRILContent :**
+
+Combine the two cmake options above.
+
+
