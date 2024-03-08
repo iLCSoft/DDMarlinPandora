@@ -24,6 +24,11 @@
 
 typedef std::vector<EVENT::CalorimeterHit *> CalorimeterHitVector;
 
+#ifdef APRILCONTENT
+namespace april_content { class CaloHitFactory; }
+#endif
+
+
 /**
  *  @brief  DDCaloHitCreator class
  */
@@ -251,6 +256,11 @@ private:
     CalorimeterHitVector                m_calorimeterHitVector;             ///< The calorimeter hit vector
 
     dd4hep::VolumeManager m_volumeManager; ///< DD4hep volume manager
+    
+#ifdef APRILCONTENT
+	static april_content::CaloHitFactory      m_pCaloHitFactory;            ///< The calo hit factory used for april calo hit creation
+#endif
+    
 
 };
 

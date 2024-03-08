@@ -306,6 +306,17 @@ pandora::StatusCode DDPandoraPFANewProcessor::RegisterUserComponents() const
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, SDHCALContent::RegisterEnergyCorrections(*m_pPandora));
     #endif
 
+    #ifdef APRILCONTENT
+    //FIXME : crash with APRILContent::RegisterAlgorithms(*m_pPandora) return STATUS_CODE_ALREADY_PRESENT
+    //PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, APRILContent::RegisterAlgorithms(*m_pPandora)); 
+    //FIXME : crash with AAPRILContent::RegisterAPRILPseudoLayerPlugin(*m_pPandora) return STATUS_CODE_ALREADY_INITIALIZED
+    //PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, APRILContent::RegisterAPRILPseudoLayerPlugin(*m_pPandora));
+    PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, APRILContent::RegisterParticleIds(*m_pPandora));
+    //FIXME : crash with APRILContent::RegisterAPRILShowerProfilePlugin(*m_pPandora) return STATUS_CODE_ALREADY_INITIALIZED
+    //PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, APRILContent::RegisterAPRILShowerProfilePlugin(*m_pPandora));
+    #endif
+
+
     if(m_settings.m_useDD4hepField)
     {
       dd4hep::Detector& mainDetector = dd4hep::Detector::getInstance();
