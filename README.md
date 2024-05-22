@@ -25,23 +25,36 @@ Note, you should have sourced the init_ilcsoft.sh script
 
 **To compile with SDHCALContent :**
 
-1. mkdir build
-2. cd build
-3. cmake -C ${ILCSOFT}/ILCSoft.cmake -DPANDORA_MONITORING=ON -DUSE_SDHCALCONTENT=ON -DSDHCALContent_DIR=/absolute/path/to/SDHCALContent ..
-4. make install
+1. 'mkdir build'
+2. 'cd build'
+3. 'cmake -C ${ILCSOFT}/ILCSoft.cmake -DPANDORA_MONITORING=ON -DUSE_SDHCALCONTENT=ON -DSDHCALContent_DIR=/absolute/path/to/SDHCALContent ..'
+4. 'make install'
 
 **To compile with APRILContent :**
 
 mlpack should be installed. You should use the same mlpack installation as the one used to compile APRILContent
 
 
-1. mkdir build
-2. cd build
-3. cmake -C ${ILCSOFT}/ILCSoft.cmake -DPANDORA_MONITORING=ON -DUSE_APRILCONTENT=ON -DAPRILContent_DIR=/absolute/path/to/APRILContent -Dmlpack_DIR=/absolute/path/to/mlpack/INSTALL ..
-4. make install
+1. 'mkdir build'
+2. 'cd build'
+3. 'cmake -C ${ILCSOFT}/ILCSoft.cmake -DPANDORA_MONITORING=ON -DUSE_APRILCONTENT=ON -DAPRILContent_DIR=/absolute/path/to/APRILContent -Dmlpack_DIR=/absolute/path/to/mlpack/INSTALL ..'
+4. 'make install'
 
 **To compile with both SDHCALContent and APRILContent :**
 
 Combine the two cmake options above.
 
+## To run Marlin with this DDMarlinPandora :
+
+1. 'echo $MARLIN_DLL'
+2. Copy the entire output of the previous command and find the part with the location of 'libDDMarlinPandora.so'
+3. Replace it with the location of the DDMarlinPandora libraries you just installed and keep the rest of the output as it is
+4. 'export MARLIN_DLL=/modified/output/of/echo/command'
+
+**To choose between APRIL and Pandora when calling Marlin :**
+
+1. Go to your ILDConfig folder in 'ILDConfig/StandardConfig/production/ParticleFlow'
+2. Open the xml file you are using for the PFA
+3. In the section for the DDMarlinProcessor add : '<parameter name="UseAPRIL" type="bool">false</parameter>'
+4. To use Marlin with APRIL, add the following option when calling it : '--MyDDMarlinPandora.UseAPRIL="true"'
 

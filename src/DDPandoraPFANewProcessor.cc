@@ -301,21 +301,25 @@ pandora::StatusCode DDPandoraPFANewProcessor::RegisterUserComponents() const
 {
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LCContent::RegisterAlgorithms(*m_pPandora));
 
-    #ifndef APRILCONTENT
+    //#ifndef APRILCONTENT
+    if(!m_settings.m_useAPRIL)
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LCContent::RegisterBasicPlugins(*m_pPandora));
-    #endif
+    //#endif
 
     #ifdef SDHCALCONTENT
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, SDHCALContent::RegisterEnergyCorrections(*m_pPandora));
     #endif
 
     #ifdef APRILCONTENT
+    if(m_settings.m_useAPRIL)
+    {
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, APRILContent::RegisterAlgorithms(*m_pPandora)); 
     //FIXME : crash with AAPRILContent::RegisterAPRILPseudoLayerPlugin(*m_pPandora) return STATUS_CODE_ALREADY_INITIALIZED
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, APRILContent::RegisterAPRILPseudoLayerPlugin(*m_pPandora));
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, APRILContent::RegisterParticleIds(*m_pPandora));
     //FIXME : crash with APRILContent::RegisterAPRILShowerProfilePlugin(*m_pPandora) return STATUS_CODE_ALREADY_INITIALIZED
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, APRILContent::RegisterAPRILShowerProfilePlugin(*m_pPandora));
+    }
     #endif
 
 
@@ -891,6 +895,12 @@ void DDPandoraPFANewProcessor::ProcessSteeringFile()
                                "The minimum correction to on ecal hit in Pandora energy correction",
                                m_settings.m_minCleanCorrectedHitEnergy,
                                softwareCompensationParameters.m_minCleanCorrectedHitEnergy);
+
+    // EXTRA PARAMETERS FROM TP
+    registerProcessorParameter("UseAPRIL",
+                            "Whether to use APRIL instead of Pandora for the reconstruction",
+                            m_settings.m_useAPRIL,
+                            false);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
