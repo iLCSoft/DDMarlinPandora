@@ -301,10 +301,8 @@ pandora::StatusCode DDPandoraPFANewProcessor::RegisterUserComponents() const
 {
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LCContent::RegisterAlgorithms(*m_pPandora));
 
-    //#ifndef APRILCONTENT
     if(!m_settings.m_useAPRIL)
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LCContent::RegisterBasicPlugins(*m_pPandora));
-    //#endif
 
     #ifdef SDHCALCONTENT
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, SDHCALContent::RegisterEnergyCorrections(*m_pPandora));
@@ -314,10 +312,10 @@ pandora::StatusCode DDPandoraPFANewProcessor::RegisterUserComponents() const
     if(m_settings.m_useAPRIL)
     {
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, APRILContent::RegisterAlgorithms(*m_pPandora)); 
-    //FIXME : crash with AAPRILContent::RegisterAPRILPseudoLayerPlugin(*m_pPandora) return STATUS_CODE_ALREADY_INITIALIZED
+    
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, APRILContent::RegisterAPRILPseudoLayerPlugin(*m_pPandora));
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, APRILContent::RegisterParticleIds(*m_pPandora));
-    //FIXME : crash with APRILContent::RegisterAPRILShowerProfilePlugin(*m_pPandora) return STATUS_CODE_ALREADY_INITIALIZED
+    
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, APRILContent::RegisterAPRILShowerProfilePlugin(*m_pPandora));
     }
     #endif
