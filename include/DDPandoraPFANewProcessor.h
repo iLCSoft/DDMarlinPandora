@@ -58,6 +58,9 @@ public:
         FloatVector m_ecalInputEnergyCorrectionPoints{};    ///< The input energy points for non-linearity energy correction in the ECAL
         FloatVector m_ecalOutputEnergyCorrectionPoints{};   ///< The input energy points for non-linearity energy correction in the ECAL
         
+
+        bool m_useAPRIL = false; ///< Choose if we want to use APRIL instead of Pandora for the reconstruction
+        
         // Software compensation parameters
         FloatVector     m_softCompParameters{};
         FloatVector     m_softCompEnergyDensityBins{};
