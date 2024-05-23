@@ -894,10 +894,15 @@ void DDPandoraPFANewProcessor::ProcessSteeringFile()
                                m_settings.m_minCleanCorrectedHitEnergy,
                                softwareCompensationParameters.m_minCleanCorrectedHitEnergy);
 
-    // EXTRA PARAMETERS FROM TP
+    // EXTRA PARAMETERS FROM TPASQUIER
     registerProcessorParameter("UseAPRIL",
                             "Whether to use APRIL instead of Pandora for the reconstruction",
                             m_settings.m_useAPRIL,
+                            false);
+
+    registerProcessorParameter("UseAPRIL_Calo",
+                            "Whether to use APRIL instead of Pandora for the reconstruction",
+                            m_caloHitCreatorSettings.m_useAPRIL,
                             false);
 }
 
@@ -965,6 +970,8 @@ void DDPandoraPFANewProcessor::FinaliseSteeringParameters()
     mainDetector.field().magneticField(position,magneticFieldVector); // get the magnetic field vector from DD4hep
     
     m_settings.m_innerBField = magneticFieldVector[2]/dd4hep::tesla; // z component at (0,0,0)
+
+    m_caloHitCreatorSettings.m_useAPRIL = m_settings.m_useAPRIL; //Added by TPasquier
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
