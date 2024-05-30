@@ -17,8 +17,6 @@
 #include "APRILApi/ObjectFactories.h"
 #endif
 
-#include "Persistency/Persistency.h"
-
 #include <DD4hep/DD4hepUnits.h>
 #include <DD4hep/DetType.h>
 #include <DD4hep/DetectorSelector.h>
@@ -83,12 +81,6 @@ DDCaloHitCreator::~DDCaloHitCreator()
 
 pandora::StatusCode DDCaloHitCreator::CreateCaloHits(const EVENT::LCEvent *const pLCEvent)
 {
-    /* if(m_settings.m_useAPRIL)
-    {
-        pandora::Persistency::SetFactory(pandora::ObjectFactory<object_creation::CaloHit::Parameters, object_creation::CaloHit::Object> *const pFactory);
-    } */
-    
-
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, this->CreateECalCaloHits(pLCEvent));
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, this->CreateHCalCaloHits(pLCEvent));
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, this->CreateMuonCaloHits(pLCEvent));
@@ -214,7 +206,6 @@ pandora::StatusCode DDCaloHitCreator::CreateECalCaloHits(const EVENT::LCEvent *c
                         caloHitParameters.m_cellSize1 = splitCellSize;
                     }
 
-                    //pandora::Persistency::SetFactory(pandora::ObjectFactory<caloHitParameters, pCaloHit>);
                     //PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters));
                     CallCreate(m_pandora, caloHitParameters, m_pCaloHitFactory);
 
