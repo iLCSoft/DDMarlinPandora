@@ -17,6 +17,7 @@
 #include "APRILApi/ObjectFactories.h"
 #endif
 
+#include "Persistency/Persistency.h"
 
 #include <DD4hep/DD4hepUnits.h>
 #include <DD4hep/DetType.h>
@@ -82,6 +83,12 @@ DDCaloHitCreator::~DDCaloHitCreator()
 
 pandora::StatusCode DDCaloHitCreator::CreateCaloHits(const EVENT::LCEvent *const pLCEvent)
 {
+    /* if(m_settings.m_useAPRIL)
+    {
+        pandora::Persistency::SetFactory(pandora::ObjectFactory<object_creation::CaloHit::Parameters, object_creation::CaloHit::Object> *const pFactory);
+    } */
+    
+
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, this->CreateECalCaloHits(pLCEvent));
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, this->CreateHCalCaloHits(pLCEvent));
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, this->CreateMuonCaloHits(pLCEvent));
@@ -207,15 +214,10 @@ pandora::StatusCode DDCaloHitCreator::CreateECalCaloHits(const EVENT::LCEvent *c
                         caloHitParameters.m_cellSize1 = splitCellSize;
                     }
 
-                    if(m_settings.m_useAPRIL)
-                    {   
-                        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters APRIL_CONTENT_CALOHIT_FACTORY));
-                    }
-                    else 
-                    {
-                        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters));
-                    }
-                    
+                    //pandora::Persistency::SetFactory(pandora::ObjectFactory<caloHitParameters, pCaloHit>);
+                    //PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters));
+                    CallCreate(m_pandora, caloHitParameters, m_pCaloHitFactory);
+
                     m_calorimeterHitVector.push_back(pCaloHit);
 
                 }
@@ -303,14 +305,8 @@ pandora::StatusCode DDCaloHitCreator::CreateHCalCaloHits(const EVENT::LCEvent *c
                     caloHitParameters.m_hadronicEnergy = std::min(m_settings.m_hCalToHadGeV * pCaloHit->getEnergy(), m_settings.m_maxHCalHitHadronicEnergy);
                     caloHitParameters.m_electromagneticEnergy = m_settings.m_hCalToEMGeV * pCaloHit->getEnergy();
 
-                    if(m_settings.m_useAPRIL)
-                    {   
-                        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters APRIL_CONTENT_CALOHIT_FACTORY));
-                    }
-                    else 
-                    {
-                        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters));
-                    }
+                    //PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters));
+                    CallCreate(m_pandora, caloHitParameters, m_pCaloHitFactory);
                     
                     m_calorimeterHitVector.push_back(pCaloHit);
                 }
@@ -413,14 +409,8 @@ pandora::StatusCode DDCaloHitCreator::CreateMuonCaloHits(const EVENT::LCEvent *c
                         caloHitParameters.m_mipEquivalentEnergy = pCaloHit->getEnergy() * m_settings.m_muonToMip;
                     }
 
-                    if(m_settings.m_useAPRIL)
-                    {   
-                        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters APRIL_CONTENT_CALOHIT_FACTORY));
-                    }
-                    else 
-                    {
-                        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters));
-                    }
+                    //PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters));
+                    CallCreate(m_pandora, caloHitParameters, m_pCaloHitFactory);
 
                     m_calorimeterHitVector.push_back(pCaloHit);
                 }
@@ -495,14 +485,8 @@ pandora::StatusCode DDCaloHitCreator::CreateLCalCaloHits(const EVENT::LCEvent *c
                     caloHitParameters.m_electromagneticEnergy = m_settings.m_eCalToEMGeV * pCaloHit->getEnergy();
                     caloHitParameters.m_hadronicEnergy = m_settings.m_eCalToHadGeVEndCap * pCaloHit->getEnergy();
 
-                    if(m_settings.m_useAPRIL)
-                    {   
-                        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters APRIL_CONTENT_CALOHIT_FACTORY));
-                    }
-                    else 
-                    {
-                        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters));
-                    }
+                    //PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters));
+                    CallCreate(m_pandora, caloHitParameters, m_pCaloHitFactory);
 
                     m_calorimeterHitVector.push_back(pCaloHit);
                 }
@@ -576,14 +560,8 @@ pandora::StatusCode DDCaloHitCreator::CreateLHCalCaloHits(const EVENT::LCEvent *
                     caloHitParameters.m_hadronicEnergy = std::min(m_settings.m_hCalToHadGeV * pCaloHit->getEnergy(), m_settings.m_maxHCalHitHadronicEnergy);
                     caloHitParameters.m_electromagneticEnergy = m_settings.m_hCalToEMGeV * pCaloHit->getEnergy();
 
-                    if(m_settings.m_useAPRIL)
-                    {   
-                        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters APRIL_CONTENT_CALOHIT_FACTORY));
-                    }
-                    else 
-                    {
-                        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters));
-                    }
+                    //PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters));
+                    CallCreate(m_pandora, caloHitParameters, m_pCaloHitFactory);
 
                     m_calorimeterHitVector.push_back(pCaloHit);
                 }
@@ -854,6 +832,20 @@ float DDCaloHitCreator::GetMaximumRadius(const EVENT::CalorimeterHit *const pCal
     }
 
     return maximumRadius;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void DDCaloHitCreator::CallCreate(const pandora::Pandora & pPandora, PandoraApi::CaloHit::Parameters & caloHitParameters, april_content::CaloHitFactory APRILFactory)
+{
+    if(m_settings.m_useAPRIL)
+    {   
+        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(pPandora, caloHitParameters, APRILFactory));
+    }
+    else 
+    {
+        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(pPandora, caloHitParameters));
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
