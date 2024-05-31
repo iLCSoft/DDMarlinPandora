@@ -249,12 +249,12 @@ private:
     float GetMaximumRadius(const EVENT::CalorimeterHit *const pCaloHit, const unsigned int symmetryOrder, const float phi0) const;
 
     /**
-     *  @brief  Calls the right create method depending on the PFA used
+     *  @brief  Calls the right create method depending on the PFA used. Added by T.Pasquier
      * 
      *  @param  pCaloHit pandora algorithm
      *  @param  caloHitParameters the calo hit parameters to populate
      */
-    void CallCreate(const pandora::Pandora & pPandora, PandoraApi::CaloHit::Parameters & caloHitParameters, april_content::CaloHitFactory APRILFactory);
+    void CallCreate(const pandora::Pandora & pPandora, PandoraApi::CaloHit::Parameters & caloHitParameters);
 
     const Settings                      m_settings;                         ///< The calo hit creator settings
 
@@ -268,9 +268,8 @@ private:
     dd4hep::VolumeManager m_volumeManager; ///< DD4hep volume manager
     
 #ifdef APRILCONTENT
-	static april_content::CaloHitFactory      m_pCaloHitFactory;            ///< The calo hit factory used for april calo hit creation
+	static april_content::CaloHitFactory      m_pAPRILCaloHitFactory;            ///< The calo hit factory used for april calo hit creation. Added by T.Pasquier
 #endif
-    
 
 };
 
