@@ -17,8 +17,6 @@
 #include "APRILApi/ObjectFactories.h"
 #endif
 
-#include "Persistency/Persistency.h"
-
 #include <DD4hep/DD4hepUnits.h>
 #include <DD4hep/DetType.h>
 #include <DD4hep/DetectorSelector.h>
