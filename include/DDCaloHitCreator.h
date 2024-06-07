@@ -20,6 +20,7 @@
 #include <DD4hep/Detector.h>
 #include <DD4hep/DetElement.h>
 
+#include <Pandora/PandoraObjectFactories.h>
 
 
 typedef std::vector<EVENT::CalorimeterHit *> CalorimeterHitVector;
@@ -249,12 +250,10 @@ private:
     float GetMaximumRadius(const EVENT::CalorimeterHit *const pCaloHit, const unsigned int symmetryOrder, const float phi0) const;
 
     /**
-     *  @brief  Calls the right create method depending on the PFA used. Added by T.Pasquier
+     *  @brief  Initialize the factory for calo hit creation
      * 
-     *  @param  pCaloHit pandora algorithm
-     *  @param  caloHitParameters the calo hit parameters to populate
      */
-    void CallCreate(const pandora::Pandora & pPandora, PandoraApi::CaloHit::Parameters & caloHitParameters);
+    void ChooseFactory();
 
     const Settings                      m_settings;                         ///< The calo hit creator settings
 
@@ -270,6 +269,13 @@ private:
 #ifdef APRILCONTENT
 	static april_content::CaloHitFactory      m_pAPRILCaloHitFactory;            ///< The calo hit factory used for april calo hit creation. Added by T.Pasquier
 #endif
+
+    pandora::ObjectFactory<object_creation::CaloHit::Parameters, object_creation::CaloHit::Object>* caloHitFactory; //General factory to initialize
+
+    pandora::PandoraObjectFactory<object_creation::CaloHit::Parameters, object_creation::CaloHit::Object> DefaultCaloFactory; //Pandora default factory
+
+    DDCaloHitCreator& operator=(const DDCaloHitCreator&) = delete;  // Disallow copying
+    DDCaloHitCreator(const DDCaloHitCreator&) = delete;
 
 };
 
