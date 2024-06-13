@@ -11,8 +11,12 @@
 
 #include "Api/PandoraApi.h"
 
+#include "Pandora/PandoraInternal.h"
+
 #include "LCContent.h"
 #include "LCPlugins/LCSoftwareCompensation.h"
+#include "LCPlugins/LCEnergyCorrectionPlugins.h"
+#include "LCPlugins/LCParticleIdPlugins.h"
 
 #ifdef SDHCALCONTENT
 #include "SDHCALContent.h"
@@ -317,6 +321,8 @@ pandora::StatusCode DDPandoraPFANewProcessor::RegisterUserComponents() const
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, APRILContent::RegisterParticleIds(*m_pPandora));
     
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, APRILContent::RegisterAPRILShowerProfilePlugin(*m_pPandora));
+
+    PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraHack(*m_pPandora)); //Register LCContent plugins
     }
     #endif
 
@@ -1001,4 +1007,21 @@ DDPandoraPFANewProcessor::Settings::Settings() :
     m_trackCreatorName("")
 
 {
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+pandora::StatusCode PandoraHack(const pandora::Pandora &pandora)
+{
+    PandoraApi::RegisterEnergyCorrectionPlugin(pandora, "CleanClusters", pandora::HADRONIC, new lc_content::LCEnergyCorrectionPlugins::CleanCluster);
+    PandoraApi::RegisterEnergyCorrectionPlugin(pandora, "ScaleHotHadrons", pandora::HADRONIC, new lc_content::LCEnergyCorrectionPlugins::ScaleHotHadrons);
+    PandoraApi::RegisterEnergyCorrectionPlugin(pandora, "MuonCoilCorrection", pandora::HADRONIC, new lc_content::LCEnergyCorrectionPlugins::MuonCoilCorrection);
+
+    PandoraApi::RegisterParticleIdPlugin(pandora, "LCEmShowerId", new lc_content::LCParticleIdPlugins::LCEmShowerId);
+    PandoraApi::RegisterParticleIdPlugin(pandora, "LCPhotonId", new lc_content::LCParticleIdPlugins::LCPhotonId);
+    PandoraApi::RegisterParticleIdPlugin(pandora, "LCElectronId", new lc_content::LCParticleIdPlugins::LCElectronId);
+    PandoraApi::RegisterParticleIdPlugin(pandora, "LCMuonId", new lc_content::LCParticleIdPlugins::LCMuonId);
+
+    return pandora::STATUS_CODE_SUCCESS;
 }
