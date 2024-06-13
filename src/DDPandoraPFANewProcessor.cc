@@ -11,8 +11,6 @@
 
 #include "Api/PandoraApi.h"
 
-#include "Pandora/PandoraInternal.h"
-
 #include "LCContent.h"
 #include "LCPlugins/LCSoftwareCompensation.h"
 #include "LCPlugins/LCEnergyCorrectionPlugins.h"
