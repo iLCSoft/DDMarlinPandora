@@ -270,6 +270,7 @@ private:
 	static april_content::CaloHitFactory      m_pAPRILCaloHitFactory;            ///< The calo hit factory used for april calo hit creation. Added by T.Pasquier
 #endif
 
+    //Added by T.Pasquier
     pandora::ObjectFactory<object_creation::CaloHit::Parameters, object_creation::CaloHit::Object>* caloHitFactory; //General factory to initialize
 
     pandora::PandoraObjectFactory<object_creation::CaloHit::Parameters, object_creation::CaloHit::Object> DefaultCaloFactory; //Pandora default factory

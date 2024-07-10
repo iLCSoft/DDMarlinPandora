@@ -17,6 +17,8 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License long with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+**The following options need to be taken into consideration only if you want to use APRIL or SDHCAL plugins. If you use DDMarlinPandora in the default configuration, you can install it the usual way.**
+
 ## Options to add SDHCALContent or APRILContent
 
 Added the compilation options to choose to include SDHCALContent or APRILContent in DDMarlinPandora.
