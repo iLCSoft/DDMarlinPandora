@@ -58,5 +58,6 @@ Combine the two cmake options above.
 1. Go to your ILDConfig folder in `ILDConfig/StandardConfig/production/ParticleFlow`
 2. Open the xml file you are using for the PFA
 3. In the section for the DDMarlinProcessor add : `<parameter name="UseAPRIL" type="bool">false</parameter>`
-4. To use Marlin with APRIL, add the following option when calling it : `--MyDDMarlinPandora.UseAPRIL="true"`
+4. In ILDConfig/StandardConfig/production/PandoraSettings, put an APRILPFA settings file
+5. To run Marlin with APRIL in ILDConfig/StandardConfig/production, add the following option when calling it : `--MyDDMarlinPandora.UseAPRIL="true" --constant.PandoraSettingsFile=PandoraSettings/YourAPRILSettingsFile.xml`
 
