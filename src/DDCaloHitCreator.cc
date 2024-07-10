@@ -80,7 +80,7 @@ DDCaloHitCreator::~DDCaloHitCreator()
 
 pandora::StatusCode DDCaloHitCreator::CreateCaloHits(const EVENT::LCEvent *const pLCEvent)
 {
-    ChooseFactory();
+    ChooseFactory(); //New method to choose the factory to use
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, this->CreateECalCaloHits(pLCEvent));
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, this->CreateHCalCaloHits(pLCEvent));
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, this->CreateMuonCaloHits(pLCEvent));
@@ -821,10 +821,10 @@ float DDCaloHitCreator::GetMaximumRadius(const EVENT::CalorimeterHit *const pCal
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-
+//Added by T. Pasquier
+//Choose between APRIL or Pandora factory when APRIL is activated
 void DDCaloHitCreator::ChooseFactory()
 {
-    //Added by T. Pasquier
     #ifdef APRILCONTENT
     if(m_settings.m_useAPRIL)
     {   

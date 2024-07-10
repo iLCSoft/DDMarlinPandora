@@ -898,7 +898,7 @@ void DDPandoraPFANewProcessor::ProcessSteeringFile()
                                m_settings.m_minCleanCorrectedHitEnergy,
                                softwareCompensationParameters.m_minCleanCorrectedHitEnergy);
 
-    // EXTRA PARAMETERS FROM TPASQUIER
+    // EXTRA PARAMETERS FROM T.PASQUIER
     registerProcessorParameter("UseAPRIL",
                             "Whether to use APRIL instead of Pandora for the reconstruction",
                             m_settings.m_useAPRIL,
@@ -1009,7 +1009,9 @@ DDPandoraPFANewProcessor::Settings::Settings() :
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
-
+//Added by T.Pasquier
+//Temporary method that allows the registration of LCCOntent corrections and pID plugins without registering PseudoLayerPlugin or ShowerProfilePlugin
+//Would be better to modify the plugins registration directly in LCContent
 pandora::StatusCode PandoraHack(const pandora::Pandora &pandora)
 {
     PandoraApi::RegisterEnergyCorrectionPlugin(pandora, "CleanClusters", pandora::HADRONIC, new lc_content::LCEnergyCorrectionPlugins::CleanCluster);
