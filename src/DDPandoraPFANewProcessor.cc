@@ -313,6 +313,9 @@ pandora::StatusCode DDPandoraPFANewProcessor::RegisterUserComponents() const
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LCContent::RegisterNonLinearityEnergyCorrection(*m_pPandora,
         "NonLinearity", pandora::HADRONIC, m_settings.m_inputEnergyCorrectionPoints, m_settings.m_outputEnergyCorrectionPoints));
 
+    PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LCContent::RegisterNonLinearityEnergyCorrection(*m_pPandora,
+        "ECALClusterCorrection", pandora::ELECTROMAGNETIC, m_settings.m_ecalInputEnergyCorrectionPoints, m_settings.m_ecalOutputEnergyCorrectionPoints));
+
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::RegisterAlgorithmFactory(*m_pPandora,
         "ExternalClustering", new DDExternalClusteringAlgorithm::Factory));
     
@@ -795,6 +798,17 @@ void DDPandoraPFANewProcessor::ProcessSteeringFile()
                             m_settings.m_outputEnergyCorrectionPoints,
                             FloatVector());
     
+    // ECAL energy non-linearity correction
+    registerProcessorParameter("ECALInputEnergyCorrectionPoints",
+                            "The input energy points for electromagnetic energy correction",
+                            m_settings.m_ecalInputEnergyCorrectionPoints,
+                            FloatVector());
+
+    registerProcessorParameter("ECALOutputEnergyCorrectionPoints",
+                            "The output energy points for electromagnetic energy correction",
+                            m_settings.m_ecalOutputEnergyCorrectionPoints,
+                            FloatVector());
+
     
     ///EXTRA PARAMETERS FROM NIKIFOROS
     registerProcessorParameter("TrackCreatorName",

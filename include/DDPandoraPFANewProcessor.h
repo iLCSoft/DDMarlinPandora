@@ -54,6 +54,9 @@ public:
 
         FloatVector     m_inputEnergyCorrectionPoints{};    ///< The input energy points for non-linearity energy correction
         FloatVector     m_outputEnergyCorrectionPoints{};   ///< The output energy points for non-linearity energy correction
+
+        FloatVector m_ecalInputEnergyCorrectionPoints{};    ///< The input energy points for non-linearity energy correction in the ECAL
+        FloatVector m_ecalOutputEnergyCorrectionPoints{};   ///< The input energy points for non-linearity energy correction in the ECAL
         
         // Software compensation parameters
         FloatVector     m_softCompParameters{};
