@@ -190,6 +190,6 @@ inline marlin::Processor *DDPandoraPFANewProcessor::newProcessor()
 /**
 *  @brief  Register the LCContent plugins outside their original function. Temporary fix. Would be better to change the plugins registration directly in LCContent
 */
-pandora::StatusCode PandoraHack(const pandora::Pandora &pandora);
+pandora::StatusCode APRILLCContentPluginRegistration(const pandora::Pandora &pandora);
 
 #endif // #ifndef DDPANDORAPFANEWPROCESSOR_H
