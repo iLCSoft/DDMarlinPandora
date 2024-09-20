@@ -303,8 +303,9 @@ pandora::StatusCode DDPandoraPFANewProcessor::RegisterUserComponents() const
 {
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LCContent::RegisterAlgorithms(*m_pPandora));
 
-    if(!m_settings.m_useAPRIL)
-    PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LCContent::RegisterBasicPlugins(*m_pPandora));
+    if(!m_settings.m_useAPRIL) {
+      PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LCContent::RegisterBasicPlugins(*m_pPandora));
+    }
 
     #ifdef SDHCALCONTENT
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, SDHCALContent::RegisterEnergyCorrections(*m_pPandora));
@@ -313,14 +314,14 @@ pandora::StatusCode DDPandoraPFANewProcessor::RegisterUserComponents() const
     #ifdef APRILCONTENT
     if(m_settings.m_useAPRIL)
     {
-    PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, APRILContent::RegisterAlgorithms(*m_pPandora)); 
-    
-    PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, APRILContent::RegisterAPRILPseudoLayerPlugin(*m_pPandora));
-    PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, APRILContent::RegisterParticleIds(*m_pPandora));
-    
-    PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, APRILContent::RegisterAPRILShowerProfilePlugin(*m_pPandora));
+        PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, APRILContent::RegisterAlgorithms(*m_pPandora)); 
+        
+        PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, APRILContent::RegisterAPRILPseudoLayerPlugin(*m_pPandora));
+        PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, APRILContent::RegisterParticleIds(*m_pPandora));
+        
+        PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, APRILContent::RegisterAPRILShowerProfilePlugin(*m_pPandora));
 
-    PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraHack(*m_pPandora)); //Register LCContent plugins
+        PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, APRILLCContentPluginRegistration(*m_pPandora)); //Register LCContent plugins
     }
     #endif
 
@@ -1010,9 +1011,9 @@ DDPandoraPFANewProcessor::Settings::Settings() :
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 //Added by T.Pasquier
-//Temporary method that allows the registration of LCCOntent corrections and pID plugins without registering PseudoLayerPlugin or ShowerProfilePlugin
+//Temporary method that allows the registration of LCContent corrections and pID plugins without registering PseudoLayerPlugin or ShowerProfilePlugin
 //Would be better to modify the plugins registration directly in LCContent
-pandora::StatusCode PandoraHack(const pandora::Pandora &pandora)
+pandora::StatusCode APRILLCContentPluginRegistration(const pandora::Pandora &pandora)
 {
     PandoraApi::RegisterEnergyCorrectionPlugin(pandora, "CleanClusters", pandora::HADRONIC, new lc_content::LCEnergyCorrectionPlugins::CleanCluster);
     PandoraApi::RegisterEnergyCorrectionPlugin(pandora, "ScaleHotHadrons", pandora::HADRONIC, new lc_content::LCEnergyCorrectionPlugins::ScaleHotHadrons);
