@@ -1,3 +1,11 @@
+# v00-12-02
+
+* 2024-08-28 tmadlener ([PR#30](https://github.com/iLCSoft/DDMarlinPandora/pull/30))
+  - Remove the no longer supported CentOS7 builds from the Key4hep based CI workflows
+
+* 2024-08-28 tmadlener ([PR#28](https://github.com/iLCSoft/DDMarlinPandora/pull/28))
+  - Make it possible to register ECAL energy corrections with Pandora similar to what is possible for the HCAL
+
 # v00-12-01
 
 * 2024-02-19 tmadlener ([PR#25](https://github.com/iLCSoft/DDMarlinPandora/pull/25))
