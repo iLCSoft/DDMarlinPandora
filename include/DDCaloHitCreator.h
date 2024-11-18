@@ -161,6 +161,13 @@ public:
      */
     void Reset();
 
+    /**
+     *  @brief  Disallow copying
+     */
+    DDCaloHitCreator& operator=(const DDCaloHitCreator&) = delete;
+    DDCaloHitCreator(const DDCaloHitCreator&) = delete;
+
+
 private:
     /**
      *  @brief  Create ecal calo hits
@@ -270,9 +277,6 @@ private:
 
     //Added by T.Pasquier
     std::unique_ptr<pandora::ObjectFactory<object_creation::CaloHit::Parameters, object_creation::CaloHit::Object>> m_caloHitFactory{nullptr}; //General factory to initialize
-
-    /* DDCaloHitCreator& operator=(const DDCaloHitCreator&) = delete;  // Disallow copying
-    DDCaloHitCreator(const DDCaloHitCreator&) = delete; */
 
 };
 
