@@ -159,24 +159,43 @@ void DDPandoraPFANewProcessor::init()
         this->FinaliseSteeringParameters();
 
         m_pPandora = new pandora::Pandora();
-        m_pGeometryCreator = new DDGeometryCreator(m_geometryCreatorSettings, m_pPandora);
-        m_pCaloHitCreator = new DDCaloHitCreator(m_caloHitCreatorSettings, m_pPandora);
-        
-        
+        if(m_settings.m_detectorName == "ALLEGRO")
+        {
+          m_settings.m_trackCreatorName = "DDTrackCreatorALLEGRO";
+          m_pGeometryCreator = new DDGeometryCreatorALLEGRO(m_geometryCreatorSettings, m_pPandora);
+          m_pCaloHitCreator = new DDCaloHitCreatorALLEGRO(m_caloHitCreatorSettings, m_pPandora);
+        }
+        else
+        {
+          m_pGeometryCreator = new DDGeometryCreator(m_geometryCreatorSettings, m_pPandora);
+          m_pCaloHitCreator = new DDCaloHitCreator(m_caloHitCreatorSettings, m_pPandora);
+        }
+
+//AD: we do not have yet tracking
+/*
         ///FIXME: IMPLEMENT FACTORY
         if (m_settings.m_trackCreatorName == "DDTrackCreatorCLIC")
             m_pTrackCreator = new DDTrackCreatorCLIC(m_trackCreatorSettings, m_pPandora);
         else if (m_settings.m_trackCreatorName == "DDTrackCreatorILD")
             m_pTrackCreator = new DDTrackCreatorILD(m_trackCreatorSettings, m_pPandora);
+        else if (m_settings.m_trackCreatorName == "DDTrackCreatorALLEGRO")
+            m_pTrackCreator = new DDTrackCreatorALLEGRO(m_trackCreatorSettings, m_pPandora);
         else
             streamlog_out(ERROR) << "Unknown DDTrackCreator: "<<m_settings.m_trackCreatorName << std::endl;
-
+*/
 
         m_pDDMCParticleCreator = new DDMCParticleCreator(m_mcParticleCreatorSettings, m_pPandora);
         m_pDDPfoCreator = new DDPfoCreator(m_pfoCreatorSettings, m_pPandora);
 
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, this->RegisterUserComponents());
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pGeometryCreator->CreateGeometry());
+        if(m_settings.m_detectorName == "ALLEGRO")
+        {
+          PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, static_cast<DDGeometryCreatorALLEGRO*>(m_pGeometryCreator)->CreateGeometry());
+        }
+        else
+        {
+          PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pGeometryCreator->CreateGeometry());
+        }
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*m_pPandora, m_settings.m_pandoraSettingsXmlFile));
     }
     catch (pandora::StatusCodeException &statusCodeException)
@@ -212,10 +231,20 @@ void DDPandoraPFANewProcessor::processEvent(LCEvent *pLCEvent)
         (void) m_pandoraToLCEventMap.insert(PandoraToLCEventMap::value_type(m_pPandora, pLCEvent));
 
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pDDMCParticleCreator->CreateMCParticles(pLCEvent));
+        // FIXME: AD: for the moment we do not have tracking
+        /*
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pTrackCreator->CreateTrackAssociations(pLCEvent));
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pTrackCreator->CreateTracks(pLCEvent));
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pDDMCParticleCreator->CreateTrackToMCParticleRelationships(pLCEvent, m_pTrackCreator->GetTrackVector()));
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pCaloHitCreator->CreateCaloHits(pLCEvent));
+        */
+        if(m_settings.m_detectorName == "ALLEGRO")
+        {
+          PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, static_cast<DDCaloHitCreatorALLEGRO*>(m_pCaloHitCreator)->CreateCaloHits(pLCEvent));
+        }
+        else
+        {
+          PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pCaloHitCreator->CreateCaloHits(pLCEvent));
+        }
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pDDMCParticleCreator->CreateCaloHitToMCParticleRelationships(pLCEvent, m_pCaloHitCreator->GetCalorimeterHitVector()));
 
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ProcessEvent(*m_pPandora));
@@ -816,6 +845,12 @@ void DDPandoraPFANewProcessor::ProcessSteeringFile()
                                m_settings.m_trackCreatorName,
                                std::string("DDTrackCreatorCLIC")); 
 
+    ///EXTRA parameter that would initialize everything for ALLEGRO detector if m_detectorName=="ALLEGRO"
+    registerProcessorParameter("DetectorName",
+                               "The name of the detector",
+                               m_settings.m_detectorName,
+                               std::string(""));
+
     registerProcessorParameter("ECalBarrelNormalVector",
                                "Normal vector for the ECal barrel sensitive layers in local coordinates",
                                m_caloHitCreatorSettings.m_eCalBarrelNormalVector,
@@ -900,19 +935,21 @@ void DDPandoraPFANewProcessor::FinaliseSteeringParameters()
     // //Get Muon Endcap extension by type, ignore plugs and rings 
     // const dd4hep::rec::LayeredCalorimeterData * muonEndcapExtension= getExtension( ( dd4hep::DetType::CALORIMETER | dd4hep::DetType::MUON | dd4hep::DetType::ENDCAP), ( dd4hep::DetType::AUXILIARY ) );
     
-    //Get COIL extension
-    const dd4hep::rec::LayeredCalorimeterData * coilExtension= getExtension( ( dd4hep::DetType::COIL ) );
-  
+    if(m_settings.m_detectorName != "ALLEGRO")
+    {
+      //Get COIL extension
+      const dd4hep::rec::LayeredCalorimeterData * coilExtension= getExtension( ( dd4hep::DetType::COIL ) );
+      m_caloHitCreatorSettings.m_coilOuterR                   =   coilExtension->extent[1]/dd4hep::mm;
+    }
     
     m_trackCreatorSettings.m_eCalBarrelInnerSymmetry        =   eCalBarrelExtension->inner_symmetry;
     m_trackCreatorSettings.m_eCalBarrelInnerPhi0            =   eCalBarrelExtension->inner_phi0/dd4hep::rad;
     m_trackCreatorSettings.m_eCalBarrelInnerR               =   eCalBarrelExtension->extent[0]/dd4hep::mm;
     m_trackCreatorSettings.m_eCalEndCapInnerZ               =   eCalEndcapExtension->extent[2]/dd4hep::mm;
-                                                            
+
     m_caloHitCreatorSettings.m_eCalBarrelOuterZ             =   eCalBarrelExtension->extent[3]/dd4hep::mm;
     m_caloHitCreatorSettings.m_hCalBarrelOuterZ             =   hCalBarrelExtension->extent[3]/dd4hep::mm;
     m_caloHitCreatorSettings.m_muonBarrelOuterZ             =   muonBarrelExtension->extent[3]/dd4hep::mm;
-    m_caloHitCreatorSettings.m_coilOuterR                   =   coilExtension->extent[1]/dd4hep::mm;
     m_caloHitCreatorSettings.m_eCalBarrelInnerPhi0          =   eCalBarrelExtension->inner_phi0/dd4hep::rad;
     m_caloHitCreatorSettings.m_eCalBarrelInnerSymmetry      =   eCalBarrelExtension->inner_symmetry;
     m_caloHitCreatorSettings.m_hCalBarrelInnerPhi0          =   hCalBarrelExtension->inner_phi0/dd4hep::rad;
@@ -941,7 +978,8 @@ void DDPandoraPFANewProcessor::FinaliseSteeringParameters()
 void DDPandoraPFANewProcessor::Reset()
 {
     m_pCaloHitCreator->Reset();
-    m_pTrackCreator->Reset();
+    // FIXME: AD: for the moment we do not have tracking -> we do not create tracks
+    //m_pTrackCreator->Reset();
 
     PandoraToLCEventMap::iterator iter = m_pandoraToLCEventMap.find(m_pPandora);
 

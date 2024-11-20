@@ -11,6 +11,8 @@
 
 #include "DDCaloHitCreator.h"
 #include "DDGeometryCreator.h"
+#include "DDCaloHitCreatorALLEGRO.h"
+#include "DDGeometryCreatorALLEGRO.h"
 #include "DDMCParticleCreator.h"
 #include "DDPfoCreator.h"
 #include "DDTrackCreatorBase.h"
@@ -72,7 +74,8 @@ public:
         //Detector names not needed anymore, accessed by det type flags
         std::string     m_trackCreatorName = "";            ///< The name of the DDTrackCreator implementation to use
 
-        
+        // Detector name (used by ALLEGRO)
+        std::string     m_detectorName = "";
     };
 
     /**
