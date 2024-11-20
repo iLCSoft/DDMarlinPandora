@@ -20,9 +20,17 @@
 #include <DD4hep/Detector.h>
 #include <DD4hep/DetElement.h>
 
+#include <Pandora/PandoraObjectFactories.h>
+
+#include <memory>
 
 
 typedef std::vector<EVENT::CalorimeterHit *> CalorimeterHitVector;
+
+#ifdef APRILCONTENT
+namespace april_content { class CaloHitFactory; }
+#endif
+
 
 /**
  *  @brief  DDCaloHitCreator class
@@ -111,6 +119,8 @@ public:
         float                         m_hCalBarrelOuterPhi0;              ///< HCal barrel outer phi0 coordinate
         unsigned int                  m_hCalBarrelOuterSymmetry;          ///< HCal barrel outer symmetry order
 
+        bool m_useAPRIL = false; ///< Choose if we want to use APRIL instead of Pandora for the reconstruction
+
     public:
       FloatVector m_eCalBarrelNormalVector;
       FloatVector m_hCalBarrelNormalVector;
@@ -150,6 +160,13 @@ public:
      *  @brief  Reset the calo hit creator
      */
     void Reset();
+
+    /**
+     *  @brief  Disallow copying
+     */
+    DDCaloHitCreator& operator=(const DDCaloHitCreator&) = delete;
+    DDCaloHitCreator(const DDCaloHitCreator&) = delete;
+
 
 private:
     /**
@@ -241,6 +258,12 @@ private:
      */
     float GetMaximumRadius(const EVENT::CalorimeterHit *const pCaloHit, const unsigned int symmetryOrder, const float phi0) const;
 
+    /**
+     *  @brief  Initialize the factory for calo hit creation
+     * 
+     */
+    void ChooseFactory();
+
     const Settings                      m_settings;                         ///< The calo hit creator settings
 
     const pandora::Pandora &            m_pandora;                          ///< Reference to the pandora object to create calo hits
@@ -251,6 +274,9 @@ private:
     CalorimeterHitVector                m_calorimeterHitVector;             ///< The calorimeter hit vector
 
     dd4hep::VolumeManager m_volumeManager; ///< DD4hep volume manager
+
+    //Added by T.Pasquier
+    std::unique_ptr<pandora::ObjectFactory<object_creation::CaloHit::Parameters, object_creation::CaloHit::Object>> m_caloHitFactory{nullptr}; //General factory to initialize
 
 };
 
