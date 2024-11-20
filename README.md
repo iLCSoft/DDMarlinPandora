@@ -39,7 +39,7 @@ mlpack should be installed. You should use the same mlpack installation as the o
 
 1. `mkdir build`
 2. `cd build`
-3. `cmake -C ${ILCSOFT}/ILCSoft.cmake -DPANDORA_MONITORING=ON -DUSE_APRILCONTENT=ON -DAPRILContent_DIR=/absolute/path/to/APRILContent -Dmlpack_DIR=/absolute/path/to/mlpack/INSTALL ..`
+3. `PKG_CONFIG_PATH=/absolute/path/to/mlpack/pkgconfig cmake -C ${ILCSOFT}/ILCSoft.cmake -DPANDORA_MONITORING=ON -DUSE_APRILCONTENT=ON -DAPRILContent_DIR=/absolute/path/to/APRILContent ..`
 4. `make install`
 
 **To compile with both SDHCALContent and APRILContent :**
