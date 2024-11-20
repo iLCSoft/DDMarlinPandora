@@ -21,6 +21,9 @@
 class DDGeometryCreator
 {
 public:
+    // give access to the private memebers from DDGeometryCreatorALLEGRO
+    friend class DDGeometryCreatorALLEGRO;
+
     /**
      *  @brief  Settings class
      */
