@@ -64,7 +64,7 @@ pandora::StatusCode DDCaloHitCreatorALLEGRO::CreateCaloHits(const EVENT::LCEvent
 {
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, this->CreateECalCaloHits(pLCEvent));
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, this->CreateHCalCaloHits(pLCEvent));
-    // FIXME: AD: for the moment we do not create the muon CaloHits
+    // FIXME! AD: for the moment we do not create the muon CaloHits
     // PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, this->CreateMuonCaloHits(pLCEvent));
 
     return pandora::STATUS_CODE_SUCCESS;
@@ -361,6 +361,7 @@ void DDCaloHitCreatorALLEGRO::GetCommonCaloHitProperties(const EVENT::Calorimete
     const float *pCaloHitPosition(pCaloHit->getPosition());
     const pandora::CartesianVector positionVector(pCaloHitPosition[0], pCaloHitPosition[1], pCaloHitPosition[2]);
 
+    // FIXME! AD: for ECAL the che cell gemoetry should be pandora::POINTING with cellSize0 = DeltaEta and cellSize1 = DeltaPhi
     caloHitParameters.m_cellGeometry = pandora::RECTANGULAR;
     caloHitParameters.m_positionVector = positionVector;
     caloHitParameters.m_expectedDirection = positionVector.GetUnitVector();

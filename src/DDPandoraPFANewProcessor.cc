@@ -26,6 +26,7 @@
 
 #include "DDTrackCreatorILD.h"
 #include "DDTrackCreatorCLIC.h"
+#include "DDTrackCreatorALLEGRO.h"
 
 #include "DDBFieldPlugin.h"
 
@@ -171,8 +172,6 @@ void DDPandoraPFANewProcessor::init()
           m_pCaloHitCreator = new DDCaloHitCreator(m_caloHitCreatorSettings, m_pPandora);
         }
 
-//AD: we do not have yet tracking
-/*
         ///FIXME: IMPLEMENT FACTORY
         if (m_settings.m_trackCreatorName == "DDTrackCreatorCLIC")
             m_pTrackCreator = new DDTrackCreatorCLIC(m_trackCreatorSettings, m_pPandora);
@@ -182,7 +181,6 @@ void DDPandoraPFANewProcessor::init()
             m_pTrackCreator = new DDTrackCreatorALLEGRO(m_trackCreatorSettings, m_pPandora);
         else
             streamlog_out(ERROR) << "Unknown DDTrackCreator: "<<m_settings.m_trackCreatorName << std::endl;
-*/
 
         m_pDDMCParticleCreator = new DDMCParticleCreator(m_mcParticleCreatorSettings, m_pPandora);
         m_pDDPfoCreator = new DDPfoCreator(m_pfoCreatorSettings, m_pPandora);
@@ -231,18 +229,16 @@ void DDPandoraPFANewProcessor::processEvent(LCEvent *pLCEvent)
         (void) m_pandoraToLCEventMap.insert(PandoraToLCEventMap::value_type(m_pPandora, pLCEvent));
 
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pDDMCParticleCreator->CreateMCParticles(pLCEvent));
-        // FIXME: AD: for the moment we do not have tracking
-        /*
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pTrackCreator->CreateTrackAssociations(pLCEvent));
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pTrackCreator->CreateTracks(pLCEvent));
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pDDMCParticleCreator->CreateTrackToMCParticleRelationships(pLCEvent, m_pTrackCreator->GetTrackVector()));
-        */
         if(m_settings.m_detectorName == "ALLEGRO")
         {
+          PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, static_cast<DDTrackCreatorALLEGRO*>(m_pTrackCreator)->CreateTracks(pLCEvent));
           PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, static_cast<DDCaloHitCreatorALLEGRO*>(m_pCaloHitCreator)->CreateCaloHits(pLCEvent));
         }
         else
         {
+          PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pTrackCreator->CreateTrackAssociations(pLCEvent));
+          PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pTrackCreator->CreateTracks(pLCEvent));
+          PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pDDMCParticleCreator->CreateTrackToMCParticleRelationships(pLCEvent, m_pTrackCreator->GetTrackVector()));
           PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pCaloHitCreator->CreateCaloHits(pLCEvent));
         }
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pDDMCParticleCreator->CreateCaloHitToMCParticleRelationships(pLCEvent, m_pCaloHitCreator->GetCalorimeterHitVector()));
@@ -978,8 +974,7 @@ void DDPandoraPFANewProcessor::FinaliseSteeringParameters()
 void DDPandoraPFANewProcessor::Reset()
 {
     m_pCaloHitCreator->Reset();
-    // FIXME: AD: for the moment we do not have tracking -> we do not create tracks
-    //m_pTrackCreator->Reset();
+    m_pTrackCreator->Reset();
 
     PandoraToLCEventMap::iterator iter = m_pandoraToLCEventMap.find(m_pPandora);
 
