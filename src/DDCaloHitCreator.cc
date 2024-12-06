@@ -154,7 +154,8 @@ pandora::StatusCode DDCaloHitCreator::CreateECalCaloHits(const EVENT::LCEvent *c
                     float absorberCorrection(1.);
 
                     //FIXME: Why is this used to get barrel or endcap??? use SystemID if available
-                    if (std::fabs(pCaloHit->getPosition()[2]) < m_settings.m_eCalBarrelOuterZ)
+                    if ( (!m_settings.m_useSystemId && std::fabs(pCaloHit->getPosition()[2]) < m_settings.m_eCalBarrelOuterZ) ||
+                         (m_settings.m_useSystemId && cellIdDecoder(pCaloHit)["system"] == m_settings.m_ecalBarrelSystemId) )
                     {
 
                       streamlog_out( DEBUG6 ) << "IDS " << *iter
@@ -265,7 +266,8 @@ pandora::StatusCode DDCaloHitCreator::CreateHCalCaloHits(const EVENT::LCEvent *c
 
                     float absorberCorrection(1.);
 
-                    if (std::fabs(pCaloHit->getPosition()[2]) < m_settings.m_hCalBarrelOuterZ)
+                    if ( (!m_settings.m_useSystemId && std::fabs(pCaloHit->getPosition()[2]) < m_settings.m_hCalBarrelOuterZ) ||
+                         (m_settings.m_useSystemId && cellIdDecoder(pCaloHit)["system"] == m_settings.m_hcalBarrelSystemId) )
                     {
 
                       this->GetBarrelCaloHitProperties(pCaloHit, barrelLayers, m_settings.m_hCalBarrelInnerSymmetry, caloHitParameters, m_settings.m_hCalBarrelNormalVector, absorberCorrection);
@@ -858,6 +860,9 @@ DDCaloHitCreator::Settings::Settings()
     m_hCalBarrelOuterR(0.f),
     m_hCalBarrelOuterPhi0(0.f),
     m_hCalBarrelOuterSymmetry(0.f),
+    m_useSystemId(false),
+    m_ecalBarrelSystemId(-1),
+    m_hcalBarrelSystemId(-1),
     m_eCalBarrelNormalVector({0.0, 0.0, 1.0}),
     m_hCalBarrelNormalVector({0.0, 0.0, 1.0}),
     m_muonBarrelNormalVector({0.0, 0.0, 1.0})
