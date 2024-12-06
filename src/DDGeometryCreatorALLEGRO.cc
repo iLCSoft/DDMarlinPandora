@@ -99,16 +99,14 @@ void DDGeometryCreatorALLEGRO::SetMandatorySubDetectorParameters(SubDetectorType
     trackerParameters.m_nLayers = 0;
     subDetectorTypeMap[pandora::INNER_TRACKER] = trackerParameters;
     */
-    /*
+
     ///FIXME:Implement a parameter for the Coil/Solenoid name
     ///NOTE: Is this the way to go, or should we go with reco structure?
     try{
         PandoraApi::Geometry::SubDetector::Parameters coilParameters;
 
+        /*
         const dd4hep::rec::LayeredCalorimeterData * coilExtension= getExtension( ( dd4hep::DetType::COIL ) );
-
-
-
         coilParameters.m_subDetectorName = "Coil";
         coilParameters.m_subDetectorType = pandora::COIL;
         coilParameters.m_innerRCoordinate = coilExtension->extent[0]/ dd4hep::mm; 
@@ -122,10 +120,32 @@ void DDGeometryCreatorALLEGRO::SetMandatorySubDetectorParameters(SubDetectorType
         coilParameters.m_isMirroredInZ = true;
         coilParameters.m_nLayers = 0;
         subDetectorTypeMap[pandora::COIL] = coilParameters;
+        */
+
+        // FIXME! AD: below an ugly way is used to define the geometry of the Solenoid since we do not have the LayeredCalorimeterData for Coil in ALLEGRO
+        //Get ECal Barrel extension
+        const dd4hep::rec::LayeredCalorimeterData * eCalBarrelExtension= getExtension( ( dd4hep::DetType::CALORIMETER | dd4hep::DetType::ELECTROMAGNETIC | dd4hep::DetType::BARREL),
+                                                                                     ( dd4hep::DetType::AUXILIARY  |  dd4hep::DetType::FORWARD ) );
+        //Get HCal Barrel extension
+        const dd4hep::rec::LayeredCalorimeterData * hCalBarrelExtension= getExtension( ( dd4hep::DetType::CALORIMETER | dd4hep::DetType::HADRONIC | dd4hep::DetType::BARREL),
+                                                                                     ( dd4hep::DetType::AUXILIARY |  dd4hep::DetType::FORWARD ) );
+        coilParameters.m_subDetectorName = "Coil";
+        coilParameters.m_subDetectorType = pandora::COIL;
+        coilParameters.m_innerRCoordinate = eCalBarrelExtension->extent[1]/ dd4hep::mm; // ECAL barrel outer R is assumed to be the inner R for the Solenoid
+        coilParameters.m_innerZCoordinate = 0.f;
+        coilParameters.m_innerPhiCoordinate = 0.f;
+        coilParameters.m_innerSymmetryOrder = 0;
+        coilParameters.m_outerRCoordinate = hCalBarrelExtension->extent[0]/ dd4hep::mm; // HCAL barrel inner R is assumed to be the outer R for the Solenoid
+        coilParameters.m_outerZCoordinate = eCalBarrelExtension->extent[3]/ dd4hep::mm; // Solenoid outer Z is assumed to be the same as ECAL barrel outer Z
+        coilParameters.m_outerPhiCoordinate = 0.f;
+        coilParameters.m_outerSymmetryOrder = 0;
+        coilParameters.m_isMirroredInZ = true;
+        coilParameters.m_nLayers = 0;
+        subDetectorTypeMap[pandora::COIL] = coilParameters;
+
     } catch ( std::exception & e ) {
         streamlog_out(ERROR) << "Failed to access COIL parameters: "<<e.what()<<std::endl;
     }
-    */
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -133,7 +153,7 @@ void DDGeometryCreatorALLEGRO::SetMandatorySubDetectorParameters(SubDetectorType
 void DDGeometryCreatorALLEGRO::SetDefaultSubDetectorParameters(const dd4hep::rec::LayeredCalorimeterData &inputParameters, const std::string &subDetectorName,
     const pandora::SubDetectorType subDetectorType, PandoraApi::Geometry::SubDetector::Parameters &parameters) const
 {
-  const std::vector<dd4hep::rec::LayeredCalorimeterStruct::Layer>& layers= inputParameters.layers;
+    const std::vector<dd4hep::rec::LayeredCalorimeterStruct::Layer>& layers= inputParameters.layers;
 
     parameters.m_subDetectorName = subDetectorName;
     parameters.m_subDetectorType = subDetectorType;

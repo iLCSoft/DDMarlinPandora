@@ -64,8 +64,7 @@ pandora::StatusCode DDCaloHitCreatorALLEGRO::CreateCaloHits(const EVENT::LCEvent
 {
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, this->CreateECalCaloHits(pLCEvent));
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, this->CreateHCalCaloHits(pLCEvent));
-    // FIXME! AD: for the moment we do not create the muon CaloHits
-    // PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, this->CreateMuonCaloHits(pLCEvent));
+    PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, this->CreateMuonCaloHits(pLCEvent));
 
     return pandora::STATUS_CODE_SUCCESS;
 }
@@ -116,7 +115,7 @@ pandora::StatusCode DDCaloHitCreatorALLEGRO::CreateECalCaloHits(const EVENT::LCE
                     float absorberCorrection(1.);
 
                     // check if the hit in barrel
-                    // NOTE: ECal barrel systemID is hardcoded
+                    // FIXME! AD: ECal barrel systemID is hardcoded
                     if (cellIdDecoder(pCaloHit)["system"] == 4)
                     {
                       this->GetBarrelCaloHitProperties(pCaloHit, barrelLayers, m_settings.m_eCalBarrelInnerSymmetry, caloHitParameters, m_settings.m_eCalBarrelNormalVector, absorberCorrection);
@@ -211,7 +210,7 @@ pandora::StatusCode DDCaloHitCreatorALLEGRO::CreateHCalCaloHits(const EVENT::LCE
                     float absorberCorrection(1.);
 
                     // check if the hit in barrel
-                    // NOTE: HCal barrel systemID is hardcoded here
+                    // FIXME! AD: HCal barrel systemID is hardcoded here
                     if (cellIdDecoder(pCaloHit)["system"] == 8)
                     {
                       this->GetBarrelCaloHitProperties(pCaloHit, barrelLayers, m_settings.m_hCalBarrelInnerSymmetry, caloHitParameters, m_settings.m_hCalBarrelNormalVector, absorberCorrection);
@@ -270,7 +269,6 @@ pandora::StatusCode DDCaloHitCreatorALLEGRO::CreateMuonCaloHits(const EVENT::LCE
 
             const std::vector<dd4hep::rec::LayeredCalorimeterStruct::Layer>& barrelLayers= getExtension(( dd4hep::DetType::CALORIMETER | dd4hep::DetType::MUON| dd4hep::DetType::BARREL), ( dd4hep::DetType::AUXILIARY  |  dd4hep::DetType::FORWARD  ))->layers;
             const std::vector<dd4hep::rec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension(( dd4hep::DetType::CALORIMETER | dd4hep::DetType::MUON| dd4hep::DetType::ENDCAP), ( dd4hep::DetType::AUXILIARY  |  dd4hep::DetType::FORWARD  ))->layers;
-            ///FIXME: WHAT ABOUT MORE MUON SYSTEMS?
             // const std::vector<dd4hep::rec::LayeredCalorimeterStruct::Layer>& plugLayers= getExtension(( dd4hep::DetType::CALORIMETER | dd4hep::DetType::HADRONIC | dd4hep::DetType::AUXILIARY ))->layers;
             UTIL::CellIDDecoder<CalorimeterHit> cellIdDecoder(pCaloHitCollection);
             const std::string layerCodingString(pCaloHitCollection->getParameters().getStringVal(LCIO::CellIDEncoding));
@@ -294,17 +292,11 @@ pandora::StatusCode DDCaloHitCreatorALLEGRO::CreateMuonCaloHits(const EVENT::LCE
                     const float radius(std::sqrt(pCaloHit->getPosition()[0] * pCaloHit->getPosition()[0] +
                         pCaloHit->getPosition()[1] * pCaloHit->getPosition()[1]));
 
-                    const bool isWithinCoil(radius < m_settings.m_coilOuterR);
                     const bool isInBarrelRegion(std::fabs(pCaloHit->getPosition()[2]) < m_settings.m_muonBarrelOuterZ);
 
                     float absorberCorrection(1.);
 
-                    if (isInBarrelRegion && isWithinCoil)
-                    {
-                      std::cout<<"BIG WARNING: CANNOT HANDLE PLUG HITS (no plug in CLIC model), DO NOTHING!"<<std::endl;
-//                         this->GetEndCapCaloHitProperties(pCaloHit, plugLayers, caloHitParameters, absorberCorrection);
-                    }
-                    else if (isInBarrelRegion)
+                    if (isInBarrelRegion)
                     {
 
                       this->GetBarrelCaloHitProperties(pCaloHit, barrelLayers, m_settings.m_muonBarrelInnerSymmetry, caloHitParameters, m_settings.m_muonBarrelNormalVector, absorberCorrection);
@@ -332,6 +324,7 @@ pandora::StatusCode DDCaloHitCreatorALLEGRO::CreateMuonCaloHits(const EVENT::LCE
                     }
 
                     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters));
+
                     m_calorimeterHitVector.push_back(pCaloHit);
                 }
                 catch (pandora::StatusCodeException &statusCodeException)
@@ -361,7 +354,7 @@ void DDCaloHitCreatorALLEGRO::GetCommonCaloHitProperties(const EVENT::Calorimete
     const float *pCaloHitPosition(pCaloHit->getPosition());
     const pandora::CartesianVector positionVector(pCaloHitPosition[0], pCaloHitPosition[1], pCaloHitPosition[2]);
 
-    // FIXME! AD: for ECAL the che cell gemoetry should be pandora::POINTING with cellSize0 = DeltaEta and cellSize1 = DeltaPhi
+    // FIXME! AD: for ECAL the cell gemoetry should be pandora::POINTING with cellSize0 = DeltaEta and cellSize1 = DeltaPhi
     caloHitParameters.m_cellGeometry = pandora::RECTANGULAR;
     caloHitParameters.m_positionVector = positionVector;
     caloHitParameters.m_expectedDirection = positionVector.GetUnitVector();

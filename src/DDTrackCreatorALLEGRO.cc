@@ -183,7 +183,7 @@ pandora::StatusCode DDTrackCreatorALLEGRO::CreateTracks(EVENT::LCEvent *pLCEvent
 		      {
 			this->GetTrackStates(pTrack, trackParameters);
 			this->TrackReachesECAL(pTrack, trackParameters);
-                        // FIXME! this is disabled for ALLEGRO since I am not sure what to do here with truth tracks
+                        // FIXME! AD: this is disabled for ALLEGRO since I am not sure what to do here with truth tracks
 			//this->GetTrackStatesAtCalo(pTrack, trackParameters);
 			this->DefineTrackPfoUsage(pTrack, trackParameters);
 
