@@ -32,24 +32,6 @@ dd4hep::rec::LayeredCalorimeterData * getExtension(unsigned int includeFlag, uns
 DDCaloHitCreatorALLEGRO::DDCaloHitCreatorALLEGRO(const Settings &settings, const pandora::Pandora *const pPandora) :
     DDCaloHitCreator(settings, pPandora)
 {
-    const std::vector<dd4hep::rec::LayeredCalorimeterStruct::Layer>& barrelLayers= getExtension(( dd4hep::DetType::CALORIMETER | dd4hep::DetType::HADRONIC | dd4hep::DetType::BARREL), ( dd4hep::DetType::AUXILIARY  |  dd4hep::DetType::FORWARD ))->layers;
-
-    const std::vector<dd4hep::rec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension(( dd4hep::DetType::CALORIMETER | dd4hep::DetType::HADRONIC | dd4hep::DetType::ENDCAP), ( dd4hep::DetType::AUXILIARY  |  dd4hep::DetType::FORWARD ))->layers;
-
-    ///Take thicknesses from last layer (was like that before with gear)
-    m_hCalEndCapLayerThickness =(endcapLayers.back().inner_thickness+endcapLayers.back().outer_thickness)/dd4hep::mm;
-    m_hCalBarrelLayerThickness =(barrelLayers.back().inner_thickness+barrelLayers.back().outer_thickness)/dd4hep::mm;
-
-    if ((m_hCalEndCapLayerThickness < std::numeric_limits<float>::epsilon()) || (m_hCalBarrelLayerThickness < std::numeric_limits<float>::epsilon()))
-        throw pandora::StatusCodeException(pandora::STATUS_CODE_INVALID_PARAMETER);
-
-   dd4hep::Detector& theDetector = dd4hep::Detector::getInstance();
-   m_volumeManager = theDetector.volumeManager();
-   if( not m_volumeManager.isValid() ){
-     theDetector.apply("DD4hepVolumeManager",0,0);
-     m_volumeManager = theDetector.volumeManager();
-   }
-
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
