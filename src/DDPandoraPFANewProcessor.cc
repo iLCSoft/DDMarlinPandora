@@ -937,7 +937,14 @@ void DDPandoraPFANewProcessor::FinaliseSteeringParameters()
       const dd4hep::rec::LayeredCalorimeterData * coilExtension= getExtension( ( dd4hep::DetType::COIL ) );
       m_caloHitCreatorSettings.m_coilOuterR                   =   coilExtension->extent[1]/dd4hep::mm;
     }
-    
+    else
+    {
+       m_caloHitCreatorSettings.m_useSystemId = true;
+       m_caloHitCreatorSettings.m_ecalBarrelSystemId = 4;
+       m_caloHitCreatorSettings.m_hcalBarrelSystemId = 8;
+       m_caloHitCreatorSettings.m_coilOuterR = 0;
+    }
+
     m_trackCreatorSettings.m_eCalBarrelInnerSymmetry        =   eCalBarrelExtension->inner_symmetry;
     m_trackCreatorSettings.m_eCalBarrelInnerPhi0            =   eCalBarrelExtension->inner_phi0/dd4hep::rad;
     m_trackCreatorSettings.m_eCalBarrelInnerR               =   eCalBarrelExtension->extent[0]/dd4hep::mm;

@@ -54,27 +54,6 @@ public:
 
 private:
     /**
-     *  @brief  Create ecal calo hits
-     * 
-     *  @param  pLCEvent the lcio event
-     */
-    pandora::StatusCode CreateECalCaloHits(const EVENT::LCEvent *const pLCEvent);
-
-    /**
-     *  @brief  Create hcal calo hits
-     * 
-     *  @param  pLCEvent the lcio event
-     */
-    pandora::StatusCode CreateHCalCaloHits(const EVENT::LCEvent *const pLCEvent);
-
-    /**
-     *  @brief  Create muon calo hits
-     * 
-     *  @param  pLCEvent the lcio event
-     */
-    pandora::StatusCode CreateMuonCaloHits(const EVENT::LCEvent *const pLCEvent);
-
-    /**
      *  @brief  Get common calo hit properties: position, parent address, input energy and time
      * 
      *  @param  pCaloHit the lcio calorimeter hit

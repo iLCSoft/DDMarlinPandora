@@ -48,16 +48,6 @@ private:
      */
     void SetMandatorySubDetectorParameters(SubDetectorTypeMap &subDetectorTypeMap) const;
 
-    /**
-     *  @brief  Set sub detector parameters to their gear default values
-     *
-     *  @param  inputParameters input parameters, from gear
-     *  @param  subDetectorName the sub detector name
-     *  @param  subDetectorType the sub detector type
-     *  @param  parameters the sub detector parameters
-     */
-    void SetDefaultSubDetectorParameters(const dd4hep::rec::LayeredCalorimeterData &inputParameters, const std::string &subDetectorName,
-        const pandora::SubDetectorType subDetectorType, PandoraApi::Geometry::SubDetector::Parameters &parameters) const;
 };
 
 #endif // #ifndef GEOMETRY_CREATOR_H
