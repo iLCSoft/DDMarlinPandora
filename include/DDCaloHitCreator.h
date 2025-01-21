@@ -30,9 +30,6 @@ typedef std::vector<EVENT::CalorimeterHit *> CalorimeterHitVector;
 class DDCaloHitCreator
 {
 public:
-    // give access to the private memebers from DDCaloHitCreatorALLEGRO
-    friend class DDCaloHitCreatorALLEGRO;
-
     typedef std::vector<std::string> StringVector;
     typedef std::vector<float> FloatVector;
 
@@ -137,14 +134,14 @@ public:
     /**
      *  @brief  Destructor
      */
-     ~DDCaloHitCreator();
+    virtual ~DDCaloHitCreator();
 
     /**
      *  @brief  Create calo hits
      * 
      *  @param  pLCEvent the lcio event
      */    
-    pandora::StatusCode CreateCaloHits(const EVENT::LCEvent *const pLCEvent);
+    virtual pandora::StatusCode CreateCaloHits(const EVENT::LCEvent *const pLCEvent);
 
     /**
      *  @brief  Get the calorimeter hit vector
@@ -158,7 +155,7 @@ public:
      */
     void Reset();
 
-private:
+protected:
     /**
      *  @brief  Create ecal calo hits
      * 
@@ -200,7 +197,7 @@ private:
      *  @param  pCaloHit the lcio calorimeter hit
      *  @param  caloHitParameters the calo hit parameters to populate
      */
-    void GetCommonCaloHitProperties(const EVENT::CalorimeterHit *const pCaloHit, PandoraApi::CaloHit::Parameters &caloHitParameters) const;
+    virtual void GetCommonCaloHitProperties(const EVENT::CalorimeterHit *const pCaloHit, PandoraApi::CaloHit::Parameters &caloHitParameters) const;
 
     /**
      *  @brief  Get end cap specific calo hit properties: cell size, absorber radiation and interaction lengths, normal vector

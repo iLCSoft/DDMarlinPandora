@@ -21,9 +21,6 @@
 class DDGeometryCreator
 {
 public:
-    // give access to the private memebers from DDGeometryCreatorALLEGRO
-    friend class DDGeometryCreatorALLEGRO;
-
     /**
      *  @brief  Settings class
      */
@@ -54,14 +51,14 @@ public:
     /**
      *  @brief  Destructor
      */
-     ~DDGeometryCreator();
+    virtual ~DDGeometryCreator();
 
     /**
      *  @brief  Create geometry
      */
-    pandora::StatusCode CreateGeometry() const;
+    virtual pandora::StatusCode CreateGeometry() const;
 
-private:
+protected:
     typedef std::map<pandora::SubDetectorType, PandoraApi::Geometry::SubDetector::Parameters> SubDetectorTypeMap;
     typedef std::map<std::string, PandoraApi::Geometry::SubDetector::Parameters> SubDetectorNameMap;
 
@@ -70,7 +67,7 @@ private:
      * 
      *  @param  subDetectorTypeMap the sub detector type map
      */
-    void SetMandatorySubDetectorParameters(SubDetectorTypeMap &subDetectorTypeMap) const;
+    virtual void SetMandatorySubDetectorParameters(SubDetectorTypeMap &subDetectorTypeMap) const;
 
     /**
      *  @brief  Set additional sub detector parameters
