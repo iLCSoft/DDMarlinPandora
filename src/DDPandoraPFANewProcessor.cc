@@ -222,18 +222,16 @@ void DDPandoraPFANewProcessor::processEvent(LCEvent *pLCEvent)
         (void) m_pandoraToLCEventMap.insert(PandoraToLCEventMap::value_type(m_pPandora, pLCEvent));
 
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pDDMCParticleCreator->CreateMCParticles(pLCEvent));
-        if(m_settings.m_detectorName == "ALLEGRO")
-        {
-          PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, static_cast<DDTrackCreatorALLEGRO*>(m_pTrackCreator)->CreateTracks(pLCEvent));
-          PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, static_cast<DDCaloHitCreatorALLEGRO*>(m_pCaloHitCreator)->CreateCaloHits(pLCEvent));
-        }
-        else
+
+        // FIXME! AD: currently CreateTrackAssociations can not be used for ALLEGRO
+        // since there are no reconstructed kink/prong/split/V0 vertex collections needed for track associations.
+        if(m_settings.m_detectorName != "ALLEGRO")
         {
           PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pTrackCreator->CreateTrackAssociations(pLCEvent));
-          PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pTrackCreator->CreateTracks(pLCEvent));
-          PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pDDMCParticleCreator->CreateTrackToMCParticleRelationships(pLCEvent, m_pTrackCreator->GetTrackVector()));
-          PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pCaloHitCreator->CreateCaloHits(pLCEvent));
         }
+        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pTrackCreator->CreateTracks(pLCEvent));
+        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pDDMCParticleCreator->CreateTrackToMCParticleRelationships(pLCEvent, m_pTrackCreator->GetTrackVector()));
+        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pCaloHitCreator->CreateCaloHits(pLCEvent));
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pDDMCParticleCreator->CreateCaloHitToMCParticleRelationships(pLCEvent, m_pCaloHitCreator->GetCalorimeterHitVector()));
 
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ProcessEvent(*m_pPandora));
