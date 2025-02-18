@@ -186,14 +186,7 @@ void DDPandoraPFANewProcessor::init()
         m_pDDPfoCreator = new DDPfoCreator(m_pfoCreatorSettings, m_pPandora);
 
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, this->RegisterUserComponents());
-        if(m_settings.m_detectorName == "ALLEGRO")
-        {
-          PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, static_cast<DDGeometryCreatorALLEGRO*>(m_pGeometryCreator)->CreateGeometry());
-        }
-        else
-        {
-          PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pGeometryCreator->CreateGeometry());
-        }
+        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pGeometryCreator->CreateGeometry());
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*m_pPandora, m_settings.m_pandoraSettingsXmlFile));
     }
     catch (pandora::StatusCodeException &statusCodeException)
