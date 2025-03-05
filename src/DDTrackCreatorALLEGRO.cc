@@ -34,7 +34,7 @@
 std::vector<double> getTrackingRegionExtent();
 
 DDTrackCreatorALLEGRO::DDTrackCreatorALLEGRO(const Settings &settings, const pandora::Pandora *const pPandora)
-  : DDTrackCreatorBase(settings,pPandora),
+  : DDTrackCreatorBase(settings, pPandora),
     m_trackerInnerR( 0.f ),
     m_trackerOuterR( 0.f ),
     m_trackerZmax( 0.f ),
@@ -184,7 +184,8 @@ pandora::StatusCode DDTrackCreatorALLEGRO::CreateTracks(EVENT::LCEvent *pLCEvent
 			this->GetTrackStates(pTrack, trackParameters);
 			this->TrackReachesECAL(pTrack, trackParameters);
                         // FIXME! AD: this is disabled for ALLEGRO since I am not sure what to do here with truth tracks
-			//this->GetTrackStatesAtCalo(pTrack, trackParameters);
+			// GM: re-enable
+			this->GetTrackStatesAtCalo(pTrack, trackParameters);
 			this->DefineTrackPfoUsage(pTrack, trackParameters);
 
 			PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Track::Create(m_pandora, trackParameters, *m_lcTrackFactory));
@@ -421,5 +422,113 @@ void DDTrackCreatorALLEGRO::TrackReachesECAL(const EVENT::Track *const pTrack, P
     }
 
     trackParameters.m_reachesCalorimeter = false;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void DDTrackCreatorALLEGRO::GetTrackStatesAtCalo( EVENT::Track *track,
+                                                  lc_content::LCTrackParameters& trackParameters ){
+
+  if( not trackParameters.m_reachesCalorimeter.Get() ) {
+      streamlog_out(DEBUG5) << "Track does not reach the ECal" <<std::endl;
+    return;
+  }
+
+  const TrackState *trackAtCalo = track->getTrackState(TrackState::AtCalorimeter);
+  if( not trackAtCalo ) {
+      streamlog_out(DEBUG5) << "Track does not have a trackState at calorimeter" <<std::endl;
+      streamlog_out(DEBUG3) << toString(track) << std::endl;
+      return;
+  }
+
+  streamlog_out(DEBUG3) << "Original" << toString(trackAtCalo) << std::endl;
+
+  const auto* tsPosition = trackAtCalo->getReferencePoint();
+
+  if( std::fabs(tsPosition[2]) <  getTrackingRegionExtent()[2] ) {
+      streamlog_out(DEBUG5) << "Original trackState is at Barrel" << std::endl;
+      pandora::InputTrackState pandoraTrackState;
+      this->CopyTrackState( trackAtCalo, pandoraTrackState );
+      trackParameters.m_trackStates.push_back( pandoraTrackState );
+      // GM FIXME: for the moment, do not extrapolate also to endcap, and return
+      return;
+  } else { // if track state is in endcap we do not repeat track state calculation, because the barrel cannot be hit
+      streamlog_out(DEBUG5) << "Original track state is at Endcap" << std::endl;
+      pandora::InputTrackState pandoraTrackState;
+      this->CopyTrackState( trackAtCalo, pandoraTrackState );
+      trackParameters.m_trackStates.push_back( pandoraTrackState );
+      return;
+  }
+
+  // GM FIXME: for the moment, do not extrapolate also to endcap, and return
+  /*
+  auto marlintrk = std::unique_ptr<MarlinTrk::IMarlinTrack>(m_trackingSystem->createTrack());
+  const EVENT::TrackerHitVec& trkHits = track->getTrackerHits();
+  const int nHitsTrack = trkHits.size();
+
+  for (int iHit = 0; iHit < nHitsTrack; ++iHit) {
+    EVENT::TrackerHit* trkHit = trkHits[iHit] ;
+    if( UTIL::BitSet32( trkHit->getType() )[ UTIL::ILDTrkHitTypeBit::COMPOSITE_SPACEPOINT ]   ){ //it is a composite spacepoint
+      //Split it up and add both hits to the MarlinTrk
+      const EVENT::LCObjectVec& rawObjects = trkHit->getRawHits();
+      for( unsigned k=0; k< rawObjects.size(); k++ ){
+	EVENT::TrackerHit* rawHit = static_cast< EVENT::TrackerHit* >( rawObjects[k] );
+	if( marlintrk->addHit( rawHit ) != MarlinTrk::IMarlinTrack::success ){
+	  streamlog_out(DEBUG4) << "DDTrackCreatorBase::GetTrackStatesAtCalo failed to add strip hit " << *rawHit << std::endl;
+	}
+      }
+    } else {
+      if( marlintrk->addHit(trkHits[iHit])  != MarlinTrk::IMarlinTrack::success  )
+	streamlog_out(DEBUG4) << "DDTrackCreatorBase::GetTrackStatesAtCalo failed to add tracker hit " << *trkHit<< std::endl;
+    }
+  }
+
+  bool tanL_is_positive = trackAtCalo->getTanLambda()>0;
+
+  auto trackState = TrackStateImpl(*trackAtCalo);
+
+  int return_error  = marlintrk->initialise(trackState, m_settings.m_bField, MarlinTrk::IMarlinTrack::modeForward);
+  if (return_error != MarlinTrk::IMarlinTrack::success ) {
+    streamlog_out(DEBUG4) << "DDTrackCreatorBase::GetTrackStatesAtCalo failed to initialize track for endcap track : " << std::endl ;
+    return ;
+  }
+
+  double chi2 = -DBL_MAX;
+  int ndf = 0;
+
+  TrackStateImpl trackStateAtCaloEndcap;
+
+  unsigned ecal_endcap_face_ID = lcio::ILDDetID::ECAL_ENDCAP;
+  int detElementID = 0;
+  m_encoder->reset();  // reset to 0
+  (*m_encoder)[lcio::LCTrackerCellID::subdet()] = ecal_endcap_face_ID;
+  (*m_encoder)[lcio::LCTrackerCellID::side()] = tanL_is_positive ? lcio::ILDDetID::fwd : lcio::ILDDetID::bwd;
+  (*m_encoder)[lcio::LCTrackerCellID::layer()]  = 0;
+
+  return_error = marlintrk->propagateToLayer(m_encoder->lowWord(), trackStateAtCaloEndcap, chi2, ndf,
+                                             detElementID, MarlinTrk::IMarlinTrack::modeForward );
+  streamlog_out(DEBUG5) << "Found trackState at endcap? Error code: " << return_error  << std::endl;
+
+  if (return_error == MarlinTrk::IMarlinTrack::success ) {
+      streamlog_out(DEBUG3) << "Endcap" << toString(&trackStateAtCaloEndcap) << std::endl;
+      const auto* tsEP = trackStateAtCaloEndcap.getReferencePoint();
+      const double radSquared = ( tsEP[0]*tsEP[0] + tsEP[1]*tsEP[1] );
+      if( radSquared < m_minimalTrackStateRadiusSquared ) {
+          streamlog_out(DEBUG5) << "new track state is below tolerance radius" << std::endl;
+          return;
+      }
+      //for curling tracks the propagated track has the wrong z0 whereas it should be 0. really
+      if( std::abs( trackStateAtCaloEndcap.getZ0() ) >
+          std::abs( 2.*M_PI/trackStateAtCaloEndcap.getOmega() * trackStateAtCaloEndcap.getTanLambda() ) ){
+          trackStateAtCaloEndcap.setZ0( 0. );
+      }
+      streamlog_out(DEBUG5) << "new track state at endcap accepted" << std::endl;
+      pandora::InputTrackState pandoraAtEndcap;
+      this->CopyTrackState( &trackStateAtCaloEndcap, pandoraAtEndcap );
+      trackParameters.m_trackStates.push_back( pandoraAtEndcap );
+  }
+
+  return;
+  */
 }
 

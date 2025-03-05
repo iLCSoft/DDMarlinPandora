@@ -161,7 +161,9 @@ void DDPfoCreator::SetClusterSubDetectorEnergies(const pandora::StringVector &su
     for (pandora::CaloHitList::const_iterator hIter = pandoraCaloHitList.begin(), hIterEnd = pandoraCaloHitList.end(); hIter != hIterEnd; ++hIter)
     {
         const pandora::CaloHit *const pPandoraCaloHit(*hIter);
+        // retrieve EDM digitised hit associated to Pandora CaloHit
         EVENT::CalorimeterHit *const pCalorimeterHit = (EVENT::CalorimeterHit*)(pPandoraCaloHit->GetParentAddress());
+
         pLcioCluster->addHit(pCalorimeterHit, 1.f);
 
         const float caloHitEnergy(pCalorimeterHit->getEnergy());
@@ -182,6 +184,10 @@ void DDPfoCreator::SetClusterSubDetectorEnergies(const pandora::StringVector &su
             case CHT::lhcal: subDetectorEnergies[LHCAL_INDEX] += caloHitEnergy; break;
             case CHT::bcal:  subDetectorEnergies[BCAL_INDEX ] += caloHitEnergy; break;
             default: streamlog_out(WARNING) << "DDPfoCreator::SetClusterSubDetectorEnergies: no subdetector found for hit with type: " << pCalorimeterHit->getType() << std::endl;
+                streamlog_out(WARNING) << "Hit position: "
+                                       << pCalorimeterHit->getPosition()[0] << " "
+                                       << pCalorimeterHit->getPosition()[1] << " "
+                                       << pCalorimeterHit->getPosition()[2] << std::endl;
         }
     }
 }
