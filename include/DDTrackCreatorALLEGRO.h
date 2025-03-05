@@ -95,14 +95,25 @@ protected:
      *  @param  pTrack the lcio track
      *  @param  trackParameters the track parameters
      */
-//    void GetTrackStates(const EVENT::Track *const pTrack, PandoraApi::Track::Parameters &trackParameters) const;
+    // inherited from base class
+    // void GetTrackStates(const EVENT::Track *const pTrack, PandoraApi::Track::Parameters &trackParameters) const;
 
     /**
      *  @brief  Obtain track time when it reaches ECAL
      * 
      *  @param  pTrack the lcio track
      */
-//    float CalculateTrackTimeAtCalorimeter(const EVENT::Track *const pTrack) const;
+    // inherited from base class
+    // float CalculateTrackTimeAtCalorimeter(const EVENT::Track *const pTrack) const;
+
+    /**
+     *  @brief  Calculate possible second track state at the ECal Endcap
+     *
+     *  @param track lcio track
+     *  @param trackParameters pandora LCTrackParameters
+     */
+    virtual void GetTrackStatesAtCalo( EVENT::Track *track, lc_content::LCTrackParameters& trackParameters);
+
 };
 
 
