@@ -338,6 +338,8 @@ void DDTrackCreatorALLEGRO::DefineTrackPfoUsage(const EVENT::Track *const pTrack
         float rInner(std::numeric_limits<float>::max()), zMin(std::numeric_limits<float>::max());
 
         // GM: why looping over track hits rather than just taking track state at first hit?
+        // this will fail on our tracks currently created from MCParticles without attaching hits to them
+        /*
         EVENT::TrackerHitVec trackerHitvec(pTrack->getTrackerHits());
         for (EVENT::TrackerHitVec::const_iterator iter = trackerHitvec.begin(), iterEnd = trackerHitvec.end(); iter != iterEnd; ++iter)
         {
@@ -351,6 +353,11 @@ void DDTrackCreatorALLEGRO::DefineTrackPfoUsage(const EVENT::Track *const pTrack
             if (absoluteZ < zMin)
                 zMin = absoluteZ;
         }
+        */
+        // replace with simpler calculation of rInner and zMin from first hit (though not necessarily the best for e.g. curling track)
+        pandora::CartesianVector posAtStart(trackParameters.m_trackStateAtStart.Get().GetPosition());
+        rInner = std::sqrt(posAtStart.GetX()*posAtStart.GetX() + posAtStart.GetY()*posAtStart.GetY());
+        zMin = std::fabs(posAtStarg.GetZ())
 
         if (this->PassesQualityCuts(pTrack, trackParameters))
         {
@@ -365,9 +372,7 @@ void DDTrackCreatorALLEGRO::DefineTrackPfoUsage(const EVENT::Track *const pTrack
             const bool isDaughter(this->IsDaughter(pTrack));
 
             // Decide whether track can be associated with a pandora cluster and used to form a charged PFO
-            //if ((d0 < m_settings.m_d0TrackCut) && (z0 < m_settings.m_z0TrackCut) && (rInner < m_trackerInnerR + m_settings.m_maxBarrelTrackerInnerRDistance))
-            // FIXME! AD: (rInner < m_trackerInnerR + m_settings.m_maxBarrelTrackerInnerRDistance) check is removed
-            if ((d0 < m_settings.m_d0TrackCut) && (z0 < m_settings.m_z0TrackCut))
+            if ((d0 < m_settings.m_d0TrackCut) && (z0 < m_settings.m_z0TrackCut) && (rInner < m_trackerInnerR + m_settings.m_maxBarrelTrackerInnerRDistance))
             {
                 canFormPfo = true;
             }
@@ -408,6 +413,10 @@ void DDTrackCreatorALLEGRO::DefineTrackPfoUsage(const EVENT::Track *const pTrack
         }
     }
 
+    // GM debug
+    streamlog_out(MESSAGE) << "Track: " << *pTrack << std::endl;
+    streamlog_out(MESSAGE) << "Can form PFO: " << canFormPfo << std::endl;
+    streamlog_out(MESSAGE) << "Can form clusterless PFO: " << canFormClusterlessPfo << std::endl;
     trackParameters.m_canFormPfo = canFormPfo;
     trackParameters.m_canFormClusterlessPfo = canFormClusterlessPfo;
 }
@@ -419,12 +428,14 @@ void DDTrackCreatorALLEGRO::TrackReachesECAL(const EVENT::Track *const pTrack, P
     // GM debug
     std::cout << "In DDTrackCreatorALLEGRO::TrackReachesECAL" << std::endl;
 
-    // FIXME! GM: check that track has hits in wrapper
-    // could loop over track hits
-    // for the moment just check last track point
-    pandora::CartesianVector posAtEnd(trackParameters.m_trackStateAtEnd.Get().GetPosition());
-    double rAtEnd = std::sqrt(posAtEnd.GetX()*posAtEnd.GetX() + posAtEnd.GetY()*posAtEnd.GetY());
-    double zAtEnd = std::fabs(posAtEnd.GetZ());
+    // we could probably just return true as done in DDTrackCreatorILD since there are quality checks in DefineTrackPfoUsage()
+
+    // Check that track has hits in wrapper
+    if (this->GetNSiWrapperHits(pTrack)<1) {
+        std::cout << "Track has no hit in wrapper, thus does not reach ECAL" << std::endl;
+        trackParameters.m_reachesCalorimeter = false;
+        return;
+    }
 
     // Check that track extrapolates to calo
     pandora::CartesianVector posAtCalo(trackParameters.m_trackStateAtCalorimeter.Get().GetPosition());
