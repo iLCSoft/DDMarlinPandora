@@ -81,8 +81,6 @@ void DDGeometryCreatorALLEGRO::SetMandatorySubDetectorParameters(SubDetectorType
     subDetectorTypeMap[pandora::MUON_BARREL] = muonBarrelParameters;
     subDetectorTypeMap[pandora::MUON_ENDCAP] = muonEndCapParameters;
 
-    // FIXME! AD: currently ignoring tracker parameters since we are using truth tracks
-    /*
     PandoraApi::Geometry::SubDetector::Parameters trackerParameters;
 
     trackerParameters.m_subDetectorName = "Tracker";
@@ -96,9 +94,8 @@ void DDGeometryCreatorALLEGRO::SetMandatorySubDetectorParameters(SubDetectorType
     trackerParameters.m_outerPhiCoordinate = 0.f;
     trackerParameters.m_outerSymmetryOrder = 0;
     trackerParameters.m_isMirroredInZ = true;
-    trackerParameters.m_nLayers = 0;
+    trackerParameters.m_nLayers = 0; // unused?
     subDetectorTypeMap[pandora::INNER_TRACKER] = trackerParameters;
-    */
 
     ///FIXME:Implement a parameter for the Coil/Solenoid name
     ///NOTE: Is this the way to go, or should we go with reco structure?
