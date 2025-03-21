@@ -1,8 +1,8 @@
 /**
  *  @file   DDMarlinPandora/src/DDGeometryCreator.cc
- * 
+ *
  *  @brief  Implementation of the geometry creator class.
- * 
+ *
  *  $Log: $
  */
 
@@ -25,7 +25,7 @@
 dd4hep::rec::LayeredCalorimeterData * getExtension(unsigned int includeFlag, unsigned int excludeFlag=0);
 
 std::vector<double> getTrackingRegionExtent();
-  
+
 
 DDGeometryCreatorALLEGRO::DDGeometryCreatorALLEGRO(const Settings &settings, const pandora::Pandora *const pPandora) : DDGeometryCreator(settings,pPandora)
 {
@@ -106,7 +106,7 @@ void DDGeometryCreatorALLEGRO::SetMandatorySubDetectorParameters(SubDetectorType
         const dd4hep::rec::LayeredCalorimeterData * coilExtension= getExtension( ( dd4hep::DetType::COIL ) );
         coilParameters.m_subDetectorName = "Coil";
         coilParameters.m_subDetectorType = pandora::COIL;
-        coilParameters.m_innerRCoordinate = coilExtension->extent[0]/ dd4hep::mm; 
+        coilParameters.m_innerRCoordinate = coilExtension->extent[0]/ dd4hep::mm;
         coilParameters.m_innerZCoordinate = 0.f;
         coilParameters.m_innerPhiCoordinate = 0.f;
         coilParameters.m_innerSymmetryOrder = 0;

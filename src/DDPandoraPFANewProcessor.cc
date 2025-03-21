@@ -948,8 +948,6 @@ void DDPandoraPFANewProcessor::FinaliseSteeringParameters()
     m_trackCreatorSettings.m_eCalBarrelInnerSymmetry        =   eCalBarrelExtension->inner_symmetry;
     m_trackCreatorSettings.m_eCalBarrelInnerPhi0            =   eCalBarrelExtension->inner_phi0/dd4hep::rad;
     m_trackCreatorSettings.m_eCalBarrelInnerR               =   eCalBarrelExtension->extent[0]/dd4hep::mm;
-    m_trackCreatorSettings.m_eCalEndCapInnerR               =   eCalEndcapExtension->extent[0]/dd4hep::mm;
-    m_trackCreatorSettings.m_eCalEndCapOuterR               =   eCalEndcapExtension->extent[1]/dd4hep::mm;
     m_trackCreatorSettings.m_eCalEndCapInnerZ               =   eCalEndcapExtension->extent[2]/dd4hep::mm;
 
     // geometry information for CaloHit creator

@@ -59,18 +59,27 @@ protected:
     float                   m_wrapperBarrelInnerR;          ///< Inner radius of the barrel wrapper
     float                   m_wrapperBarrelOuterR;          ///< Outer radius of the barrel wrapper
     float                   m_wrapperBarrelOuterZ;          ///< Maximum z of the barrel wrapper
-    float                   m_wrapperEndcapInnerR;          ///< Inner radius of the endcap wrapper
-    float                   m_wrapperEndcapOuterR;          ///< Outer radius of the endcap wrapper
-    float                   m_wrapperEndcapInnerZ;          ///< Minimum |z| of the endcap wrapper
-    float                   m_wrapperEndcapOuterZ;          ///< Maximum |z| of the endcap wrapper
+    float                   m_wrapperEndCapInnerR;          ///< Inner radius of the endcap wrapper
+    float                   m_wrapperEndCapOuterR;          ///< Outer radius of the endcap wrapper
+    float                   m_wrapperEndCapInnerZ;          ///< Minimum |z| of the endcap wrapper
+    float                   m_wrapperEndCapOuterZ;          ///< Maximum |z| of the endcap wrapper
     unsigned int            m_wrapperBarrelNLayers;         ///< Number of layers of Si wrapper in barrel
-    unsigned int            m_wrapperEndcapNLayers;         ///< Number of layers of Si wrapper in endcap
+    unsigned int            m_wrapperEndCapNLayers;         ///< Number of layers of Si wrapper in endcap
     float m_cosWrapper;                                     ///< Cos(theta) for tracks pointing from IP to tracker edge
     // DoubleVector            m_barrelWrapperRPositions;      ///< List of barrel wrapper r positions
     // DoubleVector            m_barrelWrapperOuterZ;          ///< List of barrel wrapper outer |z|
     // DoubleVector            m_endcapWrapperInnerR;          ///< List of endcap wrapper inner radii
     // DoubleVector            m_endcapWrapperOuterR;          ///< List of endcap wrapper outer radii
     // DoubleVector            m_endcapWrapperZPositions;      ///< List of endcap wrapper z positions
+
+    // ECAL
+    float                   m_eCalBarrelInnerR;          ///< Inner radius of the barrel eCal
+    // float                   m_eCalBarrelOuterR;          ///< Outer radius of the barrel eCal
+    float                   m_eCalBarrelOuterZ;          ///< Maximum z of the barrel eCal
+    float                   m_eCalEndCapInnerR;          ///< Inner radius of the endcap eCal
+    float                   m_eCalEndCapOuterR;          ///< Outer radius of the endcap eCal
+    float                   m_eCalEndCapInnerZ;          ///< Minimum |z| of the endcap eCal
+    // float                   m_eCalEndCapOuterZ;          ///< Maximum |z| of the endcap eCal
 
     /**
      *  @brief  Whether track passes the quality cuts required in order to be used to form a pfo. Detector specific
@@ -147,7 +156,7 @@ protected:
     // float CalculateTrackTimeAtCalorimeter(const EVENT::Track *const pTrack) const;
 
     /**
-     *  @brief  Calculate possible second track state at the ECal Endcap
+     *  @brief  Calculate possible second track state at the ECal EndCap
      *
      *  @param track lcio track
      *  @param trackParameters pandora LCTrackParameters
