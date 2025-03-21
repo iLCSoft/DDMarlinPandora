@@ -1,8 +1,8 @@
 /**
  *  @file   DDMarlinPandora/include/DDTrackCreatorBase.h
- *
+ * 
  *  @brief  Header file for the track creator base class.
- *
+ * 
  *  $Log: $
  */
 
@@ -116,7 +116,7 @@ public:
 
 
         ///Nikiforos: Moved from main class
-
+        
         float             m_bField;                       ///< The bfield
         int               m_eCalBarrelInnerSymmetry;      ///< ECal barrel inner symmetry order
         float             m_eCalBarrelInnerPhi0;          ///< ECal barrel inner phi 0
@@ -125,12 +125,12 @@ public:
 
         //Tracking Detector names not needed anymore, accessed by det type flag
 
-
+        
     };
 
     /**
      *  @brief  Constructor
-     *
+     * 
      *  @param  settings the creator settings
      *  @param  pPandora address of the relevant pandora instance
      */
@@ -143,21 +143,21 @@ public:
 
     /**
      *  @brief  Create associations between tracks, V0s, kinks, etc
-     *
+     * 
      *  @param  pLCEvent the lcio event
      */
     pandora::StatusCode CreateTrackAssociations(const EVENT::LCEvent *const pLCEvent);
 
     /**
      *  @brief  Create tracks, insert user code here. Implement accordin to detector model
-     *
+     * 
      *  @param  pLCEvent the lcio event
      */
     virtual pandora::StatusCode CreateTracks(EVENT::LCEvent *pLCEvent) = 0 ;
 
     /**
      *  @brief  Get the track vector
-     *
+     * 
      *  @return The track vector
      */
     const TrackVector &GetTrackVector() const;
@@ -176,14 +176,14 @@ public:
      *  @brief  Reset the track creator
      */
     void Reset();
-
-
-
+    
+    
+    
 
 protected:
-
-
-
+    
+    
+    
 
     const Settings          m_settings;                     ///< The track creator settings
     const pandora::Pandora &m_pandora;                     ///< Reference to the pandora object to create tracks and track relationships
@@ -199,22 +199,22 @@ protected:
     std::shared_ptr<UTIL::BitField64> m_encoder={};                   ///< cell ID encoder
     std::shared_ptr<lc_content::LCTrackFactory> m_lcTrackFactory={};  ///< LCTrackFactor for creating LCTracks
 
-
+    
     ///Nikiforos: Need to implement following abstract functions according to detector model
-
+    
      /**
      *  @brief  Whether track passes the quality cuts required in order to be used to form a pfo
-     *
+     * 
      *  @param  pTrack the lcio track
      *  @param  trackParameters the track parameters
-     *
+     * 
      *  @return boolean
      */
     virtual bool PassesQualityCuts(const EVENT::Track *const pTrack, const PandoraApi::Track::Parameters &trackParameters) const = 0;
-
+    
     /**
      *  @brief  Decide whether track reaches the ecal surface
-     *
+     * 
      *  @param  pTrack the lcio track
      *  @param  trackParameters the track parameters
      */
@@ -224,70 +224,70 @@ protected:
      *  @brief  Determine whether a track can be used to form a pfo under the following conditions:
      *          1) if the track proves to be associated with a cluster, OR
      *          2) if the track proves to have no cluster associations
-     *
+     * 
      *  @param  pTrack the lcio track
      *  @param  trackParameters the track parameters
      */
     virtual void DefineTrackPfoUsage(const EVENT::Track *const pTrack, PandoraApi::Track::Parameters &trackParameters) const = 0;
-
+    
     /**
      *  @brief  Extract kink information from specified lcio collections
-     *
+     * 
      *  @param  pLCEvent the lcio event
      */
     pandora::StatusCode ExtractKinks(const EVENT::LCEvent *const pLCEvent);
 
     /**
      *  @brief  Extract prong and split information from specified lcio collections
-     *
+     * 
      *  @param  pLCEvent the lcio event
      */
     pandora::StatusCode ExtractProngsAndSplits(const EVENT::LCEvent *const pLCEvent);
 
     /**
      *  @brief  Extract v0 information from specified lcio collections
-     *
+     * 
      *  @param  pLCEvent the lcio event
      */
     pandora::StatusCode ExtractV0s(const EVENT::LCEvent *const pLCEvent);
 
     /**
      *  @brief  Whether the track vertex conflicts with previously provided relationship information
-     *
+     * 
      *  @param  trackVec the vector of tracks associated with the vertex
      */
     bool IsConflictingRelationship(const EVENT::TrackVec &trackVec) const;
 
     /**
      *  @brief  Whether a track is a v0 track
-     *
+     * 
      *  @param  pTrack the lcio track
-     *
+     * 
      *  @return boolean
      */
     bool IsV0(const EVENT::Track *const pTrack) const;
 
     /**
      *  @brief  Whether a track is a parent track
-     *
+     * 
      *  @param  pTrack the lcio track
-     *
+     * 
      *  @return boolean
      */
     bool IsParent(const EVENT::Track *const pTrack) const;
 
     /**
      *  @brief  Whether a track is a daughter track
-     *
+     * 
      *  @param  pTrack the lcio track
-     *
+     * 
      *  @return boolean
      */
     bool IsDaughter(const EVENT::Track *const pTrack) const;
 
     /**
      *  @brief  Copy track states stored in lcio tracks to pandora track parameters
-     *
+     * 
      *  @param  pTrack the lcio track
      *  @param  trackParameters the track parameters
      */
@@ -295,7 +295,7 @@ protected:
 
     /**
      *  @brief  Copy track state from lcio track state instance to pandora input track state
-     *
+     * 
      *  @param  pTrackState the lcio track state instance
      *  @param  inputTrackState the pandora input track state
      */
@@ -303,7 +303,7 @@ protected:
 
     /**
      *  @brief  Obtain track time when it reaches ECAL
-     *
+     * 
      *  @param  pTrack the lcio track
      */
     float CalculateTrackTimeAtCalorimeter(const EVENT::Track *const pTrack) const;
