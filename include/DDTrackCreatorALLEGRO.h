@@ -55,7 +55,6 @@ protected:
     unsigned int            m_dchNLayers;                   ///< The number of DCH layers
 
     // wrapper
-
     float                   m_wrapperBarrelInnerR;          ///< Inner radius of the barrel wrapper
     float                   m_wrapperBarrelOuterR;          ///< Outer radius of the barrel wrapper
     float                   m_wrapperBarrelOuterZ;          ///< Maximum z of the barrel wrapper

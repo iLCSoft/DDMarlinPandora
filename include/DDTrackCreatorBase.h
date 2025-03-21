@@ -99,7 +99,7 @@ public:
         int             m_reachesECalNBarrelTrackerHits;                  ///< Minimum number of barrel tracker hits to consider track as reaching ecal
         int             m_reachesECalNFtdHits;                  ///< Minimum number of ftd hits to consider track as reaching ecal
         float           m_reachesECalBarrelTrackerOuterDistance;          ///< Max distance from track to barrel tracker r max to id whether track reaches ecal
-        int             m_reachesECalMinFtdLayer;               ///< Min layer in Ftd for tracks to be considered to have reached ecal
+        int             m_reachesECalMinFtdLayer;               ///< Min layer in Ftd for tracks to be considered to have reached decal
         float           m_reachesECalBarrelTrackerZMaxDistance;           ///< Max distance from track to barrel tracker z max to id whether track reaches ecal
         float           m_reachesECalFtdZMaxDistance;           ///< Max distance from track hit to ftd z position to identify ftd hits
         float           m_curvatureToMomentumFactor;            ///< Constant relating track curvature in b field to momentum
@@ -121,9 +121,6 @@ public:
         int               m_eCalBarrelInnerSymmetry;      ///< ECal barrel inner symmetry order
         float             m_eCalBarrelInnerPhi0;          ///< ECal barrel inner phi 0
         float             m_eCalBarrelInnerR;             ///< ECal barrel inner radius
-        float             m_eCalBarrelOuterZ;             ///< ECal barrel max z
-        float             m_eCalEndCapInnerR;             ///< ECal endcap inner radius
-        float             m_eCalEndCapOuterR;             ///< ECal endcap outer radius
         float             m_eCalEndCapInnerZ;             ///< ECal endcap inner z
 
         //Tracking Detector names not needed anymore, accessed by det type flag

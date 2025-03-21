@@ -80,12 +80,14 @@ DDTrackCreatorALLEGRO::DDTrackCreatorALLEGRO(const Settings &settings, const pan
         m_dchNLayers = dchExtension->nlayers;
     }
     catch (...) {
-        std::cout << "Failed to retrieve DCH information" << std::endl;
+        streamlog_out(WARNING) << "Failed to retrieve DCH information" << std::endl;
+        throw pandora::StatusCodeException(pandora::STATUS_CODE_NOT_INITIALIZED);
     }
     if ((std::fabs(m_dchOuterZ) < std::numeric_limits<float>::epsilon()) ||
         (std::fabs(m_dchInnerR) < std::numeric_limits<float>::epsilon()) ||
         (std::fabs(m_dchOuterR - m_dchInnerR) < std::numeric_limits<float>::epsilon()))
     {
+        streamlog_out(WARNING) << "Invalid DCH parameters" << std::endl;
         throw pandora::StatusCodeException(pandora::STATUS_CODE_INVALID_PARAMETER);
     }
     m_cosDch = m_dchOuterZ / std::sqrt(m_dchOuterZ * m_dchOuterZ + m_dchInnerR * m_dchInnerR);
@@ -141,21 +143,20 @@ DDTrackCreatorALLEGRO::DDTrackCreatorALLEGRO(const Settings &settings, const pan
         m_eCalEndCapInnerZ = eCalEndCapExtension->extent[2]/dd4hep::mm;
     }
     catch (...) {
-        std::cout << "Failed to retrieve ECAL information" << std::endl;
+        streamlog_out(WARNING) << "Failed to retrieve ECAL information" << std::endl;
+        throw pandora::StatusCodeException(pandora::STATUS_CODE_NOT_INITIALIZED);
     }
 
 
     // streamlog_out(DEBUG0)
     streamlog_out(MESSAGE)
-        << "DDTrackCreatorALLEGRO DEBUG: " << std::endl
-                          << "DCH rIn, rOut, zOut (mm): " << m_dchInnerR << " , " << m_dchOuterR << " , " << m_dchOuterZ << std::endl
-                          << "Wrapper barrel rIn, rOut, zOut (mm): " << m_wrapperBarrelInnerR << " , " << m_wrapperBarrelOuterR << " , " << m_wrapperBarrelOuterZ << std::endl
-                          << "Wrapper endcap rIn, rOut, zIn, zOut (mm): " << m_wrapperEndCapInnerR << " , " << m_wrapperEndCapOuterR << " , " << m_wrapperEndCapInnerZ << " , " << m_wrapperEndCapOuterZ << std::endl
-                          << "number of layers in DCH, wrapper barrel, wrapper endcap: " << m_dchNLayers << " , " << m_wrapperBarrelNLayers << " , " << m_wrapperEndCapNLayers << std::endl
-                          << "ECal barrel rIn, zOut (mm): " << m_eCalBarrelInnerR << " , " << m_eCalBarrelOuterZ << std::endl
-                          << "ECal endcap rIn, rOut, zIn (mm): " << m_eCalEndCapInnerR << " , " << m_eCalEndCapOuterR << " , " << m_eCalEndCapInnerZ << std::endl;
-//                          << "ECal barrel rIn, zOut (mm): " << m_settings.m_eCalBarrelInnerR << " , " << m_settings.m_eCalBarrelOuterZ << std::endl
-//                          << "ECal endcap rIn, rOut, zIn (mm): " << m_settings.m_eCalEndCapInnerR << " , " << m_settings.m_eCalEndCapOuterR << " , " << m_settings.m_eCalEndCapInnerZ << std::endl;
+        << "DEBUG: " << std::endl
+        << "DCH rIn, rOut, zOut (mm): " << m_dchInnerR << " , " << m_dchOuterR << " , " << m_dchOuterZ << std::endl
+        << "Wrapper barrel rIn, rOut, zOut (mm): " << m_wrapperBarrelInnerR << " , " << m_wrapperBarrelOuterR << " , " << m_wrapperBarrelOuterZ << std::endl
+        << "Wrapper endcap rIn, rOut, zIn, zOut (mm): " << m_wrapperEndCapInnerR << " , " << m_wrapperEndCapOuterR << " , " << m_wrapperEndCapInnerZ << " , " << m_wrapperEndCapOuterZ << std::endl
+        << "number of layers in DCH, wrapper barrel, wrapper endcap: " << m_dchNLayers << " , " << m_wrapperBarrelNLayers << " , " << m_wrapperEndCapNLayers << std::endl
+        << "ECal barrel rIn, zOut (mm): " << m_eCalBarrelInnerR << " , " << m_eCalBarrelOuterZ << std::endl
+        << "ECal endcap rIn, rOut, zIn (mm): " << m_eCalEndCapInnerR << " , " << m_eCalEndCapOuterR << " , " << m_eCalEndCapInnerZ << std::endl;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -260,7 +261,7 @@ bool DDTrackCreatorALLEGRO::PassesQualityCuts(const EVENT::Track *const pTrack, 
                                << std::endl;
         return false;
     }
-    // - non-zero curvature
+    // Non-zero curvature
     if (pTrack->getOmega() == 0.f)
     {
         streamlog_out(WARNING) << "Track has Omega = 0 " << std::endl;
@@ -366,9 +367,6 @@ void DDTrackCreatorALLEGRO::DefineTrackPfoUsage(const EVENT::Track *const pTrack
     bool canFormPfo(false);
     bool canFormClusterlessPfo(false);
 
-    //trackParameters.m_canFormPfo = true;
-    //trackParameters.m_canFormClusterlessPfo = false;
-    //return;
     if (this->IsParent(pTrack))
     {
         streamlog_out(MESSAGE) << "Track is parent!" << std::endl;
@@ -385,6 +383,7 @@ void DDTrackCreatorALLEGRO::DefineTrackPfoUsage(const EVENT::Track *const pTrack
 
         // GM: why looping over track hits rather than just taking track state at first hit?
         // this will fail on our tracks currently created from MCParticles without attaching hits to them
+        // replace with simpler calculation of rInner and zMin from first hit (though not necessarily the best for e.g. curling track)
         /*
         EVENT::TrackerHitVec trackerHitvec(pTrack->getTrackerHits());
         for (EVENT::TrackerHitVec::const_iterator iter = trackerHitvec.begin(), iterEnd = trackerHitvec.end(); iter != iterEnd; ++iter)
@@ -400,11 +399,11 @@ void DDTrackCreatorALLEGRO::DefineTrackPfoUsage(const EVENT::Track *const pTrack
                 zMin = absoluteZ;
         }
         */
-        // replace with simpler calculation of rInner and zMin from first hit (though not necessarily the best for e.g. curling track)
         pandora::CartesianVector posAtStart(trackParameters.m_trackStateAtStart.Get().GetPosition());
         rInner = std::sqrt(posAtStart.GetX()*posAtStart.GetX() + posAtStart.GetY()*posAtStart.GetY());
         zMin = std::fabs(posAtStart.GetZ());
 
+        // Apply quality cuts plus extra requirements on impact parameters, position of innermost hit, ..
         if (this->PassesQualityCuts(pTrack, trackParameters))
         {
             const pandora::CartesianVector &momentumAtDca(trackParameters.m_momentumAtDca.Get());
@@ -498,8 +497,8 @@ void DDTrackCreatorALLEGRO::TrackReachesECAL(const EVENT::Track *const pTrack, P
     // GM debug
     std::cout << "track r, z at ECAL: " << rAtCalo << " , " << zAtCalo << std::endl;
     const float minTolerance(0.01); // the following checks might otherwise fail due to rounding and FP precision
-    if ((zAtCalo - m_settings.m_eCalEndCapInnerZ) > -minTolerance) {
-        if (rAtCalo < m_settings.m_eCalEndCapInnerR-minTolerance || rAtCalo > m_settings.m_eCalEndCapOuterR+minTolerance) {
+    if ((zAtCalo - m_eCalEndCapInnerZ) > -minTolerance) {
+        if (rAtCalo < m_eCalEndCapInnerR-minTolerance || rAtCalo > m_eCalEndCapOuterR+minTolerance) {
             std::cout << "Track does not reach ECAL endcap" << std::endl;
             trackParameters.m_reachesCalorimeter = false;
             return;
@@ -511,8 +510,8 @@ void DDTrackCreatorALLEGRO::TrackReachesECAL(const EVENT::Track *const pTrack, P
         }
     }
     else {
-        if ((rAtCalo - m_settings.m_eCalBarrelInnerR) > -minTolerance) {
-            if (zAtCalo < m_settings.m_eCalBarrelOuterZ + minTolerance) {
+        if ((rAtCalo - m_eCalBarrelInnerR) > -minTolerance) {
+            if (zAtCalo < m_eCalBarrelOuterZ + minTolerance) {
                 std::cout << "Track reaches ECAL barrel" << std::endl;
                 trackParameters.m_reachesCalorimeter = true;
                 return;
