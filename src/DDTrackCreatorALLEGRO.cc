@@ -566,6 +566,10 @@ void DDTrackCreatorALLEGRO::GetTrackStatesAtCalo( EVENT::Track *track,
   // GM FIXME: for the moment, do not extrapolate also to endcap, and return
   // Wouldn't it be simpler to store second intersection with ECAL (if any, for tracks at ~edge of barrel)
   // to save both track states when doing the original fit (or in TracksFromGenParticlesWithExtrap)?
+  // also: if track extrapolates first to barrel and then to ecal, shouldn't we be able to associate endcap
+  // hits even without the extrapolation to the ecal? We will start associating hits in the barrel and then
+  // via the pseudolayers we will associated also those in the ecal?
+  // if we find this is inefficient we can add 2nd extrapolation
 
   /*
   auto marlintrk = std::unique_ptr<MarlinTrk::IMarlinTrack>(m_trackingSystem->createTrack());
