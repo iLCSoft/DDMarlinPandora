@@ -11,6 +11,7 @@
 
 
 #include "Api/PandoraApi.h"
+#include "Pandora/MessageStream.h"
 
 #include "LCContent.h"
 #include "LCPlugins/LCSoftwareCompensation.h"
@@ -190,6 +191,10 @@ void DDPandoraPFANewProcessor::init()
         m_pDDMCParticleCreator = new DDMCParticleCreator(m_mcParticleCreatorSettings, m_pPandora);
         m_pDDPfoCreator = new DDPfoCreator(m_pfoCreatorSettings, m_pPandora);
 
+        /// need to setup here the default output level otherwise it will not be applied to the plugins and algorithms
+        /// being created in RegisterUserComponents
+        /// in that case we could set it up based on the OutputValue of DDMarlinPandora..
+        pandora::MessageStream::setDefaultLogLevel("DEBUG");
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, this->RegisterUserComponents());
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pGeometryCreator->CreateGeometry());
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*m_pPandora, m_settings.m_pandoraSettingsXmlFile));
