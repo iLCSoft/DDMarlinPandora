@@ -193,8 +193,20 @@ void DDPandoraPFANewProcessor::init()
 
         /// need to setup here the default output level otherwise it will not be applied to the plugins and algorithms
         /// being created in RegisterUserComponents
-        /// in that case we could set it up based on the OutputValue of DDMarlinPandora..
-        pandora::MessageStream::setDefaultLogLevel("DEBUG");
+        /// here it is set up based on the Verbosity parameter of the DDMarlinPandora marlin::Processor
+        /// while for the algorithms setup later via the xml the output level is specified in the xml... (or INFO by default)
+        const std::string logLevel = logLevelName();
+        if (logLevel.find("VERBOSE") != std::string::npos)
+            pandora::MessageStream::setDefaultLogLevel("VERBOSE");
+        else if (logLevel.find("DEBUG") != std::string::npos)
+            pandora::MessageStream::setDefaultLogLevel("DEBUG");
+        else if (logLevel.find("WARNING") != std::string::npos)
+            pandora::MessageStream::setDefaultLogLevel("WARNING");
+        else if (logLevel.find("ERROR") != std::string::npos)
+            pandora::MessageStream::setDefaultLogLevel("ERROR");
+        else
+            pandora::MessageStream::setDefaultLogLevel("INFO");
+
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, this->RegisterUserComponents());
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pGeometryCreator->CreateGeometry());
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*m_pPandora, m_settings.m_pandoraSettingsXmlFile));
