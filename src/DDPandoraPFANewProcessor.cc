@@ -47,52 +47,7 @@ double getFieldFromCompact(){
 
 }
 
-//Not needed anymore; to be removed
-// double getCoilOuterR(){
-//
-//   try{
-//     dd4hep::Detector & mainDetector = dd4hep::Detector::getInstance();
-//     const std::vector< dd4hep::DetElement>& theDetectors = dd4hep::DetectorSelector(mainDetector).detectors(  dd4hep::DetType::COIL ) ;
-//     //access the detelement and create a shape from the envelope since only minimal info needed
-//     dd4hep::Tube coilTube = dd4hep::Tube( theDetectors.at(0).volume().solid() )  ;
-//     return coilTube->GetRmax()/ dd4hep::mm;
-//   } catch ( std::exception & e ) {
-//
-//           streamlog_out(ERROR)<< "BIG WARNING! CANNOT GET EXTENSION FOR COIL: "<<e.what()<<" MAKE SURE YOU CHANGE THIS!"<< std::endl;
-//
-//   }
-//
-//   return 0;
-// }
-
-
-///Not needed anymore. To be removed
-// DD4hep::DDRec::LayeredCalorimeterData * getExtension(std::string detectorName){
-//
-//
-//   DD4hep::DDRec::LayeredCalorimeterData * theExtension = 0;
-//
-//   try {
-//     dd4hep::Detector & mainDetector = dd4hep::Detector::getInstance();
-//     const dd4hep::DetElement & theDetector = mainDetector.detector(detectorName);
-//     theExtension = theDetector.extension<DD4hep::DDRec::LayeredCalorimeterData>();
-//     //     std::cout<< "DEBUG: in getExtension(\""<<detectorName<<"\"): size of layers: "<<theExtension->layers.size()<<" positions not shown. "<<std::endl;
-//
-//     //     for(int i=0; i< theExtension->layers.size(); i++){
-//     //       std::cout<<theExtension->layers[i].distance/dd4hep::mm<<" ";
-//     //     }
-//     //     std::cout<<std::endl;
-//   } catch ( ... ){
-//
-//     streamlog_out(ERROR) << "BIG WARNING! EXTENSION DOES NOT EXIST FOR " << detectorName<<". MAKE SURE YOU CHANGE THIS!"<< std::endl;
-//   }
-//
-//   return theExtension;
-// }
-
-
 dd4hep::rec::LayeredCalorimeterData * getExtension(unsigned int includeFlag, unsigned int excludeFlag=0) {
-
 
   dd4hep::rec::LayeredCalorimeterData * theExtension = 0;
 
@@ -135,8 +90,20 @@ std::vector<double> getTrackingRegionExtent(){
   extent[2]=mainDetector.constantAsDouble("tracker_region_zmax")/dd4hep::mm;
 
   return extent;
+}
 
-
+// comment this function when using official Pandora version
+void setPandoraDefaultLogLevel(const std::string& logLevel) {
+     if (logLevel.find("VERBOSE") != std::string::npos)
+         pandora::MessageStream::setDefaultLogLevel("VERBOSE");
+     else if (logLevel.find("DEBUG") != std::string::npos)
+         pandora::MessageStream::setDefaultLogLevel("DEBUG");
+     else if (logLevel.find("WARNING") != std::string::npos)
+         pandora::MessageStream::setDefaultLogLevel("WARNING");
+     else if (logLevel.find("ERROR") != std::string::npos)
+         pandora::MessageStream::setDefaultLogLevel("ERROR");
+     else
+         pandora::MessageStream::setDefaultLogLevel("INFO");
 }
 
 DDPandoraPFANewProcessor::PandoraToLCEventMap DDPandoraPFANewProcessor::m_pandoraToLCEventMap;
@@ -195,18 +162,7 @@ void DDPandoraPFANewProcessor::init()
         /// being created in RegisterUserComponents
         /// here it is set up based on the Verbosity parameter of the DDMarlinPandora marlin::Processor
         /// while for the algorithms setup later via the xml the output level is specified in the xml... (or INFO by default)
-        const std::string logLevel = logLevelName();
-        if (logLevel.find("VERBOSE") != std::string::npos)
-            pandora::MessageStream::setDefaultLogLevel("VERBOSE");
-        else if (logLevel.find("DEBUG") != std::string::npos)
-            pandora::MessageStream::setDefaultLogLevel("DEBUG");
-        else if (logLevel.find("WARNING") != std::string::npos)
-            pandora::MessageStream::setDefaultLogLevel("WARNING");
-        else if (logLevel.find("ERROR") != std::string::npos)
-            pandora::MessageStream::setDefaultLogLevel("ERROR");
-        else
-            pandora::MessageStream::setDefaultLogLevel("INFO");
-
+        setPandoraDefaultLogLevel(logLevelName());
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, this->RegisterUserComponents());
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, m_pGeometryCreator->CreateGeometry());
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*m_pPandora, m_settings.m_pandoraSettingsXmlFile));
