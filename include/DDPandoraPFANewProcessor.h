@@ -60,6 +60,9 @@ public:
         FloatVector m_ecalInputEnergyCorrectionPoints{};    ///< The input energy points for non-linearity energy correction in the ECAL
         FloatVector m_ecalOutputEnergyCorrectionPoints{};   ///< The input energy points for non-linearity energy correction in the ECAL
         
+
+        bool m_useAPRIL = false; ///< Choose if we want to use APRIL instead of Pandora for the reconstruction
+        
         // Software compensation parameters
         FloatVector     m_softCompParameters{};
         FloatVector     m_softCompEnergyDensityBins{};
@@ -159,6 +162,7 @@ private:
      */
     void Reset();
 
+
     pandora::Pandora                     *m_pPandora = NULL;                  ///< Address of the pandora instance
     DDCaloHitCreator                     *m_pCaloHitCreator = NULL;           ///< The calo hit creator
     DDGeometryCreator                    *m_pGeometryCreator = NULL;          ///< The geometry creator
@@ -183,5 +187,12 @@ inline marlin::Processor *DDPandoraPFANewProcessor::newProcessor()
 {
     return new DDPandoraPFANewProcessor;
 }
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//Added by T.Pasquier
+/**
+*  @brief  Register the LCContent plugins outside their original function. Temporary fix. Would be better to change the plugins registration directly in LCContent
+*/
+pandora::StatusCode APRILLCContentPluginRegistration(const pandora::Pandora &pandora);
 
 #endif // #ifndef DDPANDORAPFANEWPROCESSOR_H
