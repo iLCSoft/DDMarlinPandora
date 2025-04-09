@@ -1,8 +1,8 @@
 /**
  *  @file   DDMarlinPandora/src/DDTrackCreatorBase.cc
- * 
+ *
  *  @brief  Implementation of the track creator class.
- * 
+ *
  *  $Log: $
  */
 
@@ -48,12 +48,16 @@ DDTrackCreatorBase::DDTrackCreatorBase(const Settings &settings, const pandora::
     const float tsTolerance = settings.m_trackStateTolerance;
     m_minimalTrackStateRadiusSquared = (ecalInnerR-tsTolerance)*(ecalInnerR-tsTolerance);
     //wrap in shared_ptr with a dummy destructor
-    m_trackingSystem =
-      std::shared_ptr<MarlinTrk::IMarlinTrkSystem>( MarlinTrk::Factory::createMarlinTrkSystem(settings.m_trackingSystemName,
-                                                                                              nullptr, ""),
-                                                    [](MarlinTrk::IMarlinTrkSystem*){} );
-    m_trackingSystem->init();
-    m_encoder = std::make_shared<UTIL::BitField64>( lcio::LCTrackerCellID::encoding_string() );
+    // GM: don't want this or ALLEGRO, so initialise it
+    // only if tracking system name is explicitly set
+    if (settings.m_trackingSystemName!="") {
+        m_trackingSystem =
+            std::shared_ptr<MarlinTrk::IMarlinTrkSystem>( MarlinTrk::Factory::createMarlinTrkSystem(settings.m_trackingSystemName,
+                                                                                                    nullptr, ""),
+                                                          [](MarlinTrk::IMarlinTrkSystem*){} );
+        m_trackingSystem->init();
+        m_encoder = std::make_shared<UTIL::BitField64>( lcio::LCTrackerCellID::encoding_string() );
+    }
     m_lcTrackFactory = std::make_shared<lc_content::LCTrackFactory>();
 }
 
@@ -361,8 +365,10 @@ void DDTrackCreatorBase::GetTrackStates(const EVENT::Track *const pTrack, Pandor
 {
     const TrackState *pTrackState = pTrack->getTrackState(TrackState::AtIP);
 
-    if (!pTrackState)
+    if (!pTrackState) {
+        streamlog_out(WARNING) << "Track state at IP is null" << std::endl;
         throw pandora::StatusCodeException(pandora::STATUS_CODE_NOT_INITIALIZED);
+    }
 
     const double pt(m_settings.m_bField * 2.99792e-4 / std::fabs(pTrackState->getOmega()));
     trackParameters.m_momentumAtDca = pandora::CartesianVector(std::cos(pTrackState->getPhi()), std::sin(pTrackState->getPhi()), pTrackState->getTanLambda()) * pt;
@@ -536,8 +542,10 @@ float DDTrackCreatorBase::CalculateTrackTimeAtCalorimeter(const EVENT::Track *co
         }
     }
 
-    if (bestECalProjection.GetMagnitudeSquared() < std::numeric_limits<float>::epsilon())
+    if (bestECalProjection.GetMagnitudeSquared() < std::numeric_limits<float>::epsilon()) {
+        streamlog_out(WARNING) << "bestECalProjection.GetMagnitudeSquared too small: " << bestECalProjection.GetMagnitudeSquared() << std::endl;
         throw pandora::StatusCodeException(pandora::STATUS_CODE_NOT_INITIALIZED);
+    }
 
     return minGenericTime;
 }
@@ -546,8 +554,10 @@ float DDTrackCreatorBase::CalculateTrackTimeAtCalorimeter(const EVENT::Track *co
 
 void DDTrackCreatorBase::CopyTrackState(const TrackState *const pTrackState, pandora::InputTrackState &inputTrackState) const
 {
-    if (!pTrackState)
+    if (!pTrackState) {
+        streamlog_out(WARNING) << "Track state being copied is null" << std::endl;
         throw pandora::StatusCodeException(pandora::STATUS_CODE_NOT_INITIALIZED);
+    }
 
     const double pt(m_settings.m_bField * 2.99792e-4 / std::fabs(pTrackState->getOmega()));
 

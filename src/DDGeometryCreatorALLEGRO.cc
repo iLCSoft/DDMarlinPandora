@@ -1,8 +1,8 @@
 /**
  *  @file   DDMarlinPandora/src/DDGeometryCreator.cc
- * 
+ *
  *  @brief  Implementation of the geometry creator class.
- * 
+ *
  *  $Log: $
  */
 
@@ -25,7 +25,7 @@
 dd4hep::rec::LayeredCalorimeterData * getExtension(unsigned int includeFlag, unsigned int excludeFlag=0);
 
 std::vector<double> getTrackingRegionExtent();
-  
+
 
 DDGeometryCreatorALLEGRO::DDGeometryCreatorALLEGRO(const Settings &settings, const pandora::Pandora *const pPandora) : DDGeometryCreator(settings,pPandora)
 {
@@ -81,8 +81,6 @@ void DDGeometryCreatorALLEGRO::SetMandatorySubDetectorParameters(SubDetectorType
     subDetectorTypeMap[pandora::MUON_BARREL] = muonBarrelParameters;
     subDetectorTypeMap[pandora::MUON_ENDCAP] = muonEndCapParameters;
 
-    // FIXME! AD: currently ignoring tracker parameters since we are using truth tracks
-    /*
     PandoraApi::Geometry::SubDetector::Parameters trackerParameters;
 
     trackerParameters.m_subDetectorName = "Tracker";
@@ -96,9 +94,8 @@ void DDGeometryCreatorALLEGRO::SetMandatorySubDetectorParameters(SubDetectorType
     trackerParameters.m_outerPhiCoordinate = 0.f;
     trackerParameters.m_outerSymmetryOrder = 0;
     trackerParameters.m_isMirroredInZ = true;
-    trackerParameters.m_nLayers = 0;
+    trackerParameters.m_nLayers = 0; // unused?
     subDetectorTypeMap[pandora::INNER_TRACKER] = trackerParameters;
-    */
 
     ///FIXME:Implement a parameter for the Coil/Solenoid name
     ///NOTE: Is this the way to go, or should we go with reco structure?
@@ -109,7 +106,7 @@ void DDGeometryCreatorALLEGRO::SetMandatorySubDetectorParameters(SubDetectorType
         const dd4hep::rec::LayeredCalorimeterData * coilExtension= getExtension( ( dd4hep::DetType::COIL ) );
         coilParameters.m_subDetectorName = "Coil";
         coilParameters.m_subDetectorType = pandora::COIL;
-        coilParameters.m_innerRCoordinate = coilExtension->extent[0]/ dd4hep::mm; 
+        coilParameters.m_innerRCoordinate = coilExtension->extent[0]/ dd4hep::mm;
         coilParameters.m_innerZCoordinate = 0.f;
         coilParameters.m_innerPhiCoordinate = 0.f;
         coilParameters.m_innerSymmetryOrder = 0;
