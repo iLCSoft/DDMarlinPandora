@@ -1,3 +1,9 @@
+# v00-13
+
+* 2025-03-05 Archil Durglishvili ([PR#31](https://github.com/iLCSoft/DDMarlinPandora/pull/31))
+  - The "DetectorName" parameter is added to the DDPandoraPFANewProcessor which allows to setup the DDGeometryCreator, DDCaloHitCreator and DDTrackCreator for the ALLEGRO detector;
+  - Three new classes are created that are specific for the ALLEGRO detector: DDGeometryCreatorALLEGRO, DDCaloHitCreatorALLEGRO and DDTrackCreatorALLEGRO.
+
 # v00-12-02
 
 * 2024-08-28 tmadlener ([PR#30](https://github.com/iLCSoft/DDMarlinPandora/pull/30))
