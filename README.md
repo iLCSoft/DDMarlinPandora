@@ -21,9 +21,9 @@ You should have received a copy of the GNU General Public License long with this
 
 ## Options to add SDHCALContent or APRILContent
 
-Added the compilation options to choose to include SDHCALContent or APRILContent in DDMarlinPandora.
+You can optionally include [SDHCALContent](https://github.com/SDHCAL/SDHCALContent) or [APRILContent](https://github.com/SDHCAL/APRILContent) in the compilation of DDMarlinPandora by enabling the appropriate options.
 
-Note, you should have sourced the init_ilcsoft.sh script
+Note: You should have sourced the `init_ilcsoft.sh` script beforehand.
 
 **To compile with SDHCALContent :**
 
