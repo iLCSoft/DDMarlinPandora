@@ -13,6 +13,9 @@
 
 #include "UTIL/CellIDDecoder.h"
 
+#ifdef APRILCONTENT
+#include "APRILApi/ObjectFactories.h"
+#endif
 
 #include <DD4hep/DD4hepUnits.h>
 #include <DD4hep/DetType.h>
@@ -37,7 +40,8 @@ DDCaloHitCreator::DDCaloHitCreator(const Settings &settings, const pandora::Pand
     m_hCalBarrelLayerThickness(0.f),
     m_hCalEndCapLayerThickness(0.f),
     m_calorimeterHitVector(0),
-    m_volumeManager()
+    m_volumeManager(),
+    m_caloHitFactory()
 {
     
     const std::vector<dd4hep::rec::LayeredCalorimeterStruct::Layer>& barrelLayers= getExtension(( dd4hep::DetType::CALORIMETER | dd4hep::DetType::HADRONIC | dd4hep::DetType::BARREL), ( dd4hep::DetType::AUXILIARY  |  dd4hep::DetType::FORWARD ))->layers;
@@ -57,6 +61,8 @@ DDCaloHitCreator::DDCaloHitCreator(const Settings &settings, const pandora::Pand
      theDetector.apply("DD4hepVolumeManager",0,0);
      m_volumeManager = theDetector.volumeManager();
    }
+
+   ChooseFactory();
 
 }
 
@@ -92,9 +98,11 @@ pandora::StatusCode DDCaloHitCreator::CreateECalCaloHits(const EVENT::LCEvent *c
             const int nElements(pCaloHitCollection->getNumberOfElements());
 
             if (0 == nElements)
+            {
                 continue;
+            }
 
-	    streamlog_out( DEBUG1 ) << "Creating " << *iter << " hits" << std::endl;
+	        streamlog_out( DEBUG1 ) << "Creating " << *iter << " hits" << std::endl;
 
             const std::vector<dd4hep::rec::LayeredCalorimeterStruct::Layer>& barrelLayers= getExtension( ( dd4hep::DetType::CALORIMETER | dd4hep::DetType::ELECTROMAGNETIC | dd4hep::DetType::BARREL), ( dd4hep::DetType::AUXILIARY  |  dd4hep::DetType::FORWARD ) )->layers;
             const std::vector<dd4hep::rec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension( ( dd4hep::DetType::CALORIMETER | dd4hep::DetType::ELECTROMAGNETIC | dd4hep::DetType::ENDCAP), ( dd4hep::DetType::AUXILIARY  |  dd4hep::DetType::FORWARD ) )->layers;
@@ -196,7 +204,8 @@ pandora::StatusCode DDCaloHitCreator::CreateECalCaloHits(const EVENT::LCEvent *c
                         caloHitParameters.m_cellSize1 = splitCellSize;
                     }
 
-                    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters));
+                    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters, *m_caloHitFactory));
+
                     m_calorimeterHitVector.push_back(pCaloHit);
 
                 }
@@ -237,9 +246,11 @@ pandora::StatusCode DDCaloHitCreator::CreateHCalCaloHits(const EVENT::LCEvent *c
             UTIL::CellIDDecoder<CalorimeterHit> cellIdDecoder(pCaloHitCollection);
             
             if (0 == nElements)
+            {
                 continue;
+            }
             
-	    streamlog_out( DEBUG1 ) << "Creating " << *iter << " hits" << std::endl;
+	        streamlog_out( DEBUG1 ) << "Creating " << *iter << " hits" << std::endl;
 
             const std::vector<dd4hep::rec::LayeredCalorimeterStruct::Layer>& barrelLayers= getExtension( ( dd4hep::DetType::CALORIMETER | dd4hep::DetType::HADRONIC | dd4hep::DetType::BARREL), ( dd4hep::DetType::AUXILIARY  |  dd4hep::DetType::FORWARD ) )->layers;
             const std::vector<dd4hep::rec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension( ( dd4hep::DetType::CALORIMETER | dd4hep::DetType::HADRONIC| dd4hep::DetType::ENDCAP), ( dd4hep::DetType::AUXILIARY )  |  dd4hep::DetType::FORWARD )->layers;
@@ -285,7 +296,8 @@ pandora::StatusCode DDCaloHitCreator::CreateHCalCaloHits(const EVENT::LCEvent *c
                     caloHitParameters.m_hadronicEnergy = std::min(m_settings.m_hCalToHadGeV * pCaloHit->getEnergy(), m_settings.m_maxHCalHitHadronicEnergy);
                     caloHitParameters.m_electromagneticEnergy = m_settings.m_hCalToEMGeV * pCaloHit->getEnergy();
 
-                    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters));
+                    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters, *m_caloHitFactory));
+                    
                     m_calorimeterHitVector.push_back(pCaloHit);
                 }
                 catch (pandora::StatusCodeException &statusCodeException)
@@ -320,9 +332,11 @@ pandora::StatusCode DDCaloHitCreator::CreateMuonCaloHits(const EVENT::LCEvent *c
             const int nElements(pCaloHitCollection->getNumberOfElements());
 
             if (0 == nElements)
+            {
                 continue;
+            }
 
-	    streamlog_out( DEBUG1 ) << "Creating " << *iter << " hits" << std::endl;
+	        streamlog_out( DEBUG1 ) << "Creating " << *iter << " hits" << std::endl;
 
             const std::vector<dd4hep::rec::LayeredCalorimeterStruct::Layer>& barrelLayers= getExtension(( dd4hep::DetType::CALORIMETER | dd4hep::DetType::MUON| dd4hep::DetType::BARREL), ( dd4hep::DetType::AUXILIARY  |  dd4hep::DetType::FORWARD  ))->layers;
             const std::vector<dd4hep::rec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension(( dd4hep::DetType::CALORIMETER | dd4hep::DetType::MUON| dd4hep::DetType::ENDCAP), ( dd4hep::DetType::AUXILIARY  |  dd4hep::DetType::FORWARD  ))->layers;
@@ -387,7 +401,8 @@ pandora::StatusCode DDCaloHitCreator::CreateMuonCaloHits(const EVENT::LCEvent *c
                         caloHitParameters.m_mipEquivalentEnergy = pCaloHit->getEnergy() * m_settings.m_muonToMip;
                     }
 
-                    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters));
+                    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters, *m_caloHitFactory));
+
                     m_calorimeterHitVector.push_back(pCaloHit);
                 }
                 catch (pandora::StatusCodeException &statusCodeException)
@@ -422,9 +437,11 @@ pandora::StatusCode DDCaloHitCreator::CreateLCalCaloHits(const EVENT::LCEvent *c
             const int nElements(pCaloHitCollection->getNumberOfElements());
 
             if (0 == nElements)
+            {
                 continue;
+            }
 
-	    streamlog_out( DEBUG1 ) << "Creating " << *iter << " hits" << std::endl;
+	        streamlog_out( DEBUG1 ) << "Creating " << *iter << " hits" << std::endl;
 
             ///FIXME: WHAT ABOUT OTHER ECALS?
             const std::vector<dd4hep::rec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension( dd4hep::DetType::CALORIMETER |  dd4hep::DetType::ENDCAP  | dd4hep::DetType::ELECTROMAGNETIC |  dd4hep::DetType::FORWARD ,  dd4hep::DetType::AUXILIARY )->layers;
@@ -461,7 +478,8 @@ pandora::StatusCode DDCaloHitCreator::CreateLCalCaloHits(const EVENT::LCEvent *c
                     caloHitParameters.m_electromagneticEnergy = m_settings.m_eCalToEMGeV * pCaloHit->getEnergy();
                     caloHitParameters.m_hadronicEnergy = m_settings.m_eCalToHadGeVEndCap * pCaloHit->getEnergy();
 
-                    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters));
+                    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters, *m_caloHitFactory));
+
                     m_calorimeterHitVector.push_back(pCaloHit);
                 }
                 catch (pandora::StatusCodeException &statusCodeException)
@@ -496,9 +514,12 @@ pandora::StatusCode DDCaloHitCreator::CreateLHCalCaloHits(const EVENT::LCEvent *
             const int nElements(pCaloHitCollection->getNumberOfElements());
 
             if (0 == nElements)
+            {
                 continue;
+            }
+                
 
-	    streamlog_out( DEBUG1 ) << "Creating " << *iter << " hits" << std::endl;
+	        streamlog_out( DEBUG1 ) << "Creating " << *iter << " hits" << std::endl;
 
             ///FIXME! WHAT ABOUT MORE HCALS?
             const std::vector<dd4hep::rec::LayeredCalorimeterStruct::Layer>& endcapLayers= getExtension(dd4hep::DetType::CALORIMETER |  dd4hep::DetType::ENDCAP  | dd4hep::DetType::HADRONIC|  dd4hep::DetType::FORWARD)->layers;
@@ -534,7 +555,8 @@ pandora::StatusCode DDCaloHitCreator::CreateLHCalCaloHits(const EVENT::LCEvent *
                     caloHitParameters.m_hadronicEnergy = std::min(m_settings.m_hCalToHadGeV * pCaloHit->getEnergy(), m_settings.m_maxHCalHitHadronicEnergy);
                     caloHitParameters.m_electromagneticEnergy = m_settings.m_hCalToEMGeV * pCaloHit->getEnergy();
 
-                    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters));
+                    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters, *m_caloHitFactory));
+
                     m_calorimeterHitVector.push_back(pCaloHit);
                 }
                 catch (pandora::StatusCodeException &statusCodeException)
@@ -804,6 +826,22 @@ float DDCaloHitCreator::GetMaximumRadius(const EVENT::CalorimeterHit *const pCal
     }
 
     return maximumRadius;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//Added by T. Pasquier
+void DDCaloHitCreator::ChooseFactory()
+{
+    #ifdef APRILCONTENT
+    if(m_settings.m_useAPRIL)
+    {   
+        m_caloHitFactory = std::make_unique<april_content::CaloHitFactory>();
+    }
+    else
+    #endif
+    {
+        m_caloHitFactory = std::make_unique<pandora::PandoraObjectFactory<object_creation::CaloHit::Parameters, object_creation::CaloHit::Object>>();
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

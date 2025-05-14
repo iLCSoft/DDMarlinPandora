@@ -9,11 +9,20 @@
 #include "marlin/Global.h"
 #include "marlin/Exceptions.h"
 
-
 #include "Api/PandoraApi.h"
 
 #include "LCContent.h"
 #include "LCPlugins/LCSoftwareCompensation.h"
+#include "LCPlugins/LCEnergyCorrectionPlugins.h"
+#include "LCPlugins/LCParticleIdPlugins.h"
+
+#ifdef SDHCALCONTENT
+#include "SDHCALContent.h"
+#endif
+
+#ifdef APRILCONTENT
+#include "APRILContent.h"
+#endif
 
 #include "DDExternalClusteringAlgorithm.h"
 #include "DDPandoraPFANewProcessor.h"
@@ -29,7 +38,6 @@
 #include "DDTrackCreatorALLEGRO.h"
 
 #include "DDBFieldPlugin.h"
-
 
 #include <cstdlib>
 
@@ -304,7 +312,29 @@ const EVENT::LCEvent *DDPandoraPFANewProcessor::GetCurrentEvent(const pandora::P
 pandora::StatusCode DDPandoraPFANewProcessor::RegisterUserComponents() const
 {
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LCContent::RegisterAlgorithms(*m_pPandora));
-    PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LCContent::RegisterBasicPlugins(*m_pPandora));
+
+    if(!m_settings.m_useAPRIL) {
+      PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LCContent::RegisterBasicPlugins(*m_pPandora));
+    }
+
+    #ifdef SDHCALCONTENT
+    PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, SDHCALContent::RegisterEnergyCorrections(*m_pPandora));
+    #endif
+
+    #ifdef APRILCONTENT
+    if(m_settings.m_useAPRIL)
+    {
+        PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, APRILContent::RegisterAlgorithms(*m_pPandora)); 
+        
+        PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, APRILContent::RegisterAPRILPseudoLayerPlugin(*m_pPandora));
+        PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, APRILContent::RegisterParticleIds(*m_pPandora));
+        
+        PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, APRILContent::RegisterAPRILShowerProfilePlugin(*m_pPandora));
+
+        PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, APRILLCContentPluginRegistration(*m_pPandora)); //Register LCContent plugins
+    }
+    #endif
+
 
     if(m_settings.m_useDD4hepField)
     {
@@ -328,7 +358,7 @@ pandora::StatusCode DDPandoraPFANewProcessor::RegisterUserComponents() const
 
     PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::RegisterAlgorithmFactory(*m_pPandora,
         "ExternalClustering", new DDExternalClusteringAlgorithm::Factory));
-    
+
     lc_content::LCSoftwareCompensationParameters softwareCompensationParameters;
     softwareCompensationParameters.m_softCompParameters = m_settings.m_softCompParameters;
     softwareCompensationParameters.m_softCompEnergyDensityBins = m_settings.m_softCompEnergyDensityBins;
@@ -884,6 +914,17 @@ void DDPandoraPFANewProcessor::ProcessSteeringFile()
                                "The minimum correction to on ecal hit in Pandora energy correction",
                                m_settings.m_minCleanCorrectedHitEnergy,
                                softwareCompensationParameters.m_minCleanCorrectedHitEnergy);
+
+    // EXTRA PARAMETERS FROM T.PASQUIER
+    registerProcessorParameter("UseAPRIL",
+                            "Whether to use APRIL instead of Pandora for the reconstruction",
+                            m_settings.m_useAPRIL,
+                            false);
+
+    registerProcessorParameter("UseAPRIL_Calo",
+                            "Whether to use APRIL instead of Pandora for the reconstruction",
+                            m_caloHitCreatorSettings.m_useAPRIL,
+                            false);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -959,6 +1000,8 @@ void DDPandoraPFANewProcessor::FinaliseSteeringParameters()
     mainDetector.field().magneticField(position,magneticFieldVector); // get the magnetic field vector from DD4hep
     
     m_settings.m_innerBField = magneticFieldVector[2]/dd4hep::tesla; // z component at (0,0,0)
+
+    m_caloHitCreatorSettings.m_useAPRIL = m_settings.m_useAPRIL; //Added by TPasquier
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -988,4 +1031,23 @@ DDPandoraPFANewProcessor::Settings::Settings() :
     m_trackCreatorName("")
 
 {
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+//Added by T.Pasquier
+//Temporary method that allows the registration of LCContent corrections and pID plugins without registering PseudoLayerPlugin or ShowerProfilePlugin
+//Would be better to modify the plugins registration directly in LCContent
+pandora::StatusCode APRILLCContentPluginRegistration(const pandora::Pandora &pandora)
+{
+    PandoraApi::RegisterEnergyCorrectionPlugin(pandora, "CleanClusters", pandora::HADRONIC, new lc_content::LCEnergyCorrectionPlugins::CleanCluster);
+    PandoraApi::RegisterEnergyCorrectionPlugin(pandora, "ScaleHotHadrons", pandora::HADRONIC, new lc_content::LCEnergyCorrectionPlugins::ScaleHotHadrons);
+    PandoraApi::RegisterEnergyCorrectionPlugin(pandora, "MuonCoilCorrection", pandora::HADRONIC, new lc_content::LCEnergyCorrectionPlugins::MuonCoilCorrection);
+
+    PandoraApi::RegisterParticleIdPlugin(pandora, "LCEmShowerId", new lc_content::LCParticleIdPlugins::LCEmShowerId);
+    PandoraApi::RegisterParticleIdPlugin(pandora, "LCPhotonId", new lc_content::LCParticleIdPlugins::LCPhotonId);
+    PandoraApi::RegisterParticleIdPlugin(pandora, "LCElectronId", new lc_content::LCParticleIdPlugins::LCElectronId);
+    PandoraApi::RegisterParticleIdPlugin(pandora, "LCMuonId", new lc_content::LCParticleIdPlugins::LCMuonId);
+
+    return pandora::STATUS_CODE_SUCCESS;
 }

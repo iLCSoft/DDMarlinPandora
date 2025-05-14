@@ -16,3 +16,48 @@ DDMarlinPandora is free software: you can redistribute it and/or modify it under
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License long with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+**The following options need to be taken into consideration only if you want to use APRIL or SDHCAL plugins. If you use DDMarlinPandora in the default configuration, you can install it the usual way.**
+
+## Options to add SDHCALContent or APRILContent
+
+You can optionally include [SDHCALContent](https://github.com/SDHCAL/SDHCALContent) or [APRILContent](https://github.com/SDHCAL/APRILContent) in the compilation of DDMarlinPandora by enabling the appropriate options.
+
+Note: You should have sourced the `init_ilcsoft.sh` script beforehand.
+
+**To compile with SDHCALContent :**
+
+1. `mkdir build`
+2. `cd build`
+3. `cmake -C ${ILCSOFT}/ILCSoft.cmake -DPANDORA_MONITORING=ON -DUSE_SDHCALCONTENT=ON -DSDHCALContent_DIR=/absolute/path/to/SDHCALContent ..`
+4. `make install`
+
+**To compile with APRILContent :**
+
+mlpack should be installed. You should use the same mlpack installation as the one used to compile APRILContent
+
+
+1. `mkdir build`
+2. `cd build`
+3. `PKG_CONFIG_PATH=/absolute/path/to/mlpack/pkgconfig cmake -C ${ILCSOFT}/ILCSoft.cmake -DPANDORA_MONITORING=ON -DUSE_APRILCONTENT=ON -DAPRILContent_DIR=/absolute/path/to/APRILContent ..`
+4. `make install`
+
+**To compile with both SDHCALContent and APRILContent :**
+
+Combine the two cmake options above.
+
+## To run Marlin with this DDMarlinPandora :
+
+1. `echo $MARLIN_DLL`
+2. Copy the entire output of the previous command and find the part with the location of `libDDMarlinPandora.so`
+3. Replace it with the location of the DDMarlinPandora libraries you just installed and keep the rest of the output as it is
+4. `export MARLIN_DLL=/modified/output/of/echo/command`
+
+**To choose between APRIL and Pandora when calling Marlin :**
+
+1. Go to your ILDConfig folder in `ILDConfig/StandardConfig/production/ParticleFlow`
+2. Open the xml file you are using for the PFA
+3. In the section for the DDMarlinProcessor add : `<parameter name="UseAPRIL" type="bool">false</parameter>`
+4. In `ILDConfig/StandardConfig/production/PandoraSettings`, put an APRILPFA settings file
+5. To run Marlin with APRIL in `ILDConfig/StandardConfig/production`, add the following option when calling it : `--MyDDMarlinPandora.UseAPRIL="true" --constant.PandoraSettingsFile=PandoraSettings/YourAPRILSettingsFile.xml`
+
