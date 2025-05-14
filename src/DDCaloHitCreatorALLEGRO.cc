@@ -58,9 +58,7 @@ void DDCaloHitCreatorALLEGRO::GetCommonCaloHitProperties(const EVENT::Calorimete
     const float *pCaloHitPosition(pCaloHit->getPosition());
     const pandora::CartesianVector positionVector(pCaloHitPosition[0], pCaloHitPosition[1], pCaloHitPosition[2]);
 
-    // FIXME! AD: for ECAL the cell geometry should be pandora::POINTING with cellSize0 = DeltaEta and cellSize1 = DeltaPhi
-    // FIXME! GM: actually with should modify pandora to introduce POINTING_THETA so that DeltaTheta x DeltaPhi is used instead
-    caloHitParameters.m_cellGeometry = pandora::RECTANGULAR;
+    caloHitParameters.m_cellGeometry = pandora::POINTING_THETAPHI;
     caloHitParameters.m_positionVector = positionVector;
     caloHitParameters.m_expectedDirection = positionVector.GetUnitVector();
     caloHitParameters.m_pParentAddress = (void*)pCaloHit;
