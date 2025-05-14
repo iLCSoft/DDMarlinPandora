@@ -111,6 +111,7 @@ public:
         float                         m_hCalBarrelOuterPhi0;              ///< HCal barrel outer phi0 coordinate
         unsigned int                  m_hCalBarrelOuterSymmetry;          ///< HCal barrel outer symmetry order
 
+        std::string                   m_detectorName;                     ///< to handle detector-specific settings
         bool                          m_useSystemId;                      ///< flag whether to use systemId or not to identify origin of the CaloHit
         int                           m_ecalBarrelSystemId;               ///< systemId of ECal Barrel
         int                           m_hcalBarrelSystemId;               ///< systemId of HCal Barrel

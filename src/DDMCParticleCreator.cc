@@ -74,7 +74,12 @@ pandora::StatusCode DDMCParticleCreator::CreateMCParticles(const EVENT::LCEvent 
                         pMcParticle->getVertex()[2]);
                     mcParticleParameters.m_endpoint = pandora::CartesianVector(pMcParticle->getEndpoint()[0], pMcParticle->getEndpoint()[1],
                         pMcParticle->getEndpoint()[2]);
-
+                    streamlog_out(DEBUG) << "DDMCParticleCreator: particle " << i << std::endl;
+                    streamlog_out(DEBUG) << "PDG = " << pMcParticle->getPDG() << std::endl;
+                    streamlog_out(DEBUG) << "E = " << pMcParticle->getEnergy() << std::endl;
+                    streamlog_out(DEBUG) << "px, py, pz = " << pMcParticle->getMomentum()[0] << " " << pMcParticle->getMomentum()[1] << " " << pMcParticle->getMomentum()[2] << std::endl;
+                    streamlog_out(DEBUG) << "x, y, z at production = " << pMcParticle->getVertex()[0] << " " << pMcParticle->getVertex()[1] << " " << pMcParticle->getVertex()[2] << std::endl;
+                    streamlog_out(DEBUG) << "x, y, z at endpoint = " << pMcParticle->getEndpoint()[0] << " " << pMcParticle->getEndpoint()[1] << " " << pMcParticle->getEndpoint()[2] << std::endl;
                     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::MCParticle::Create(m_pandora, mcParticleParameters));
 
                     // Create parent-daughter relationships
@@ -116,6 +121,7 @@ pandora::StatusCode DDMCParticleCreator::CreateTrackToMCParticleRelationships(co
             const EVENT::LCCollection *pMCRelationCollection = pLCEvent->getCollection(*iter);
             UTIL::LCRelationNavigator navigate(pMCRelationCollection);
 
+            streamlog_out(DEBUG) << "Looping over tracks" << std::endl;
             for (TrackVector::const_iterator trackIter = trackVector.begin(), trackIterEnd = trackVector.end();
                 trackIter != trackIterEnd; ++trackIter)
             {
@@ -127,6 +133,7 @@ pandora::StatusCode DDMCParticleCreator::CreateTrackToMCParticleRelationships(co
                     // Get reconstructed momentum at dca
                     const pandora::Helix helixFit(pTrack->getPhi(), pTrack->getD0(), pTrack->getZ0(), pTrack->getOmega(), pTrack->getTanLambda(), m_bField);
                     const float recoMomentum(helixFit.GetMomentum().GetMagnitude());
+                    streamlog_out(DEBUG) << "Momentum of track at dca: " << recoMomentum << std::endl;
 
                     // Use momentum magnitude to identify best mc particle
                     MCParticle *pBestMCParticle = NULL;
@@ -152,8 +159,13 @@ pandora::StatusCode DDMCParticleCreator::CreateTrackToMCParticleRelationships(co
                         }
                     }
 
-                    if (NULL == pBestMCParticle)
+                    if (NULL == pBestMCParticle) {
+                        streamlog_out(DEBUG) << "No match found" << std::endl;
                         continue;
+                    }
+                    else {
+                        streamlog_out(DEBUG) << "Best match found: PDG = " << pBestMCParticle->getPDG() << std::endl;
+                    }
 
                     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetTrackToMCParticleRelationship(m_pandora, pTrack,
                         pBestMCParticle));
