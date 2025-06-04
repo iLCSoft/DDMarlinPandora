@@ -6,7 +6,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.2 FATAL_ERROR)
 
 
 # project name
-PROJECT( DDMarlinPandora )
+PROJECT( DDMarlinPandora LANGUAGES CXX )
 
 
 # project version# continuing from MarlinPandora version 2.0.0 revision 1934
