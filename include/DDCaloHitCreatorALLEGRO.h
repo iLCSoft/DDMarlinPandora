@@ -1,8 +1,8 @@
 /**
  *  @file   DDMarlinPandora/include/DDCaloHitCreatorALLEGRO.h
- * 
+ *
  *  @brief  Header file for the calo hit creator class.
- * 
+ *
  *  $Log: $
  */
 
@@ -16,50 +16,48 @@
 
 #include "Api/PandoraApi.h"
 
-#include <DDRec/DetectorData.h>
-#include <DD4hep/Detector.h>
 #include <DD4hep/DetElement.h>
+#include <DD4hep/Detector.h>
+#include <DDRec/DetectorData.h>
 
 #include "DDCaloHitCreator.h"
-
 
 /**
  *  @brief  DDCaloHitCreator class
  */
-class DDCaloHitCreatorALLEGRO : public DDCaloHitCreator
-{
+class DDCaloHitCreatorALLEGRO : public DDCaloHitCreator {
 public:
-    typedef std::vector<std::string> StringVector;
-    typedef std::vector<float> FloatVector;
+  typedef std::vector<std::string> StringVector;
+  typedef std::vector<float> FloatVector;
 
-    /**
-     *  @brief  Constructor
-     * 
-     *  @param  settings the creator settings
-     *  @param  pPandora address of the relevant pandora instance
-     */
-     DDCaloHitCreatorALLEGRO(const Settings &settings, const pandora::Pandora *const pPandora);
+  /**
+   *  @brief  Constructor
+   *
+   *  @param  settings the creator settings
+   *  @param  pPandora address of the relevant pandora instance
+   */
+  DDCaloHitCreatorALLEGRO(const Settings& settings, const pandora::Pandora* const pPandora);
 
-    /**
-     *  @brief  Destructor
-     */
-     ~DDCaloHitCreatorALLEGRO();
+  /**
+   *  @brief  Destructor
+   */
+  ~DDCaloHitCreatorALLEGRO();
 
-    /**
-     *  @brief  Create calo hits
-     * 
-     *  @param  pLCEvent the lcio event
-     */    
-    pandora::StatusCode CreateCaloHits(const EVENT::LCEvent *const pLCEvent);
+  /**
+   *  @brief  Create calo hits
+   *
+   *  @param  pLCEvent the lcio event
+   */
+  pandora::StatusCode CreateCaloHits(const EVENT::LCEvent* const pLCEvent);
 
 private:
-    /**
-     *  @brief  Get common calo hit properties: position, parent address, input energy and time
-     * 
-     *  @param  pCaloHit the lcio calorimeter hit
-     *  @param  caloHitParameters the calo hit parameters to populate
-     */
-    void GetCommonCaloHitProperties(const EVENT::CalorimeterHit *const pCaloHit, PandoraApi::CaloHit::Parameters &caloHitParameters) const;
-
+  /**
+   *  @brief  Get common calo hit properties: position, parent address, input energy and time
+   *
+   *  @param  pCaloHit the lcio calorimeter hit
+   *  @param  caloHitParameters the calo hit parameters to populate
+   */
+  void GetCommonCaloHitProperties(const EVENT::CalorimeterHit* const pCaloHit,
+                                  PandoraApi::CaloHit::Parameters& caloHitParameters) const;
 };
 #endif // #ifndef CALO_HIT_CREATOR_H

@@ -1,24 +1,24 @@
 #ifndef DIGITIZER_DDCCALODIGI_H
 #define DIGITIZER_DDCCALODIGI_H 1
 
-#include "marlin/Processor.h"
-#include <IMPL/CalorimeterHitImpl.h>
-#include <IMPL/LCFlagImpl.h>
+#include "CLHEP/Random/MTwistEngine.h"
 #include "CalorimeterHitType.h"
-#include "lcio.h"
-#include <string>
-#include <vector>
+#include "DDScintillatorPpdDigi.h"
 #include "TFile.h"
 #include "TH1.h"
 #include "TH2.h"
-#include "DDScintillatorPpdDigi.h"
-#include "CLHEP/Random/MTwistEngine.h"
+#include "lcio.h"
+#include "marlin/Processor.h"
+#include <IMPL/CalorimeterHitImpl.h>
+#include <IMPL/LCFlagImpl.h>
+#include <string>
+#include <vector>
 
-using namespace lcio ;
-using namespace marlin ;
+using namespace lcio;
+using namespace marlin;
 
 const int MAX_LAYERS = 200;
-const int MAX_STAVES =  16;
+const int MAX_STAVES = 16;
 
 /** === DDCaloDigi Processor === <br>
  *  Simple calorimeter digitizer Processor. <br>
@@ -47,7 +47,7 @@ const int MAX_STAVES =  16;
  *  a given sampling fraction. <br>
  *  List of layer numbers terminating each section are given through <br>
  *  processor parameters ECALLayers and HCALLayers <br>
- *  There is an option to perform digitization of <br> 
+ *  There is an option to perform digitization of <br>
  *  both ECAL and HCAL in a digital mode. <br>
  *  Digital mode is activated by  <br>
  *  setting processor parameters <br>
@@ -60,13 +60,13 @@ const int MAX_STAVES =  16;
  *  Relations between CalorimeterHits and SimCalorimeterHits <br>
  *  are held in the corresponding relation collection. <br>
  *  The name of this relation collection is specified <br>
- *  via processor parameter RelationOutputCollection. <br> 
+ *  via processor parameter RelationOutputCollection. <br>
  *  <h4>Input collections and prerequisites</h4>
  *  SimCalorimeterHit collections <br>
  *  <h4>Output</h4>
  *  CalorimeterHit collections for ECal and HCal. <br>
  *  Collection of relations <br>
- *  between CalorimeterHits and SimCalorimeterHits. <br> 
+ *  between CalorimeterHits and SimCalorimeterHits. <br>
  *  For ECal Calorimeter hits the variable type is set to 0, <br>
  *  whereas for HCal Calorimeter hits the type is set to 1 <br>
  *  @author A. Raspereza (DESY) <br>
@@ -74,55 +74,51 @@ const int MAX_STAVES =  16;
  *  @version $Id$ <br>
  */
 class DDCaloDigi : public Processor {
-  
- public:
-  
-  virtual Processor*  newProcessor() { return new DDCaloDigi ; }
-  
-  
-  DDCaloDigi() ;
+
+public:
+  virtual Processor* newProcessor() { return new DDCaloDigi; }
+
+  DDCaloDigi();
   DDCaloDigi(const DDCaloDigi&) = delete;
   DDCaloDigi& operator=(const DDCaloDigi&) = delete;
-  
-  virtual void init() ;
-  
-  virtual void processRunHeader( LCRunHeader* run ) ;
-  
-  virtual void processEvent( LCEvent * evt ) ; 
-   
-  virtual void check( LCEvent * evt ) ; 
-  
-  virtual void end() ;
 
-  virtual void fillECALGaps() ;
-  
-  float digitalHcalCalibCoeff(CHT::Layout,float energy );
+  virtual void init();
 
-  float analogueHcalCalibCoeff(CHT::Layout, int layer );
+  virtual void processRunHeader(LCRunHeader* run);
 
-  float digitalEcalCalibCoeff(int layer );
+  virtual void processEvent(LCEvent* evt);
 
-  float analogueEcalCalibCoeff(int layer );
+  virtual void check(LCEvent* evt);
 
- protected:
+  virtual void end();
 
+  virtual void fillECALGaps();
+
+  float digitalHcalCalibCoeff(CHT::Layout, float energy);
+
+  float analogueHcalCalibCoeff(CHT::Layout, int layer);
+
+  float digitalEcalCalibCoeff(int layer);
+
+  float analogueEcalCalibCoeff(int layer);
+
+protected:
   float ecalEnergyDigi(float energy, int id0, int id1);
   float ahcalEnergyDigi(float energy, int id0, int id1);
 
   float siliconDigi(float energy);
   float scintillatorDigi(float energy, bool isEcal);
-  LCCollection* combineVirtualStripCells(LCCollection* col, bool isBarrel, int orientation );
+  LCCollection* combineVirtualStripCells(LCCollection* col, bool isBarrel, int orientation);
 
   int getNumberOfVirtualCells();
-  std::vector < std::pair <int, int> > & getLayerConfig();
+  std::vector<std::pair<int, int>>& getLayerConfig();
   void checkConsistency(std::string colName, int layer);
-  std::pair < int, int > getLayerProperties( std::string colName, int layer );
-  int getStripOrientationFromColName( std::string colName );
-
+  std::pair<int, int> getLayerProperties(std::string colName, int layer);
+  int getStripOrientationFromColName(std::string colName);
 
   int _nRun = 0;
   int _nEvt = 0;
-  
+
   LCFlagImpl _flag{};
 
   std::vector<std::string> _ecalCollections{};
@@ -141,7 +137,7 @@ class DDCaloDigi : public Processor {
   int _mapsEcalCorrection = 0;
   int _digitalHcal = 0;
 
-  //bool _ECAL_stripHits;
+  // bool _ECAL_stripHits;
 
   std::vector<float> _calibrCoeffEcal{};
   std::vector<float> _calibrCoeffHcalBarrel{};
@@ -156,7 +152,7 @@ class DDCaloDigi : public Processor {
   float _ecalModuleGapCorrectionFactor = 0.5;
   float _ecalEndcapCorrectionFactor = 1.025;
   float _hcalEndcapCorrectionFactor = 1.025;
-  int   _hcalGapCorrection = 1;
+  int _hcalGapCorrection = 1;
   float _hcalModuleGapCorrectionFactor = 0.5;
 
   std::vector<CalorimeterHitImpl*> _calHitsByStaveLayer[MAX_STAVES][MAX_LAYERS];
@@ -168,99 +164,93 @@ class DDCaloDigi : public Processor {
   float _endcapPixelSizeX[MAX_LAYERS];
   float _endcapPixelSizeY[MAX_LAYERS];
   float _barrelStaveDir[MAX_STAVES][2];
-  
-  int   _histograms = 0;
+
+  int _histograms = 0;
 
   // timing
-  int   _useEcalTiming = 0;
-  int   _ecalCorrectTimesForPropagation = 0;
+  int _useEcalTiming = 0;
+  int _ecalCorrectTimesForPropagation = 0;
   float _ecalTimeWindowMin = -10.0;
   float _ecalBarrelTimeWindowMax = 100.0;
   float _ecalEndcapTimeWindowMax = 100.0;
   float _ecalDeltaTimeHitResolution = 10.0;
   float _ecalTimeResolution = 10.0;
-  bool  _ecalSimpleTimingCut = true;
+  bool _ecalSimpleTimingCut = true;
 
-  int   _useHcalTiming = 1;
-  int   _hcalCorrectTimesForPropagation = 0;
+  int _useHcalTiming = 1;
+  int _hcalCorrectTimesForPropagation = 0;
   float _hcalTimeWindowMin = -10.0;
   float _hcalBarrelTimeWindowMax = 100.0;
   float _hcalEndcapTimeWindowMax = 100.0;
   float _hcalDeltaTimeHitResolution = 10.0;
   float _hcalTimeResolution = 10.0;
-  bool  _hcalSimpleTimingCut = true;
-  
+  bool _hcalSimpleTimingCut = true;
+
   std::unique_ptr<DDScintillatorPpdDigi> _scEcalDigi{};
   std::unique_ptr<DDScintillatorPpdDigi> _scHcalDigi{};
 
-
   // parameters for extra ECAL digitization effects
-  float _calibEcalMip = 1.0e-4;       // MIP calibration factor
-  int   _applyEcalDigi = 0;           // which realistic calib to apply
-  float _ecal_PPD_pe_per_mip = 7;     // # photoelectrons/MIP for MPPC
-  int   _ecal_PPD_n_pixels = 10000;   // # pixels in MPPC
-  float _ehEnergy = 3.6;              // energy to create e-h pair in silicon
-  float _ecal_misCalibNpix = 0.05;    // miscalibration of # MPPC pixels
+  float _calibEcalMip = 1.0e-4;    // MIP calibration factor
+  int _applyEcalDigi = 0;          // which realistic calib to apply
+  float _ecal_PPD_pe_per_mip = 7;  // # photoelectrons/MIP for MPPC
+  int _ecal_PPD_n_pixels = 10000;  // # pixels in MPPC
+  float _ehEnergy = 3.6;           // energy to create e-h pair in silicon
+  float _ecal_misCalibNpix = 0.05; // miscalibration of # MPPC pixels
 
   float _misCalibEcal_uncorrel = 0.0; // general ECAL miscalibration (uncorrelated between channels)
-  bool  _misCalibEcal_uncorrel_keep = false;// if true, use the same ECAL cell miscalibs in each event (requires more memory)
-  float _misCalibEcal_correl = 0.0;     // general ECAL miscalibration (100% uncorrelated between channels)
+  bool _misCalibEcal_uncorrel_keep =
+      false;                        // if true, use the same ECAL cell miscalibs in each event (requires more memory)
+  float _misCalibEcal_correl = 0.0; // general ECAL miscalibration (100% uncorrelated between channels)
 
-  float _deadCellFractionEcal = 0.0;  // fraction of random dead channels
-  bool  _deadCellEcal_keep = false;   // keep same cells dead between events?
+  float _deadCellFractionEcal = 0.0; // fraction of random dead channels
+  bool _deadCellEcal_keep = false;   // keep same cells dead between events?
 
-  float _strip_abs_length = 1000000;  // absorption length along strip for non-uniformity modeling
-  float _ecal_pixSpread = 0.05;       // relative spread of MPPC pixel signal
-  float _ecal_elec_noise = 0;         // electronics noise (as fraction of MIP)
-  float _ecalMaxDynMip = 2500;        // electronics dynamic range (in terms of MIPs)
-  int _ecalStrip_default_nVirt = 9;   // # virtual cells used in Mokka simulation of strips (if available, this is taken from gear file)
-  std::string _ecal_deafult_layer_config ="000000000000000";// ECAL layer configuration (if available, this is taken from gear file)
+  float _strip_abs_length = 1000000; // absorption length along strip for non-uniformity modeling
+  float _ecal_pixSpread = 0.05;      // relative spread of MPPC pixel signal
+  float _ecal_elec_noise = 0;        // electronics noise (as fraction of MIP)
+  float _ecalMaxDynMip = 2500;       // electronics dynamic range (in terms of MIPs)
+  int _ecalStrip_default_nVirt =
+      9; // # virtual cells used in Mokka simulation of strips (if available, this is taken from gear file)
+  std::string _ecal_deafult_layer_config =
+      "000000000000000"; // ECAL layer configuration (if available, this is taken from gear file)
 
   // parameters for extra AHCAL digitization effects
-  float _calibHcalMip = 1.0e-4;       // MIP calibration factor
-  int   _applyHcalDigi = 0;           // which realistic calib to apply
-  float _hcal_PPD_pe_per_mip = 10;    // # photoelectrons/MIP for MPPC
-  int   _hcal_PPD_n_pixels= 400;      // # pixels in MPPC
-  float _hcal_misCalibNpix = 0.05;    // miscalibration of # MPPC pixels
+  float _calibHcalMip = 1.0e-4;    // MIP calibration factor
+  int _applyHcalDigi = 0;          // which realistic calib to apply
+  float _hcal_PPD_pe_per_mip = 10; // # photoelectrons/MIP for MPPC
+  int _hcal_PPD_n_pixels = 400;    // # pixels in MPPC
+  float _hcal_misCalibNpix = 0.05; // miscalibration of # MPPC pixels
 
   float _misCalibHcal_uncorrel = 0.0; // general ECAL miscalibration (uncorrelated between channels)
-  bool  _misCalibHcal_uncorrel_keep = false; // if true, use the same AHCAL cell miscalibs in each event (requires more memory)
-  float _misCalibHcal_correl = 0.0;   // general ECAL miscalibration (100% uncorrelated between channels)
+  bool _misCalibHcal_uncorrel_keep =
+      false;                        // if true, use the same AHCAL cell miscalibs in each event (requires more memory)
+  float _misCalibHcal_correl = 0.0; // general ECAL miscalibration (100% uncorrelated between channels)
 
-  float _deadCellFractionHcal = 0.0;  // fraction of random dead channels
-  bool  _deadCellHcal_keep = false;   // keep same cells dead between events?
-  float _hcal_pixSpread = 0.0;        // relative spread of MPPC pixel signal
-  float _hcal_elec_noise = 0.0;       // electronics noise (as fraction of MIP)
-  float _hcalMaxDynMip = 200;         // electronics dynamic range (in terms of MIPs)
-
-
+  float _deadCellFractionHcal = 0.0; // fraction of random dead channels
+  bool _deadCellHcal_keep = false;   // keep same cells dead between events?
+  float _hcal_pixSpread = 0.0;       // relative spread of MPPC pixel signal
+  float _hcal_elec_noise = 0.0;      // electronics noise (as fraction of MIP)
+  float _hcalMaxDynMip = 200;        // electronics dynamic range (in terms of MIPs)
 
   // internal variables
-  std::vector < std::pair <int, int> > _layerTypes {};
+  std::vector<std::pair<int, int>> _layerTypes{};
   int _strip_virt_cells = 999;
   int _countWarnings = 0;
   std::string _ecalLayout = "";
 
   float _event_correl_miscalib_ecal = 0.0;
   float _event_correl_miscalib_hcal = 0.0;
-  
-  CLHEP::MTwistEngine *_randomEngineDeadCellEcal = NULL;
-  CLHEP::MTwistEngine *_randomEngineDeadCellHcal = NULL;
 
-  std::map < std::pair <int, int> , float > _ECAL_cell_miscalibs{};
-  std::map < std::pair <int, int> , bool > _ECAL_cell_dead{};
-  std::map < std::pair <int, int> , float > _HCAL_cell_miscalibs{};
-  std::map < std::pair <int, int> , bool > _HCAL_cell_dead{};
+  CLHEP::MTwistEngine* _randomEngineDeadCellEcal = NULL;
+  CLHEP::MTwistEngine* _randomEngineDeadCellHcal = NULL;
 
-  enum {
-    SQUARE,
-    STRIP_ALIGN_ALONG_SLAB,
-    STRIP_ALIGN_ACROSS_SLAB,
-    SIECAL=0,
-    SCECAL
-  };
+  std::map<std::pair<int, int>, float> _ECAL_cell_miscalibs{};
+  std::map<std::pair<int, int>, bool> _ECAL_cell_dead{};
+  std::map<std::pair<int, int>, float> _HCAL_cell_miscalibs{};
+  std::map<std::pair<int, int>, bool> _HCAL_cell_dead{};
 
-  
+  enum { SQUARE, STRIP_ALIGN_ALONG_SLAB, STRIP_ALIGN_ACROSS_SLAB, SIECAL = 0, SCECAL };
+
   TH1F* fEcal = NULL;
   TH1F* fHcal = NULL;
   TH1F* fEcalC = NULL;
@@ -295,10 +285,6 @@ class DDCaloDigi : public Processor {
   TH1F* fEcalRLayer1 = NULL;
   TH1F* fEcalRLayer11 = NULL;
   TH1F* fEcalRLayer21 = NULL;
-
-} ;
+};
 
 #endif
-
-
-
