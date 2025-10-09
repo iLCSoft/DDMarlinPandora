@@ -109,6 +109,12 @@ pandora::StatusCode DDCaloHitCreator::CreateECalCaloHits(const EVENT::LCEvent* c
 
       UTIL::CellIDDecoder<CalorimeterHit> cellIdDecoder(pCaloHitCollection);
       const std::string layerCodingString(pCaloHitCollection->getParameters().getStringVal(LCIO::CellIDEncoding));
+      std::string xCellIDName = "x";
+      std::string yCellIDName = "y";
+      if (layerCodingString.find("cellX") != std::string::npos) {
+        xCellIDName = "cellX";
+        yCellIDName = "cellY";
+      }
       std::string layerCoding("layer");
 
       for (int i = 0; i < nElements; ++i) {
@@ -166,8 +172,9 @@ pandora::StatusCode DDCaloHitCreator::CreateECalCaloHits(const EVENT::LCEvent* c
                                   << cellIdDecoder(pCaloHit)["system"] << std::setw(5)
                                   << cellIdDecoder(pCaloHit)["module"] << std::setw(5)
                                   << cellIdDecoder(pCaloHit)["stave"] << std::setw(5)
-                                  << cellIdDecoder(pCaloHit)["layer"] << std::setw(5) << cellIdDecoder(pCaloHit)["x"]
-                                  << std::setw(5) << cellIdDecoder(pCaloHit)["y"] << std::endl;
+                                  << cellIdDecoder(pCaloHit)["layer"] << std::setw(5)
+                                  << cellIdDecoder(pCaloHit)[xCellIDName] << std::setw(5)
+                                  << cellIdDecoder(pCaloHit)[yCellIDName] << std::endl;
 
             this->GetBarrelCaloHitProperties(pCaloHit, barrelLayers, m_settings.m_eCalBarrelInnerSymmetry,
                                              caloHitParameters, m_settings.m_eCalBarrelNormalVector,
