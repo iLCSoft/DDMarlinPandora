@@ -11,18 +11,18 @@ DDMarlinPandora: Development package to integrate with DD4hep
    * DDMarlinPandora::CaloHitCreator:
    Get normal vector from DD4hep::DetElement instead of using assumptions
    about calorimeter construction to calculate phi, which are no longer true
-   
+
    Add options to set local NormalVector for ecal, hcal, and muon barrels
    in case they are not build with layers increasing along the z-axis
    ECalBarrelNormalVector
    HCalBarrelNormalVector
    YokeBarrelNormalVector
-   
+
    All three are three vectors
-   
+
    Correct and simplify calculation of NormalVector for cylindrical barrel
    calorimeters
-   
+
    * Fix many compiler warnings
 
 
@@ -39,22 +39,22 @@ DDMarlinPandora: Development package to integrate with DD4hep
  | v00-03 |
   --------
 
-N. Nikiforou 06/04/2016 
+N. Nikiforou 06/04/2016
  - Merged changes from MarlinPandora/TrackCreator (committed by Bono on Feb 24 wit git commit 0917739) to DDTrackCreatorILD
  - Merged changes from MarlinPandora/CaloHitCreator (committed by Bono on Mar 30 wit git commit 6b381cf) to DDCaloHitCreator
     -Note: commits in MarlinPandora in-between the two revisions npted above have been reverted in the last commit
 
 N. Nikiforou 19/02/2016
- - Merged changes from ILDCaloDigi (MarlinReco rev. 5432) into DDCaloDigi. 
+ - Merged changes from ILDCaloDigi (MarlinReco rev. 5432) into DDCaloDigi.
    It incorporates changes to ILDCaloDigy by Daniel. The introduction of
    parameters for the cell encoding fiels was not merged, since lcio files
-   produced with DDSim will have the standard conventions defined in 
+   produced with DDSim will have the standard conventions defined in
    the calorimeter segmentations
  - Implemented access of subdetectors by DetType flags instead of strings
  - Elevated missing ECal parameters to ERROR
-   
 
-  
+
+
 N. Nikiforou 17/02/2016
  - Merged changes from MalrinPandora 02-02-00 up to today (7c88d10)
 
@@ -67,18 +67,18 @@ F.Gaede
  - enforce unique selection in getExtension(include,exclude)
    - throws exception if not unique
  - bug fix: eCalBarrelExtension -> eCalEndcapExtension
-   for setting m_eCalEndCapInnerZ 
- - added DetType::FORWARD to excludeFlags for main calorimeters 
+   for setting m_eCalEndCapInnerZ
+ - added DetType::FORWARD to excludeFlags for main calorimeters
  - added DetType::AUXILIARY to excludeFlag for LCal ( exclude BeamCal )
  - DDTrackCreatorILD.cc :
-   - added dd4hep units to parameters extracted from DD4hep 
+   - added dd4hep units to parameters extracted from DD4hep
    - protect against poor tracks ( ndf <0 or missing/poor parameters)
    - added debug printout for track selection
 
 
 
 N.Nikiforou 12/02/2016:
-  - Changed handling of Coil parameters: now the info is accessed from LayeredCalorimeterData 
+  - Changed handling of Coil parameters: now the info is accessed from LayeredCalorimeterData
     extensions attached to the drivers (Solenoid for CLICdp, SCoil02 for ILD).
   - Removed/commented out obsolete and unused auxilliary static functions
 
@@ -90,8 +90,8 @@ N.Nikiforou 11/02/2016 (pm):
 
 N.Nikiforou 11/02/2016 (am):
   - Modified DDTrackCreatorILD to use det type flags. Dropped tracker/vertex detector name parameters
-  - Modified DDTrackCreatorILD to actually access hits in fit (offset 2) which is the definition now. 
-    
+  - Modified DDTrackCreatorILD to actually access hits in fit (offset 2) which is the definition now.
+
 
 N.Nikiforou 10/02/2016:
   - Started using the new facility by DD4hep that allows the accessing of detectors based on their
@@ -99,23 +99,23 @@ N.Nikiforou 10/02/2016:
     associated with the vertex and tracker will soon be removed.
 
 N.Nikiforou 07/09/2015:
-  - Many changes that require full implemetation of DDRec structures for all subdetectors 
+  - Many changes that require full implemetation of DDRec structures for all subdetectors
   - Introduced DDTrackCreatorBase class and derived implementation classes for ILD and CLIC
   - Removed references to "TPC" from DDTrackCreatorBase::Settings. Whatever was a configuration parameter
-    has its relevant variable and Processor parameter names changed from "Tpc" to "BarrelTracker". Also, 
+    has its relevant variable and Processor parameter names changed from "Tpc" to "BarrelTracker". Also,
     moved any TPC geometry-related variables from DDTrackCreatorBase::Settings to DDTrackCreatorILD proper.
-  - Added Parameter for DDPandoraPFANewProcessor: TrackCreatorName to select the relevant implementation 
+  - Added Parameter for DDPandoraPFANewProcessor: TrackCreatorName to select the relevant implementation
     of DDTrackCreatorBase for the detector model in use (Curretly ILD or CLIC). Still need to implement
-    a proper factory to select the proper algorithm. 
+    a proper factory to select the proper algorithm.
 
 
 N. Nikiforou
 v00-01
 
   - first version that 'runs' with CLIC_o2_v01 and ILD_o1_v05
- 
 
-********************  COPIED OVER FROM MARLINPANDORA REVISION 1934 ************************************************************************* 
+
+********************  COPIED OVER FROM MARLINPANDORA REVISION 1934 *************************************************************************
 --------------------------------------------------------------------------------------------------------------------------------------------
 TAG v02-00-00
 --------------------------------------------------------------------------------------------------------------------------------------------
