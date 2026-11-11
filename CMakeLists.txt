@@ -11,7 +11,7 @@ PROJECT( DDMarlinPandora LANGUAGES CXX )
 
 # project version# continuing from MarlinPandora version 2.0.0 revision 1934
 SET( DDMarlinPandora_VERSION_MAJOR 0 )
-SET( DDMarlinPandora_VERSION_MINOR 14 )
+SET( DDMarlinPandora_VERSION_MINOR 15 )
 SET( DDMarlinPandora_VERSION_PATCH 0 )
 
 
