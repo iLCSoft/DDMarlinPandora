@@ -1,3 +1,12 @@
+# v00-15
+
+* 2026-11-11 Juan Miguel Carceller ([PR#41](https://github.com/iLCSoft/DDMarlinPandora/pull/41))
+  - Require CMake 3.10 to fix `Compatibility with CMake < 3.5 has been removed from CMake.`
+
+* 2026-09-10 Thomas Madlener ([PR#40](https://github.com/iLCSoft/DDMarlinPandora/pull/40))
+  - Switch to the latest version of the key4hep-build workflow
+  - Remove dead energy-sum accumulator variables in DDCaloDigi.cc that gcc16 flagged as set-but-unused, fixing the nightly/alma9 build
+
 # v00-14
 
 * 2025-10-10 Thomas Madlener ([PR#38](https://github.com/iLCSoft/DDMarlinPandora/pull/38))
